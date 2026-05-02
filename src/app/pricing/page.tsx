@@ -112,14 +112,14 @@ export default function PricingPage() {
             key={offer.krone}
             className={`card relative p-5 ${
               offer.popular
-                ? "border-primary/30 glow-primary scale-[1.02]"
+                ? "border-violet-500/30 shadow-lg shadow-violet-500/10 scale-[1.02]"
                 : offer.color === "premium"
-                ? "border-premium/20 hover:border-premium/40"
+                ? "border-amber-500/20 hover:border-amber-500/40"
                 : ""
             }`}
           >
             {offer.popular && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-[10px] font-bold text-white shadow-lg shadow-primary-glow">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-violet-500 px-4 py-1 text-xs font-bold text-white shadow-lg shadow-violet-500/30">
                 Populaire
               </span>
             )}
@@ -130,7 +130,7 @@ export default function PricingPage() {
                     ? "bg-amber-500/10 text-amber-400"
                     : offer.color === "primary"
                     ? "bg-violet-500/10 text-violet-400"
-                    : "bg-muted/10 text-white/60"
+                    : "bg-white/5 text-white/60"
                 }`}
               >
                 <offer.icon className="h-4 w-4" />

@@ -25,7 +25,7 @@ export default function Navbar() {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-600/10 text-violet-400 transition-transform group-hover:scale-105">
               <Zap className="h-5 w-5" />
             </div>
-            <span className="text-lg font-semibold text-white">
+            <span className="font-display text-lg font-semibold text-white">
               Synkrone
             </span>
           </Link>

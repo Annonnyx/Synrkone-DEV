@@ -35,6 +35,7 @@
   --color-violet: var(--violet);
   --color-amber: var(--amber);
   --font-sans: var(--font-geist-sans);
+  --font-display: var(--font-syne);
 }
 
 * {
@@ -49,7 +50,12 @@ html {
 body {
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Display font for headings */
+.font-display {
+  font-family: var(--font-syne), var(--font-geist-sans), system-ui, sans-serif;
 }
 
 /* ===== CARDS ===== */
@@ -213,6 +219,43 @@ body {
   background: var(--amber);
   width: 300px;
   height: 300px;
+}
+
+/* Background that covers entire page */
+.page-glow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.page-glow::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: var(--violet);
+  border-radius: 50%;
+  filter: blur(150px);
+  opacity: 0.15;
+  animation: float 8s ease-in-out infinite;
+}
+
+.page-glow::after {
+  content: '';
+  position: absolute;
+  bottom: 20%;
+  left: -5%;
+  width: 400px;
+  height: 400px;
+  background: var(--amber);
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.1;
+  animation: float 10s ease-in-out infinite reverse;
 }
 
 /* Shimmer effect for badges */

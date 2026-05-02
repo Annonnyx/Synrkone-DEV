@@ -7,44 +7,37 @@ const features = [
   {
     icon: Layers,
     title: "Modules pré-codés",
-    description: "Auto-rôles, modération, économie, musique. Activez ce dont vous avez besoin en un clic.",
+    description: "Auto-rôles, modération, économie, musique. Activez ce dont vous avez besoin.",
     span: "md:col-span-2",
     featured: true,
   },
   {
     icon: Zap,
-    title: "Zéro code requis",
+    title: "Zéro code",
     description: "Configuration visuelle. Votre bot en ligne en minutes.",
     span: "md:col-span-1",
     featured: false,
   },
   {
     icon: Shield,
-    title: "Hébergement flexible",
-    description: "Cloud Synkrone ou auto-hébergé. Vous choisissez.",
+    title: "Cloud ou Self-hosted",
+    description: "Hébergement Synkrone ou code source complet.",
     span: "md:col-span-1",
     featured: false,
   },
   {
     icon: Crown,
-    title: "Système de Krônes",
-    description: "Payez uniquement ce que vous utilisez. Pas d'abonnement forcé.",
+    title: "Paiement flexible",
+    description: "Payez ce que vous utilisez. Pas d'abonnement forcé.",
     span: "md:col-span-1",
     featured: false,
   },
   {
     icon: Globe,
-    title: "Créateur de sites web",
-    description: "Une page dédiée pour votre serveur, avec notre constructeur visuel.",
+    title: "Site web inclus",
+    description: "Créez une page pour votre serveur avec notre constructeur.",
     span: "md:col-span-2",
     featured: true,
-  },
-  {
-    icon: BarChart3,
-    title: "Analytics temps réel",
-    description: "Suivez l'activité de votre bot avec des graphiques détaillés.",
-    span: "md:col-span-1",
-    featured: false,
   },
 ];
 
@@ -57,16 +50,12 @@ const bots = [
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen overflow-hidden">
-      {/* Hero */}
-      <section className="relative min-h-screen flex items-center">
-        {/* Background ambient glow */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="ambient-glow glow-violet -top-40 -right-40 animate-float" />
-          <div className="ambient-glow glow-amber bottom-20 -left-20 animate-float" style={{ animationDelay: "-3s" }} />
-          <div className="absolute inset-0 bg-gradient-to-b from-violet-950/10 via-transparent to-transparent" />
-        </div>
+    <main className="min-h-screen">
+      {/* Global background glow */}
+      <div className="page-glow" />
 
+      {/* Hero */}
+      <section className="relative min-h-[90vh] flex items-center">
         <div className="relative z-10 mx-auto max-w-6xl px-6 lg:px-8">
           {/* Badge */}
           <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-2 text-sm text-violet-200">
@@ -74,17 +63,16 @@ export default function HomePage() {
             <span>Plateforme de bots Discord</span>
           </div>
 
-          {/* Main heading */}
-          <h1 className="animate-fade-up delay-100 mt-8 text-6xl font-semibold text-white sm:text-7xl lg:text-8xl leading-[1.05]">
-            Créez votre bot
+          {/* Main heading - Larger with Syne font */}
+          <h1 className="font-display animate-fade-up delay-100 mt-8 text-7xl font-semibold text-white sm:text-8xl lg:text-9xl leading-[0.95] tracking-tight">
+            Créez votre
             <br />
-            <span className="text-gradient">sans coder</span>
+            <span className="text-gradient">bot sans code</span>
           </h1>
 
-          {/* Description */}
-          <p className="animate-fade-up delay-200 mt-8 max-w-xl text-lg text-[#a79eb5] leading-relaxed">
-            Modules pré-codés, hébergement flexible, statistiques temps réel. 
-            Pour les créateurs de communautés Discord.
+          {/* Description - Shorter */}
+          <p className="animate-fade-up delay-200 mt-8 max-w-xl text-xl text-[#a79eb5] leading-relaxed">
+            Modules pré-codés, hébergement flexible, analytics temps réel.
           </p>
 
           {/* CTAs */}
@@ -98,27 +86,18 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {/* Stats */}
+          {/* Stats - Bigger numbers */}
           <div className="animate-fade-up delay-400 mt-20 flex gap-16 border-t border-white/10 pt-10">
             <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-semibold text-white">99.7</span>
-                <span className="text-lg text-violet-400">%</span>
-              </div>
-              <div className="mt-1 text-sm text-[#6b6078]">Uptime garanti</div>
+              <div className="font-display text-4xl font-semibold text-white">99.7%</div>
+              <div className="mt-1 text-sm text-[#6b6078]">Uptime</div>
             </div>
             <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-semibold text-white">4.8</span>
-                <span className="text-lg text-amber-400">K+</span>
-              </div>
-              <div className="mt-1 text-sm text-[#6b6078]">Utilisateurs actifs</div>
+              <div className="font-display text-4xl font-semibold text-white">4.8K+</div>
+              <div className="mt-1 text-sm text-[#6b6078]">Utilisateurs</div>
             </div>
             <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-semibold text-white">12</span>
-                <span className="text-lg text-violet-400">K+</span>
-              </div>
+              <div className="font-display text-4xl font-semibold text-white">12K+</div>
               <div className="mt-1 text-sm text-[#6b6078]">Commandes/jour</div>
             </div>
           </div>
@@ -129,13 +108,10 @@ export default function HomePage() {
       <section className="relative py-32">
         <div className="mx-auto max-w-6xl px-6 lg:px-8">
           <div className="mb-16">
-            <span className="text-sm font-medium text-violet-400">Fonctionnalités</span>
-            <h2 className="mt-3 text-4xl font-semibold text-white sm:text-5xl">
-              Tout ce qu&apos;il vous faut
+            <span className="text-sm font-medium text-violet-400 uppercase tracking-wider">Fonctionnalités</span>
+            <h2 className="font-display mt-4 text-5xl font-semibold text-white sm:text-6xl">
+              Tout inclus
             </h2>
-            <p className="mt-4 max-w-lg text-lg text-[#a79eb5]">
-              Une suite complète pour gérer et faire grandir votre communauté Discord.
-            </p>
           </div>
 
           <div className="grid gap-5 md:grid-cols-3">
@@ -152,7 +128,7 @@ export default function HomePage() {
                 }`}>
                   <feature.icon className="h-6 w-6" />
                 </div>
-                <h3 className="text-xl font-medium text-white mb-2">
+                <h3 className="font-display text-2xl font-medium text-white mb-2">
                   {feature.title}
                 </h3>
                 <p className="text-[15px] text-[#a79eb5] leading-relaxed">
@@ -169,19 +145,16 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-6 lg:px-8">
           <div className="mb-16 flex items-end justify-between">
             <div>
-              <span className="text-sm font-medium text-violet-400">Bots actifs</span>
-              <h2 className="mt-3 text-4xl font-semibold text-white">
-                Nos bots en ligne
+              <span className="text-sm font-medium text-violet-400 uppercase tracking-wider">Nos bots</span>
+              <h2 className="font-display mt-4 text-5xl font-semibold text-white">
+                Prêts à l&apos;emploi
               </h2>
-              <p className="mt-3 text-[#a79eb5]">
-                Prêts à rejoindre votre serveur.
-              </p>
             </div>
             <Link 
               href="/projects" 
               className="hidden sm:inline-flex items-center gap-1 text-sm text-violet-400 hover:text-violet-300 transition-colors"
             >
-              Voir tous les bots
+              Voir tous
               <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
@@ -202,7 +175,7 @@ export default function HomePage() {
                     <Bot className="h-7 w-7" />
                   </div>
                 </div>
-                <h3 className="text-lg font-medium text-white">{bot.name}</h3>
+                <h3 className="font-display text-xl font-medium text-white">{bot.name}</h3>
                 <p className="mt-1 text-sm text-[#6b6078]">{bot.desc}</p>
                 
                 <div className="mt-4 flex items-center justify-center gap-1 text-sm text-violet-400 opacity-0 transition-all group-hover:opacity-100">
@@ -221,17 +194,17 @@ export default function HomePage() {
           <div className="card-featured p-12 sm:p-16">
             <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-2 text-sm text-violet-200 mb-8">
               <Sparkles className="h-4 w-4 text-amber-400" />
-              Commencez gratuitement
+              Gratuit pour commencer
             </div>
             
-            <h2 className="text-4xl font-semibold text-white sm:text-5xl">
+            <h2 className="font-display text-5xl font-semibold text-white sm:text-6xl">
               Prêt à créer
               <br />
               <span className="text-gradient">votre bot ?</span>
             </h2>
             
-            <p className="mx-auto mt-6 max-w-lg text-lg text-[#a79eb5]">
-              Pas de carte requise. Créez votre bot et testez les modules en quelques minutes.
+            <p className="mx-auto mt-6 max-w-lg text-xl text-[#a79eb5]">
+              Pas de carte requise. Testez tous les modules gratuitement.
             </p>
             
             <div className="mt-10 flex flex-wrap justify-center gap-4">
