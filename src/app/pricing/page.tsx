@@ -1,52 +1,60 @@
-import { Check, Crown, Zap, Bot, Coins, ShoppingCart, Plus, Star, Server, Download } from "lucide-react";
+import { Check, Crown, Zap, Bot, Coins, ShoppingCart, Plus, Star, Server, Download, Sparkles, Percent } from "lucide-react";
 import Link from "next/link";
 
 const kroneOffers = [
   {
     krone: 30,
-    modulePoints: 10,
-    price: "2,99 €",
-    description: "Très limité, idéal pour tester.",
-    color: "muted",
+    price: "4,99 €",
+    basePrice: "24,00 €", // 30 × 0.80€
+    description: "Idéal pour tester. 2-3 modules.",
+    discount: null,
     icon: Zap,
     popular: false,
+    features: ["2-3 modules actifs", "Support communautaire"],
   },
   {
     krone: 60,
-    modulePoints: 25,
-    price: "4,99 €",
-    minEuros: "2 €",
-    description: "Pour les petits serveurs.",
-    color: "primary",
+    price: "7,99 €",
+    basePrice: "48,00 €", // 60 × 0.80€
+    description: "Pour les petits serveurs. 4-6 modules.",
+    discount: "-10%",
+    discountValue: 10,
     icon: Bot,
-    popular: true,
+    popular: false,
+    features: ["4-6 modules actifs", "Support email", "Stats avancées"],
   },
   {
     krone: 110,
-    modulePoints: 50,
-    price: "8,99 €",
-    description: "Pour les communautés moyennes.",
-    color: "primary",
+    price: "11,99 €",
+    basePrice: "88,00 €", // 110 × 0.80€
+    description: "Pour les communautés moyennes. Tous modules.",
+    discount: "-20%",
+    discountValue: 20,
     icon: Star,
-    popular: false,
+    popular: true,
+    features: ["Modules illimités", "Support prioritaire", "API access"],
   },
   {
     krone: 150,
-    modulePoints: 75,
-    price: "11,99 €",
-    description: "Pour les gros serveurs.",
-    color: "premium",
+    price: "14,99 €",
+    basePrice: "120,00 €", // 150 × 0.80€
+    description: "Pour les gros serveurs actifs.",
+    discount: "-30%",
+    discountValue: 30,
     icon: Crown,
     popular: false,
+    features: ["Modules illimités", "Support prioritaire", "Instance supplémentaire", "Webhook custom"],
   },
   {
     krone: 200,
-    modulePoints: 100,
-    price: "15,99 €",
-    description: "Accès complet, aucune limite.",
-    color: "premium",
+    price: "17,99 €",
+    basePrice: "160,00 €", // 200 × 0.80€
+    description: "La meilleure valeur. Accès complet.",
+    discount: "-35%",
+    discountValue: 35,
     icon: Crown,
     popular: false,
+    features: ["Tout inclus", "2 instances", "Support dédié", "Early access"],
   },
 ];
 
@@ -54,9 +62,7 @@ const microTransactions = [
   { name: "Instance supplémentaire", description: "Ajoutez un bot supplémentaire à votre compte.", price: "1,99 €", icon: Bot },
   { name: "Profil personnalisé", description: "Personnalisez la page de profil de votre bot.", price: "0,99 €", icon: Star },
   { name: "Commande Premium", description: "Débloquez une commande Premium spécifique.", price: "1,49 €", icon: Crown },
-  { name: "Pack de points +10", description: "Ajoutez 10 pts de modules à votre offre.", price: "1,99 €", icon: Plus },
-  { name: "Pack de points +25", description: "Ajoutez 25 pts de modules à votre offre.", price: "3,99 €", icon: Plus },
-  { name: "Support prioritaire", description: "Accédez au support dédié pendant 30 jours.", price: "2,99 €", icon: Crown },
+  { name: "Support prioritaire", description: "Accédez au support dédié pendant 30 jours.", price: "2,99 €", icon: Sparkles },
 ];
 
 const hostingOptions = [
@@ -80,86 +86,86 @@ const hostingOptions = [
   },
 ];
 
-const pointExamples = [
-  { feature: "Auto-Rôles (simple)", cost: 1 },
-  { feature: "Messages de bienvenue (simple)", cost: 1 },
-  { feature: "Tickets (simple)", cost: 1 },
-  { feature: "Musique (complet)", cost: 2 },
-  { feature: "Modération (complet)", cost: 2 },
-  { feature: "Giveaways (complet)", cost: 2 },
-  { feature: "Génération IA (avancé)", cost: 3 },
-  { feature: "Économie (avancé)", cost: 3 },
-];
-
 export default function PricingPage() {
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="text-center mb-12">
-        <h1 className="text-3xl font-bold text-white">Tarifs</h1>
-        <p className="mt-3 text-white/60">
-          Payez en Krônes, dépensez en points de modules. Un système flexible et transparent.
+    <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
+      {/* Header */}
+      <div className="text-center mb-16">
+        <span className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-2 text-sm text-violet-200 mb-6">
+          <Coins className="h-4 w-4 text-amber-400" />
+          1 Krône = 0,80 € de valeur
+        </span>
+        <h1 className="font-display text-5xl font-semibold text-white sm:text-6xl">Tarifs</h1>
+        <p className="mt-4 text-xl text-white/60 max-w-2xl mx-auto">
+          Plus vous prenez de Krônes, plus vous économisez. Jusqu&apos;à -35%.
         </p>
-        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-violet-500/10 px-4 py-1.5 text-sm font-medium text-violet-400">
-          <Coins className="h-4 w-4" />
-          1 Krône ≈ 0,08 €
-        </div>
       </div>
 
       {/* Krône offers */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {kroneOffers.map((offer) => (
           <div
             key={offer.krone}
-            className={`card relative p-5 ${
+            className={`card relative p-6 ${
               offer.popular
-                ? "border-violet-500/30 shadow-lg shadow-violet-500/10 scale-[1.02]"
-                : offer.color === "premium"
-                ? "border-amber-500/20 hover:border-amber-500/40"
+                ? "border-violet-500/40 shadow-xl shadow-violet-500/15 scale-[1.02]"
                 : ""
             }`}
           >
-            {offer.popular && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-violet-500 px-4 py-1 text-xs font-bold text-white shadow-lg shadow-violet-500/30">
-                Populaire
+            {/* Discount badge */}
+            {offer.discount && (
+              <span className="absolute -top-3 right-3 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 px-3 py-1 text-xs font-bold text-black flex items-center gap-1 shadow-lg">
+                <Percent className="h-3 w-3" />
+                {offer.discount}
               </span>
             )}
-            <div className="flex items-center gap-2 mb-3">
-              <div
-                className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                  offer.color === "premium"
-                    ? "bg-amber-500/10 text-amber-400"
-                    : offer.color === "primary"
-                    ? "bg-violet-500/10 text-violet-400"
-                    : "bg-white/5 text-white/60"
-                }`}
-              >
-                <offer.icon className="h-4 w-4" />
-              </div>
-              <span className="text-lg font-bold text-white">{offer.krone} Kr</span>
-            </div>
-            <div className="mb-2">
-              <span className="text-2xl font-extrabold text-white">{offer.price}</span>
-            </div>
-            <p className="text-xs text-white/60 mb-3">{offer.description}</p>
-            <div className="rounded-xl border border-white/10 bg-white/3 p-3 mb-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-white/60">Points de modules</span>
-                <span className="text-sm font-bold text-violet-400">{offer.modulePoints} pts</span>
-              </div>
-            </div>
-            {offer.minEuros && (
-              <p className="text-[10px] text-warning mb-2">
-                Min. {offer.minEuros} d&apos;achat requis
-              </p>
+            
+            {offer.popular && (
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-violet-500 px-4 py-1 text-xs font-bold text-white shadow-lg shadow-violet-500/30">
+                Plus rentable
+              </span>
             )}
+            
+            <div className="flex items-center gap-2 mb-4">
+              <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                offer.popular 
+                  ? "bg-gradient-to-br from-violet-500/20 to-amber-500/10 text-violet-300"
+                  : "bg-white/5 text-violet-300"
+              }`}>
+                <offer.icon className="h-5 w-5" />
+              </div>
+              <div>
+                <span className="font-display text-2xl font-bold text-white">{offer.krone}</span>
+                <span className="text-sm text-white/40 ml-1">Kr</span>
+              </div>
+            </div>
+            
+            {/* Price with base price strikethrough */}
+            <div className="mb-2">
+              {offer.discount && (
+                <div className="text-sm text-white/40 line-through mb-1">{offer.basePrice}</div>
+              )}
+              <span className="font-display text-3xl font-bold text-white">{offer.price}</span>
+            </div>
+            
+            <p className="text-sm text-white/50 mb-4">{offer.description}</p>
+            
+            {/* Features */}
+            <ul className="space-y-2 mb-5">
+              {offer.features.map((feature) => (
+                <li key={feature} className="flex items-center gap-2 text-sm text-white/70">
+                  <Check className="h-4 w-4 text-violet-400 flex-shrink-0" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+            
             <Link
               href="/dashboard"
-              className={`block w-full rounded-xl px-3 py-2 text-center text-xs font-semibold transition-all ${
+              className={`block w-full text-center rounded-xl py-3 text-sm font-medium transition-all ${
                 offer.popular
-                  ? "btn-shiny text-white"
-                  : offer.color === "premium"
-                  ? "bg-amber-500/10 text-amber-400 hover:bg-premium/20 border border-premium/30"
-                  : "glass text-white hover:bg-white/8"
+                  ? "bg-gradient-to-r from-violet-600 to-violet-500 text-white hover:shadow-lg hover:shadow-violet-500/25"
+                  : "border border-white/10 bg-white/5 text-white hover:bg-white/10"
               }`}
             >
               Choisir
@@ -168,95 +174,81 @@ export default function PricingPage() {
         ))}
       </div>
 
-      {/* Module points explanation */}
-      <div className="mt-16 card p-6">
-        <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-          <Coins className="h-5 w-5 text-violet-400" />
-          Comment fonctionnent les points de modules ?
-        </h2>
-        <p className="text-sm text-white/60 mb-6">
-          Chaque offre vous donne un nombre de points de modules. Vous répartissez ces points
-          entre les modules de votre choix. Une feature simple coûte 1 pt, une feature complète
-          coûte 2-3 pts.
-        </p>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/10">
-                <th className="py-3 text-left font-semibold text-white">Feature</th>
-                <th className="py-3 text-right font-semibold text-white">Coût en pts</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pointExamples.map((ex) => (
-                <tr key={ex.feature} className="border-b border-white/10/50">
-                  <td className="py-2.5 text-white/60">{ex.feature}</td>
-                  <td className="py-2.5 text-right">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                      ex.cost === 1 ? "bg-emerald-500/10 text-emerald-400" :
-                      ex.cost === 2 ? "bg-violet-500/10 text-violet-400" :
-                      "bg-amber-500/10 text-amber-400"
-                    }`}>
-                      {ex.cost} pt{ex.cost > 1 ? "s" : ""}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Value proposition */}
+      <div className="mt-12 card-featured p-8">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+          <div>
+            <h3 className="font-display text-2xl font-semibold text-white mb-2">
+              Pourquoi les Krônes ?
+            </h3>
+            <p className="text-white/60 max-w-xl">
+              Notre système vous permet de dépenser vos Krônes uniquement sur les modules que vous utilisez. 
+              Vous gardez le contrôle total de votre budget.
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <div className="text-sm text-white/40">Économisez jusqu&apos;à</div>
+              <div className="font-display text-3xl font-bold text-amber-400">35%</div>
+            </div>
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-violet-500/10 flex items-center justify-center">
+              <Percent className="h-6 w-6 text-amber-400" />
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Hosting Options */}
-      <div className="mt-16">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
-            <Server className="h-6 w-6 text-violet-400" />
-            Options d&apos;hébergement
-          </h2>
-          <p className="mt-2 text-white/60">
-            Choisissez l&apos;hébergement qui vous convient. Cloud managé ou auto-hébergé.
+      <div className="mt-20">
+        <div className="text-center mb-12">
+          <h2 className="font-display text-4xl font-semibold text-white">Options d&apos;hébergement</h2>
+          <p className="mt-4 text-white/60">
+            Choisissez ce qui vous convient. Cloud managé ou auto-hébergé.
           </p>
         </div>
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-6 sm:grid-cols-2 max-w-4xl mx-auto">
           {hostingOptions.map((option) => (
             <div
               key={option.name}
-              className={`card relative p-6 ${option.recommended ? "border-primary/30" : ""}`}
+              className={`card relative p-8 ${option.recommended ? "border-violet-500/30" : ""}`}
             >
               {option.recommended && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-violet-500 px-3 py-1 text-xs font-bold text-white shadow-lg shadow-violet-500/30">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-violet-500 px-4 py-1 text-xs font-bold text-white shadow-lg shadow-violet-500/30">
                   Recommandé
                 </span>
               )}
-              <div className="flex items-center gap-4 mb-4">
-                <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${option.recommended ? "bg-violet-500/10 text-violet-400" : "bg-amber-500/10 text-amber-400"}`}>
-                  <option.icon className="h-6 w-6" />
+              <div className="flex items-center gap-4 mb-6">
+                <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${
+                  option.recommended 
+                    ? "bg-gradient-to-br from-violet-500/20 to-violet-600/10 text-violet-300"
+                    : "bg-amber-500/10 text-amber-400"
+                }`}>
+                  <option.icon className="h-7 w-7" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">{option.name}</h3>
-                  <p className="text-xs text-white/60">{option.priceNote}</p>
+                  <h3 className="font-display text-xl font-semibold text-white">{option.name}</h3>
+                  <p className="text-sm text-white/40">{option.priceNote}</p>
                 </div>
               </div>
-              <p className="text-sm text-white/60 mb-4">{option.description}</p>
-              <ul className="space-y-2 mb-6">
+              <p className="text-white/60 mb-6">{option.description}</p>
+              <ul className="space-y-3 mb-8">
                 {option.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2 text-sm text-white">
-                    <Check className={`h-4 w-4 ${option.recommended ? "text-violet-400" : "text-amber-400"}`} />
+                  <li key={feature} className="flex items-center gap-3 text-white/80">
+                    <Check className={`h-5 w-5 ${option.recommended ? "text-violet-400" : "text-amber-400"}`} />
                     {feature}
                   </li>
                 ))}
               </ul>
               <div className="flex items-center justify-between">
-                <span className={`text-2xl font-bold ${option.recommended ? "text-white" : "text-amber-400"}`}>
+                <span className={`font-display text-3xl font-bold ${option.recommended ? "text-white" : "text-amber-400"}`}>
                   {option.price}
                 </span>
                 <Link
                   href="/dashboard"
-                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
+                  className={`rounded-xl px-6 py-3 text-sm font-medium transition-all ${
                     option.recommended
-                      ? "bg-violet-500 text-white hover:bg-violet-600"
-                      : "border border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+                      ? "bg-violet-600 text-white hover:bg-violet-500"
+                      : "border border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
                   }`}
                 >
                   {option.recommended ? "Choisir" : "En savoir plus"}
@@ -268,69 +260,32 @@ export default function PricingPage() {
       </div>
 
       {/* Micro-transactions */}
-      <div className="mt-16">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
-            <ShoppingCart className="h-6 w-6 text-cyan-400" />
-            Micro-transactions
+      <div className="mt-20">
+        <div className="text-center mb-12">
+          <h2 className="font-display text-4xl font-semibold text-white flex items-center justify-center gap-3">
+            <ShoppingCart className="h-8 w-8 text-violet-400" />
+            Compléments
           </h2>
-          <p className="mt-2 text-white/60">
-            Ajoutez des éléments à la carte, sans engagement.
+          <p className="mt-4 text-white/60">
+            Ajoutez des options à la carte, sans engagement.
           </p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {microTransactions.map((micro) => (
-            <div
-              key={micro.name}
-              className="card group p-5 hover:border-accent/30"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400">
-                  <micro.icon className="h-4 w-4" />
+            <div key={micro.name} className="card p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400">
+                  <micro.icon className="h-5 w-5" />
                 </div>
-                <h3 className="text-sm font-semibold text-white">{micro.name}</h3>
+                <h3 className="font-medium text-white">{micro.name}</h3>
               </div>
-              <p className="text-xs text-white/60 mb-3">{micro.description}</p>
+              <p className="text-sm text-white/50 mb-4">{micro.description}</p>
               <div className="flex items-center justify-between">
-                <span className="text-lg font-bold text-white">{micro.price}</span>
-                <button className="rounded-xl border border-accent/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-semibold text-cyan-400 hover:bg-accent/20 transition-all">
-                  Acheter
+                <span className="font-display text-xl font-bold text-white">{micro.price}</span>
+                <button className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white hover:bg-white/10 transition-colors">
+                  Ajouter
                 </button>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* FAQ */}
-      <div className="mt-16 text-center">
-        <h2 className="text-2xl font-bold text-white">Questions fréquentes</h2>
-        <div className="mt-8 mx-auto max-w-2xl space-y-4 text-left">
-          {[
-            {
-              q: "Qu'est-ce qu'un Krône ?",
-              a: "Le Krône est la monnaie virtuelle de Synkrone. 1 Krône ≈ 0,08 €. Vous achetez des Krônes puis les échangez contre des points de modules.",
-            },
-            {
-              q: "Puis-je changer d'offre à tout moment ?",
-              a: "Oui, vous pouvez upgrader à tout moment. La différence sera calculée au prorata. Les points non utilisés sont reportés.",
-            },
-            {
-              q: "Que se passe-t-il si je dépasse mes points de modules ?",
-              a: "Vous pouvez acheter des packs de points supplémentaires en micro-transaction, ou upgrader votre offre.",
-            },
-            {
-              q: "Les points de modules sont-ils réinitialisés chaque mois ?",
-              a: "Non, vos points sont conservés tant que votre abonnement est actif. Seule la répartition peut changer.",
-            },
-            {
-              q: "Puis-je répartir mes points différemment ?",
-              a: "Oui, à tout moment depuis le Dashboard. Désactivez un module pour récupérer ses points et les allouer ailleurs.",
-            },
-          ].map((faq) => (
-            <div key={faq.q} className="card p-5">
-              <h3 className="font-semibold text-white text-sm">{faq.q}</h3>
-              <p className="mt-2 text-sm text-white/60">{faq.a}</p>
             </div>
           ))}
         </div>

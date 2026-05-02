@@ -137,19 +137,19 @@ export default function DashboardPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400">
                 <Bot className="h-5 w-5" />
               </div>
-              <h2 className="text-xl font-semibold text-white">Créer un bot</h2>
+              <h2 className="font-display text-xl font-semibold text-white">Créer un bot</h2>
             </div>
 
             <div className="space-y-4">
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-white">
-                  Nom du bot
+                  Nom du projet
                 </label>
                 <input
                   type="text"
                   value={botName}
                   onChange={(e) => setBotName(e.target.value)}
-                  placeholder="Mon Bot Synkrone"
+                  placeholder="Mon Projet Synkrone"
                   className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/60/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all"
                 />
               </div>
@@ -274,7 +274,7 @@ export default function DashboardPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400">
                 <Plus className="h-5 w-5" />
               </div>
-              <h2 className="text-xl font-semibold text-white">
+              <h2 className="font-display text-xl font-semibold text-white">
                 Nous créons le bot pour vous
               </h2>
             </div>
@@ -315,7 +315,7 @@ export default function DashboardPage() {
           {/* Existing bots */}
           <div className="card p-6 lg:col-span-2">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-white">Vos bots</h2>
+              <h2 className="font-display text-xl font-semibold text-white">Vos bots</h2>
               <button className="rounded-xl border border-white/10 px-3 py-1.5 text-xs font-medium text-white/60 hover:bg-white/5 hover:text-white transition-all">
                 + Nouveau bot
               </button>
@@ -332,7 +332,7 @@ export default function DashboardPage() {
         <div id="modules">
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-white">Modules disponibles</h2>
+              <h2 className="font-display text-xl font-semibold text-white">Modules disponibles</h2>
               <p className="mt-1 text-sm text-white/60">
                 Activez les modules que vous souhaitez. Chaque module consomme des points.
               </p>
@@ -348,24 +348,52 @@ export default function DashboardPage() {
           </div>
 
           {/* Points bar */}
-          <div className="mb-6 card p-5">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-white">Points de modules utilisés</span>
-              <span className={`text-sm font-bold ${totalPointsUsed > maxPoints ? "text-red-400" : "text-violet-400"}`}>
-                {totalPointsUsed} / {maxPoints} pts
-              </span>
+          <div className="mb-6 card p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="font-display text-lg font-semibold text-white">Points de modules</h3>
+                <p className="text-sm text-white/50 mt-1">
+                  Chaque module consomme des points. Activez selon vos besoins.
+                </p>
+              </div>
+              <div className="text-right">
+                <span className={`font-display text-2xl font-bold ${totalPointsUsed > maxPoints ? "text-red-400" : "text-violet-400"}`}>
+                  {totalPointsUsed}
+                </span>
+                <span className="text-white/40 text-sm"> / {maxPoints} pts</span>
+              </div>
             </div>
-            <div className="h-3 rounded-full bg-border overflow-hidden">
+            <div className="h-3 rounded-full bg-white/5 overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${
-                  totalPointsUsed > maxPoints ? "bg-danger" : "bg-primary"
+                  totalPointsUsed > maxPoints ? "bg-red-500" : "bg-gradient-to-r from-violet-600 to-violet-400"
                 }`}
                 style={{ width: `${Math.min((totalPointsUsed / maxPoints) * 100, 100)}%` }}
               />
             </div>
-            <p className="mt-2 text-xs text-white/60">
-              Votre offre actuelle vous donne {maxPoints} pts de modules.{" "}
-              <a href="/pricing" className="text-violet-400 hover:underline">
+            
+            {/* Points cost examples */}
+            <div className="mt-5 grid grid-cols-3 gap-3 text-center">
+              <div className="rounded-lg bg-white/5 p-3">
+                <div className="text-xs text-white/40 mb-1">Simple</div>
+                <div className="font-display text-lg font-bold text-emerald-400">1 pt</div>
+                <div className="text-xs text-white/50">Auto-rôles</div>
+              </div>
+              <div className="rounded-lg bg-white/5 p-3">
+                <div className="text-xs text-white/40 mb-1">Standard</div>
+                <div className="font-display text-lg font-bold text-amber-400">2 pts</div>
+                <div className="text-xs text-white/50">Musique, Modération</div>
+              </div>
+              <div className="rounded-lg bg-white/5 p-3">
+                <div className="text-xs text-white/40 mb-1">Avancé</div>
+                <div className="font-display text-lg font-bold text-rose-400">3 pts</div>
+                <div className="text-xs text-white/50">Économie, IA</div>
+              </div>
+            </div>
+            
+            <p className="mt-4 text-xs text-white/60">
+              Besoin de plus de points ?{" "}
+              <a href="/pricing" className="text-violet-400 hover:text-violet-300 underline underline-offset-2">
                 Augmenter votre offre →
               </a>
             </p>
@@ -431,7 +459,7 @@ export default function DashboardPage() {
         /* Stats view */
         <div id="stats">
           <div className="mb-6">
-            <h2 className="text-xl font-semibold text-white">Statistiques du bot</h2>
+            <h2 className="font-display text-xl font-semibold text-white">Statistiques du bot</h2>
             <p className="mt-1 text-sm text-white/60">
               Suivez en temps réel les performances et l&apos;activité de votre bot.
             </p>
