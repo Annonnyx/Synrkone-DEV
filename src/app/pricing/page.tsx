@@ -5,9 +5,9 @@ const kroneOffers = [
   {
     krone: 30,
     price: "4,99 €",
-    basePrice: "24,00 €", // 30 × 0.80€
+    unitPrice: "0,166 €",
     description: "Idéal pour tester. 2-3 modules.",
-    discount: null,
+    savings: null,
     icon: Zap,
     popular: false,
     features: ["2-3 modules actifs", "Support communautaire"],
@@ -15,10 +15,9 @@ const kroneOffers = [
   {
     krone: 60,
     price: "7,99 €",
-    basePrice: "48,00 €", // 60 × 0.80€
+    unitPrice: "0,133 €",
     description: "Pour les petits serveurs. 4-6 modules.",
-    discount: "-10%",
-    discountValue: 10,
+    savings: "Économisez 20%",
     icon: Bot,
     popular: false,
     features: ["4-6 modules actifs", "Support email", "Stats avancées"],
@@ -26,10 +25,9 @@ const kroneOffers = [
   {
     krone: 110,
     price: "11,99 €",
-    basePrice: "88,00 €", // 110 × 0.80€
+    unitPrice: "0,109 €",
     description: "Pour les communautés moyennes. Tous modules.",
-    discount: "-20%",
-    discountValue: 20,
+    savings: "Économisez 35%",
     icon: Star,
     popular: true,
     features: ["Modules illimités", "Support prioritaire", "API access"],
@@ -37,10 +35,9 @@ const kroneOffers = [
   {
     krone: 150,
     price: "14,99 €",
-    basePrice: "120,00 €", // 150 × 0.80€
+    unitPrice: "0,100 €",
     description: "Pour les gros serveurs actifs.",
-    discount: "-30%",
-    discountValue: 30,
+    savings: "Économisez 40%",
     icon: Crown,
     popular: false,
     features: ["Modules illimités", "Support prioritaire", "Instance supplémentaire", "Webhook custom"],
@@ -48,10 +45,9 @@ const kroneOffers = [
   {
     krone: 200,
     price: "17,99 €",
-    basePrice: "160,00 €", // 200 × 0.80€
+    unitPrice: "0,090 €",
     description: "La meilleure valeur. Accès complet.",
-    discount: "-35%",
-    discountValue: 35,
+    savings: "Économisez 45%",
     icon: Crown,
     popular: false,
     features: ["Tout inclus", "2 instances", "Support dédié", "Early access"],
@@ -112,11 +108,11 @@ export default function PricingPage() {
                 : ""
             }`}
           >
-            {/* Discount badge */}
-            {offer.discount && (
+            {/* Savings badge */}
+            {offer.savings && (
               <span className="absolute -top-3 right-3 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 px-3 py-1 text-xs font-bold text-black flex items-center gap-1 shadow-lg">
                 <Percent className="h-3 w-3" />
-                {offer.discount}
+                {offer.savings}
               </span>
             )}
             
@@ -140,12 +136,10 @@ export default function PricingPage() {
               </div>
             </div>
             
-            {/* Price with base price strikethrough */}
+            {/* Price and unit price */}
             <div className="mb-2">
-              {offer.discount && (
-                <div className="text-sm text-white/40 line-through mb-1">{offer.basePrice}</div>
-              )}
               <span className="font-display text-3xl font-bold text-white">{offer.price}</span>
+              <div className="text-sm text-white/40 mt-1">{offer.unitPrice}/Kr</div>
             </div>
             
             <p className="text-sm text-white/50 mb-4">{offer.description}</p>
