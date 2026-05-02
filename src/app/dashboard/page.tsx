@@ -74,12 +74,15 @@ const mockStats = {
   dailyActivity: [12, 18, 25, 31, 45, 52, 48, 67, 82, 74, 58, 43],
 };
 
+type HostingOption = "synkrone" | "self";
+
 export default function DashboardPage() {
   const [modules, setModules] = useState(defaultModules);
   const [botName, setBotName] = useState("");
   const [token, setToken] = useState("");
   const [step, setStep] = useState<"setup" | "modules" | "stats">("setup");
   const [showToken, setShowToken] = useState(false);
+  const [hosting, setHosting] = useState<HostingOption>("synkrone");
 
   const totalPointsUsed = modules.filter((m) => m.enabled).reduce((sum, m) => sum + m.pointCost, 0);
   const maxPoints = 25;
@@ -95,8 +98,8 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
-          <p className="mt-1 text-sm text-muted">Créez et gérez votre bot Discord.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-white">Dashboard</h1>
+          <p className="mt-1 text-sm text-white/50">Créez et gérez votre bot Discord.</p>
         </div>
         <div className="flex gap-1.5 glass rounded-2xl p-1.5">
           <button
@@ -184,22 +187,75 @@ export default function DashboardPage() {
                 </p>
               </div>
 
+              {/* Hosting option */}
+              <div className="rounded-xl border border-glass-border bg-white/3 p-4">
+                <h3 className="text-sm font-semibold text-foreground mb-4">Option d&apos;hébergement</h3>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Synkrone hosting */}
+                  <button
+                    onClick={() => setHosting("synkrone")}
+                    className={`relative rounded-xl border p-4 text-left transition-all ${
+                      hosting === "synkrone"
+                        ? "border-violet-500/50 bg-violet-500/10"
+                        : "border-white/10 bg-white/5 hover:border-white/20"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-white">Synkrone</span>
+                      {hosting === "synkrone" && (
+                        <span className="flex h-2 w-2 rounded-full bg-violet-400" />
+                      )}
+                    </div>
+                    <p className="text-xs text-white/50">Inclus dans l&apos;abonnement</p>
+                    <p className="text-xs text-violet-400 mt-1">Hébergement cloud + support</p>
+                  </button>
+
+                  {/* Self hosting */}
+                  <button
+                    onClick={() => setHosting("self")}
+                    className={`relative rounded-xl border p-4 text-left transition-all ${
+                      hosting === "self"
+                        ? "border-amber-500/50 bg-amber-500/10"
+                        : "border-white/10 bg-white/5 hover:border-white/20"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-white">Auto-hébergé</span>
+                      {hosting === "self" && (
+                        <span className="flex h-2 w-2 rounded-full bg-amber-400" />
+                      )}
+                    </div>
+                    <p className="text-xs text-white/50">Paiement unique</p>
+                    <p className="text-xs text-amber-400 mt-1">29,99 € une fois</p>
+                  </button>
+                </div>
+
+                {hosting === "self" && (
+                  <div className="mt-3 rounded-lg bg-amber-500/10 border border-amber-500/20 p-3">
+                    <p className="text-xs text-amber-200/80">
+                      Vous recevrez le code source complet et les instructions pour héberger vous-même sur votre serveur.
+                    </p>
+                  </div>
+                )}
+              </div>
+
               <div className="rounded-xl border border-glass-border bg-white/3 p-4">
                 <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                  <Key className="h-4 w-4 text-warning" />
+                  <Key className="h-4 w-4 text-amber-400" />
                   Options requises sur Discord Dev
                 </h3>
-                <ul className="mt-2 space-y-1 text-xs text-muted">
+                <ul className="mt-2 space-y-1 text-xs text-white/50">
                   <li className="flex items-center gap-2">
-                    <span className="h-1 w-1 rounded-full bg-primary" />
+                    <span className="h-1 w-1 rounded-full bg-violet-400" />
                     Activer les Intents : SERVER MEMBERS, MESSAGE CONTENT
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="h-1 w-1 rounded-full bg-primary" />
+                    <span className="h-1 w-1 rounded-full bg-violet-400" />
                     Activer l&apos;OAuth2 Bot scope
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="h-1 w-1 rounded-full bg-primary" />
+                    <span className="h-1 w-1 rounded-full bg-violet-400" />
                     Permissions : Administrator (recommandé)
                   </li>
                 </ul>
@@ -207,7 +263,7 @@ export default function DashboardPage() {
 
               <button className="btn-shiny w-full rounded-xl px-4 py-3 text-sm font-semibold text-white">
                 <Zap className="mr-2 inline h-4 w-4" />
-                Créer et démarrer le bot
+                {hosting === "synkrone" ? "Créer et héberger le bot" : "Créer et recevoir le code"}
               </button>
             </div>
           </div>

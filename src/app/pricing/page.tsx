@@ -1,4 +1,4 @@
-import { Check, Crown, Zap, Bot, Coins, ShoppingCart, Plus, Star } from "lucide-react";
+import { Check, Crown, Zap, Bot, Coins, ShoppingCart, Plus, Star, Server, Download } from "lucide-react";
 import Link from "next/link";
 
 const kroneOffers = [
@@ -57,6 +57,27 @@ const microTransactions = [
   { name: "Pack de points +10", description: "Ajoutez 10 pts de modules à votre offre.", price: "1,99 €", icon: Plus },
   { name: "Pack de points +25", description: "Ajoutez 25 pts de modules à votre offre.", price: "3,99 €", icon: Plus },
   { name: "Support prioritaire", description: "Accédez au support dédié pendant 30 jours.", price: "2,99 €", icon: Crown },
+];
+
+const hostingOptions = [
+  {
+    name: "Hébergement Synkrone",
+    description: "Inclus dans tous les abonnements. Uptime 99.7%, redémarrage auto, support inclus.",
+    price: "Inclus",
+    priceNote: "dans l'abonnement",
+    icon: Server,
+    recommended: true,
+    features: ["Uptime 99.7%", "Redémarrage auto", "Support 24/7", "Mises à jour auto"],
+  },
+  {
+    name: "Auto-hébergement",
+    description: "Code source complet pour héberger sur votre propre serveur. Paiement unique.",
+    price: "29,99 €",
+    priceNote: "paiement unique",
+    icon: Download,
+    recommended: false,
+    features: ["Code source complet", "Documentation incluse", "Mises à jour 6 mois", "Support setup"],
+  },
 ];
 
 const pointExamples = [
@@ -183,6 +204,66 @@ export default function PricingPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Hosting Options */}
+      <div className="mt-16">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
+            <Server className="h-6 w-6 text-primary" />
+            Options d&apos;hébergement
+          </h2>
+          <p className="mt-2 text-muted">
+            Choisissez l&apos;hébergement qui vous convient. Cloud managé ou auto-hébergé.
+          </p>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2">
+          {hostingOptions.map((option) => (
+            <div
+              key={option.name}
+              className={`bento-item relative p-6 ${option.recommended ? "border-primary/30" : ""}`}
+            >
+              {option.recommended && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-violet-500 px-3 py-1 text-xs font-bold text-white shadow-lg shadow-violet-500/30">
+                  Recommandé
+                </span>
+              )}
+              <div className="flex items-center gap-4 mb-4">
+                <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${option.recommended ? "bg-violet-500/10 text-violet-400" : "bg-amber-500/10 text-amber-400"}`}>
+                  <option.icon className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">{option.name}</h3>
+                  <p className="text-xs text-muted">{option.priceNote}</p>
+                </div>
+              </div>
+              <p className="text-sm text-muted mb-4">{option.description}</p>
+              <ul className="space-y-2 mb-6">
+                {option.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-sm text-foreground">
+                    <Check className={`h-4 w-4 ${option.recommended ? "text-violet-400" : "text-amber-400"}`} />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <div className="flex items-center justify-between">
+                <span className={`text-2xl font-bold ${option.recommended ? "text-foreground" : "text-amber-400"}`}>
+                  {option.price}
+                </span>
+                <Link
+                  href="/dashboard"
+                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
+                    option.recommended
+                      ? "bg-violet-500 text-white hover:bg-violet-600"
+                      : "border border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+                  }`}
+                >
+                  {option.recommended ? "Choisir" : "En savoir plus"}
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
