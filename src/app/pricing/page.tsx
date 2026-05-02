@@ -118,7 +118,7 @@ export default function PricingPage() {
             {/* Badges */}
             {offer.popular ? (
               <>
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-violet-500 px-4 py-1 text-xs font-bold text-white shadow-lg shadow-violet-500/30 z-10">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-violet-500 px-3 py-1 text-xs font-bold text-white shadow-lg shadow-violet-500/30 z-10 whitespace-nowrap">
                   Plus populaire
                 </span>
                 {offer.savings && (
