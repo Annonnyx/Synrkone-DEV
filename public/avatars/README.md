@@ -40,13 +40,15 @@ curl -H "Authorization: Bot VOTRE_TOKEN" \
 
 ```
 public/avatars/
-├── vex.png          (1366780122891419784)
-├── onyx.png         (1122092101459517481)
-├── vex-bot.png      (1367891720871874560)
-├── asuna.png        (1428865683986452640)
-├── kayaba.png       (1385913159717621780)
-├── yui.png          (1460012999912853810)
-└── server-icon.png  (Synkrone Support)
+├── vex.png              (1366780122891419784) - Team VEX
+├── onyx.png             (1122092101459517481) - Team ØNYX
+├── vex.png              (1367891720871874560) - Bot Vex
+├── asuna.png            (1428865683986452640) - Bot Asuna
+├── kayaba.png           (1385913159717621780) - Bot Kayaba
+├── yui.png              (1460012999912853810) - Bot Yui
+├── french-baguette.png  - Minecraft modpack logo
+├── maths-app.png        - Maths-App logo
+└── server.png           - Synkrone Support server icon
 ```
 
 ## URLs CDN Discord

@@ -36,7 +36,7 @@ const bots = [
     color: "violet",
     stats: "2.4K serveurs",
     discordId: "1367891720871874560",
-    avatarUrl: null, // Ex: "https://cdn.discordapp.com/avatars/1367891720871874560/HASH.png" ou "/avatars/vex-bot.png"
+    avatarUrl: "/avatars/vex.png",
     features: [
       "Modération auto",
       "Économie",
@@ -53,7 +53,7 @@ const bots = [
     color: "violet",
     stats: "1.8K serveurs",
     discordId: "1428865683986452640",
-    avatarUrl: null, // Ex: "/avatars/asuna.png"
+    avatarUrl: "/avatars/asuna.png",
     features: [
       "Auto-modération",
       "Anti-raid",
@@ -70,7 +70,7 @@ const bots = [
     color: "violet",
     stats: "900+ serveurs",
     discordId: "1385913159717621780",
-    avatarUrl: null, // Ex: "/avatars/kayaba.png"
+    avatarUrl: "/avatars/kayaba.png",
     features: [
       "Embeds",
       "Auto-rôles",
@@ -87,7 +87,7 @@ const bots = [
     color: "rose",
     stats: "Nouveau",
     discordId: "1460012999912853810",
-    avatarUrl: null, // Ex: "/avatars/yui.png"
+    avatarUrl: "/avatars/yui.png",
     features: [
       "Casino",
       "Niveaux",
@@ -107,6 +107,7 @@ const minecraftProjects = [
     href: "https://discord.gg/jX9mFnEk72",
     color: "emerald",
     stats: "500+ joueurs actifs",
+    avatarUrl: "/avatars/french-baguette.png",
     ip: "play.frenchbaguette.fr",
     features: [
       "Create, Mekanism, AE2",
@@ -174,6 +175,7 @@ const communityProjects = [
     href: "https://maths-app.com",
     color: "cyan",
     stats: "Partenaire officiel",
+    avatarUrl: "/avatars/maths-app.png"
   },
 ];
 

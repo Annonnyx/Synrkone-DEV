@@ -13,8 +13,7 @@ const teamMembers = [
     role: "Co-fondateur & Lead Dev",
     avatar: "🔮",
     discordId: "1366780122891419784",
-    // Exemple avec URL Discord CDN: avatarUrl: "https://cdn.discordapp.com/avatars/1366780122891419784/AVATAR_HASH.png"
-    avatarUrl: null, // Remplacer par l'URL ou "/avatars/vex.png" si fichier local
+    avatarUrl: "/avatars/vex.png",
     color: "violet",
     description: "Lead dev. Architecture logicielle et bots Discord.",
     skills: ["Full-Stack", "Bots"],
@@ -27,8 +26,7 @@ const teamMembers = [
     role: "Co-fondateur & DevOps",
     avatar: "⚡",
     discordId: "1122092101459517481",
-    // Exemple avec URL Discord CDN: avatarUrl: "https://cdn.discordapp.com/avatars/1122092101459517481/AVATAR_HASH.png"
-    avatarUrl: null, // Remplacer par l'URL ou "/avatars/onyx.png" si fichier local
+    avatarUrl: "/avatars/onyx.png",
     color: "amber",
     description: "Infrastructure & cloud. Stabilité des systèmes.",
     skills: ["DevOps", "Cloud"],
