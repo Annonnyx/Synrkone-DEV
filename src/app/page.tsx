@@ -82,7 +82,7 @@ export default function HomePage() {
               <ArrowRight className="h-5 w-5" />
             </Link>
             <Link href="/pricing" className="btn-ghost inline-flex items-center gap-2 px-8 py-4 text-base">
-              Voir les tarifs
+              Voir les Krônes
             </Link>
           </div>
 

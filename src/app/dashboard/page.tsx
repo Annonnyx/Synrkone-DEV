@@ -29,6 +29,10 @@ import {
   AlertTriangle,
   CheckCircle2,
   XCircle,
+  ChevronDown,
+  HelpCircle,
+  Copy,
+  Check,
 } from "lucide-react";
 
 interface Module {
@@ -83,6 +87,7 @@ export default function DashboardPage() {
   const [step, setStep] = useState<"setup" | "modules" | "stats">("setup");
   const [showToken, setShowToken] = useState(false);
   const [hosting, setHosting] = useState<HostingOption>("synkrone");
+  const [showTokenGuide, setShowTokenGuide] = useState(false);
 
   const totalPointsUsed = modules.filter((m) => m.enabled).reduce((sum, m) => sum + m.pointCost, 0);
   const maxPoints = 25;
@@ -173,19 +178,81 @@ export default function DashboardPage() {
                     {showToken ? "Cacher" : "Voir"}
                   </button>
                 </div>
-                <p className="mt-1.5 text-xs text-white/60">
-                  Obtenez votre token sur{" "}
-                  <a
-                    href="https://discord.com/developers/applications"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-violet-400 hover:underline"
+                <div className="mt-2">
+                  <button
+                    onClick={() => setShowTokenGuide(!showTokenGuide)}
+                    className="inline-flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 transition-colors"
                   >
-                    Discord Developer Portal
-                    <ExternalLink className="ml-0.5 inline h-3 w-3" />
-                  </a>
-                </p>
+                    <HelpCircle className="h-3.5 w-3.5" />
+                    Comment récupérer mon TOKEN ?
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showTokenGuide ? "rotate-180" : ""}`} />
+                  </button>
+                </div>
               </div>
+
+              {/* Token Guide Accordion */}
+              {showTokenGuide && (
+                <div className="rounded-xl border border-violet-500/20 bg-gradient-to-br from-violet-500/5 to-transparent p-5 animate-fade-up">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/20 text-violet-400">
+                      <Key className="h-4 w-4" />
+                    </div>
+                    <h3 className="font-display text-sm font-semibold text-white">Guide : Récupérer votre token</h3>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="flex gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-violet-500/20 flex items-center justify-center text-xs font-bold text-violet-400">1</div>
+                      <div>
+                        <p className="text-sm font-medium text-white">Création de l&apos;application</p>
+                        <p className="text-xs text-white/50 mt-1">
+                          Rendez-vous sur{" "}
+                          <a href="https://discord.com/developers/applications" target="_blank" rel="noopener noreferrer" className="text-violet-400 hover:underline inline-flex items-center gap-0.5">
+                            Discord Developer Portal
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        </p>
+                        <p className="text-xs text-white/50 mt-1">Cliquez sur <span className="text-white/70 font-medium">New Application</span>, donnez-lui un nom et acceptez les conditions.</p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-violet-500/20 flex items-center justify-center text-xs font-bold text-violet-400">2</div>
+                      <div>
+                        <p className="text-sm font-medium text-white">Configuration des intents</p>
+                        <p className="text-xs text-white/50 mt-1">Dans l&apos;onglet <span className="text-white/70 font-medium">Bot</span> (menu à gauche) :</p>
+                        <ul className="text-xs text-white/50 mt-1 list-disc list-inside space-y-0.5">
+                          <li>Descendez jusqu&apos;à <span className="text-white/70">Privileged Gateway Intents</span></li>
+                          <li>Activez <span className="text-emerald-400">Presence Intent</span>, <span className="text-emerald-400">Server Members Intent</span> et <span className="text-emerald-400">Message Content Intent</span></li>
+                        </ul>
+                        <p className="text-xs text-amber-400 mt-1.5">⚠️ Cliquez sur <span className="font-medium">Save Changes</span> en bas de page pour valider.</p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-violet-500/20 flex items-center justify-center text-xs font-bold text-violet-400">3</div>
+                      <div>
+                        <p className="text-sm font-medium text-white">Invitation sur le serveur</p>
+                        <p className="text-xs text-white/50 mt-1">Dans l&apos;onglet <span className="text-white/70 font-medium">OAuth2</span> {'>'} <span className="text-white/70 font-medium">URL Generator</span> :</p>
+                        <ul className="text-xs text-white/50 mt-1 list-disc list-inside space-y-0.5">
+                          <li>Cochez <span className="text-white/70">bot</span> et <span className="text-white/70">applications.commands</span></li>
+                          <li>Dans Bot Permissions, cochez <span className="text-violet-400 font-medium">Administrator</span></li>
+                          <li>Copiez le lien généré et ouvrez-le dans votre navigateur</li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center text-xs font-bold text-amber-400">4</div>
+                      <div>
+                        <p className="text-sm font-medium text-white">Récupérer le token</p>
+                        <p className="text-xs text-white/50 mt-1">Dans l&apos;onglet <span className="text-white/70 font-medium">Bot</span>, cliquez sur <span className="text-white/70 font-medium">Reset Token</span> puis <span className="text-white/70 font-medium">Copy</span>.</p>
+                        <p className="text-xs text-amber-400 mt-1.5">⚠️ Gardez ce token secret ! Ne le partagez jamais.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Hosting option */}
               <div className="rounded-xl border border-white/10 bg-white/5 p-4">
@@ -403,45 +470,57 @@ export default function DashboardPage() {
             {modules.map((mod) => (
               <div
                 key={mod.id}
-                className={`card group p-5 ${
-                  mod.enabled ? "border-primary/30 ring-1 ring-violet-500/30" : ""
+                className={`card group p-5 transition-all duration-300 ${
+                  mod.enabled 
+                    ? "border-violet-500/40 shadow-lg shadow-violet-500/10 bg-gradient-to-br from-violet-500/5 to-transparent" 
+                    : "border-white/10 hover:border-white/20"
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${
-                        mod.enabled ? "bg-primary/20 text-violet-400" : "bg-card-hover text-white/60"
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
+                        mod.enabled 
+                          ? "bg-gradient-to-br from-violet-500/30 to-violet-600/10 text-violet-300 shadow-lg shadow-violet-500/20" 
+                          : "bg-white/5 text-white/50"
                       }`}
                     >
                       <mod.icon className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                      <h3 className={`text-sm font-semibold flex items-center gap-2 transition-colors ${
+                        mod.enabled ? "text-white" : "text-white/80"
+                      }`}>
                         {mod.name}
                         {mod.premium && (
-                          <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold text-violet-400">
+                          <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-400 border border-amber-500/30">
                             PRO
                           </span>
                         )}
                       </h3>
-                      <span className="text-[11px] text-white/60">{mod.pointCost} pt{mod.pointCost > 1 ? "s" : ""}</span>
+                      <span className={`text-[11px] transition-colors ${
+                        mod.enabled ? "text-violet-400" : "text-white/50"
+                      }`}>{mod.pointCost} pt{mod.pointCost > 1 ? "s" : ""}</span>
                     </div>
                   </div>
                   <button
                     onClick={() => toggleModule(mod.id)}
-                    className={`relative h-6 w-11 rounded-full transition-colors ${
-                      mod.enabled ? "bg-primary" : "bg-border"
+                    className={`relative h-7 w-12 rounded-full transition-all duration-300 ${
+                      mod.enabled 
+                        ? "bg-gradient-to-r from-violet-600 to-violet-500 shadow-lg shadow-violet-500/30" 
+                        : "bg-white/10 hover:bg-white/15"
                     }`}
                   >
                     <span
-                      className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-                        mod.enabled ? "left-[22px]" : "left-0.5"
+                      className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-md transition-all duration-300 ${
+                        mod.enabled ? "translate-x-6" : "translate-x-1"
                       }`}
                     />
                   </button>
                 </div>
-                <p className="mt-3 text-xs text-white/60">{mod.description}</p>
+                <p className={`mt-3 text-xs transition-colors ${
+                  mod.enabled ? "text-white/70" : "text-white/50"
+                }`}>{mod.description}</p>
               </div>
             ))}
           </div>
