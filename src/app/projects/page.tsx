@@ -28,7 +28,7 @@ import {
 const bots = [
   {
     icon: Bot,
-    name: "Vex",
+    name: "Vax",
     version: "v2.4.1",
     category: "Bot Multifonction",
     description: "Modération, utilitaires, fun et économie.",
@@ -36,7 +36,7 @@ const bots = [
     color: "violet",
     stats: "2.4K serveurs",
     discordId: "1367891720871874560",
-    avatarUrl: "/avatars/vex.png",
+    avatarUrl: "/avatars/vax.png",
     features: [
       "Modération auto",
       "Économie",
@@ -323,8 +323,12 @@ export default function ProjectsPage() {
                   className={`card group p-6 ${colors.border} transition-all duration-300 hover:shadow-xl ${colors.glow}`}
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${colors.bg} ${colors.text} transition-transform group-hover:scale-105`}>
-                      <project.icon className="h-7 w-7" />
+                    <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${colors.bg} ${colors.text} transition-transform group-hover:scale-105 overflow-hidden`}>
+                      {project.avatarUrl ? (
+                        <img src={project.avatarUrl} alt={project.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <project.icon className="h-7 w-7" />
+                      )}
                     </div>
                     <div className="flex items-center gap-1.5">
                       {project.online && (
@@ -416,8 +420,12 @@ export default function ProjectsPage() {
                 >
                   <div className="relative mx-auto mb-4 flex h-16 w-16 items-center justify-center">
                     <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br from-${project.color}-500/30 to-${project.color === 'amber' ? 'violet' : project.color}-500/20 opacity-50 blur-xl transition-opacity group-hover:opacity-80`} />
-                    <div className={`relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${colors.bg} ${colors.text} transition-transform group-hover:scale-110`}>
-                      <project.icon className="h-7 w-7" />
+                    <div className={`relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${colors.bg} ${colors.text} transition-transform group-hover:scale-110 overflow-hidden`}>
+                      {project.avatarUrl ? (
+                        <img src={project.avatarUrl} alt={project.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <project.icon className="h-7 w-7" />
+                      )}
                     </div>
                   </div>
                   <h3 className="font-display text-lg font-medium text-white">{project.name}</h3>
