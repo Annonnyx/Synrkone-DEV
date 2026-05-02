@@ -94,7 +94,7 @@ export default function PricingPage() {
       <div className="text-center mb-16">
         <span className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-2 text-sm text-violet-200 mb-6">
           <Coins className="h-4 w-4 text-amber-400" />
-          1 Krône = 0,80 € de valeur
+          Prix au Krône : 0,166 € → 0,090 €
         </span>
         <h1 className="font-display text-5xl font-semibold text-white sm:text-6xl">Tarifs</h1>
         <p className="mt-4 text-xl text-white/60 max-w-2xl mx-auto">
