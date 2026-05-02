@@ -132,7 +132,7 @@ export default function DashboardPage() {
       {step === "setup" ? (
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Bot creation form */}
-          <div className="surface-card p-6">
+          <div className="card p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400">
                 <Bot className="h-5 w-5" />
@@ -216,23 +216,23 @@ export default function DashboardPage() {
                     onClick={() => setHosting("self")}
                     className={`relative rounded-xl border p-4 text-left transition-all ${
                       hosting === "self"
-                        ? "border-amber-500/50 bg-amber-500/10"
+                        ? "border-violet-500/50 bg-violet-500/10"
                         : "border-white/10 bg-white/5 hover:border-white/20"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-white">Auto-hébergé</span>
                       {hosting === "self" && (
-                        <span className="flex h-2 w-2 rounded-full bg-amber-400" />
+                        <span className="flex h-2 w-2 rounded-full bg-violet-400" />
                       )}
                     </div>
                     <p className="text-xs text-white/50">Paiement unique</p>
-                    <p className="text-xs text-amber-400 mt-1">29,99 € une fois</p>
+                    <p className="text-xs text-violet-400 mt-1">29,99 € une fois</p>
                   </button>
                 </div>
 
                 {hosting === "self" && (
-                  <div className="mt-3 rounded-lg bg-amber-500/10 border border-amber-500/20 p-3">
+                  <div className="mt-3 rounded-lg bg-violet-500/10 border border-violet-500/20 p-3">
                     <p className="text-xs text-amber-200/80">
                       Vous recevrez le code source complet et les instructions pour héberger vous-même sur votre serveur.
                     </p>
@@ -242,7 +242,7 @@ export default function DashboardPage() {
 
               <div className="rounded-xl border border-white/10 bg-white/5 p-4">
                 <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                  <Key className="h-4 w-4 text-amber-400" />
+                  <Key className="h-4 w-4 text-violet-400" />
                   Options requises sur Discord Dev
                 </h3>
                 <ul className="mt-2 space-y-1 text-xs text-white/50">
@@ -261,7 +261,7 @@ export default function DashboardPage() {
                 </ul>
               </div>
 
-              <button className="btn-primary w-full rounded-xl px-4 py-3 text-sm font-semibold text-white">
+              <button className="btn-violet w-full rounded-xl px-4 py-3 text-sm font-semibold text-white">
                 <Zap className="mr-2 inline h-4 w-4" />
                 {hosting === "synkrone" ? "Créer et héberger le bot" : "Créer et recevoir le code"}
               </button>
@@ -269,7 +269,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Or let us create it */}
-          <div className="surface-card p-6">
+          <div className="card p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400">
                 <Plus className="h-5 w-5" />
@@ -313,7 +313,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Existing bots */}
-          <div className="surface-card p-6 lg:col-span-2">
+          <div className="card p-6 lg:col-span-2">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-white">Vos bots</h2>
               <button className="rounded-xl border border-white/10 px-3 py-1.5 text-xs font-medium text-white/60 hover:bg-white/5 hover:text-white transition-all">
@@ -348,7 +348,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Points bar */}
-          <div className="mb-6 surface-card p-5">
+          <div className="mb-6 card p-5">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-white">Points de modules utilisés</span>
               <span className={`text-sm font-bold ${totalPointsUsed > maxPoints ? "text-red-400" : "text-violet-400"}`}>
@@ -375,7 +375,7 @@ export default function DashboardPage() {
             {modules.map((mod) => (
               <div
                 key={mod.id}
-                className={`surface-card group p-5 ${
+                className={`card group p-5 ${
                   mod.enabled ? "border-primary/30 ring-1 ring-violet-500/30" : ""
                 }`}
               >
@@ -392,7 +392,7 @@ export default function DashboardPage() {
                       <h3 className="text-sm font-semibold text-white flex items-center gap-2">
                         {mod.name}
                         {mod.premium && (
-                          <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400">
+                          <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold text-violet-400">
                             PRO
                           </span>
                         )}
@@ -422,7 +422,7 @@ export default function DashboardPage() {
             <span className="text-sm text-white/60">
               Total : <span className="font-semibold text-white">{totalPointsUsed} pts</span> utilisés sur {maxPoints}
             </span>
-            <button className="btn-primary rounded-xl px-6 py-2.5 text-sm font-semibold text-white">
+            <button className="btn-violet rounded-xl px-6 py-2.5 text-sm font-semibold text-white">
               Sauvegarder la configuration
             </button>
           </div>
@@ -443,9 +443,9 @@ export default function DashboardPage() {
               { label: "Serveurs", value: mockStats.servers.toString(), icon: Server, color: "text-violet-400" },
               { label: "Utilisateurs atteints", value: mockStats.users.toLocaleString(), icon: UsersRound, color: "text-cyan-400" },
               { label: "Commandes aujourd&apos;hui", value: mockStats.commandsToday.toString(), icon: Terminal, color: "text-emerald-400" },
-              { label: "Commandes totales", value: mockStats.totalCommands.toLocaleString(), icon: BarChart3, color: "text-amber-400" },
+              { label: "Commandes totales", value: mockStats.totalCommands.toLocaleString(), icon: BarChart3, color: "text-violet-400" },
             ].map((metric) => (
-              <div key={metric.label} className="surface-card p-5">
+              <div key={metric.label} className="card p-5">
                 <div className="flex items-center justify-between">
                   <metric.icon className={`h-5 w-5 ${metric.color}`} />
                   <TrendingUp className="h-4 w-4 text-emerald-400" />
@@ -464,7 +464,7 @@ export default function DashboardPage() {
               { label: "Mémoire", value: mockStats.memory, icon: Cpu, status: "success" },
               { label: "CPU", value: mockStats.cpu, icon: Activity, status: "success" },
             ].map((perf) => (
-              <div key={perf.label} className="surface-card p-4 flex items-center gap-3">
+              <div key={perf.label} className="card p-4 flex items-center gap-3">
                 <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${
                   perf.status === "success" ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
                 }`}>
@@ -480,7 +480,7 @@ export default function DashboardPage() {
 
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Activity chart (simplified) */}
-            <div className="surface-card p-6">
+            <div className="card p-6">
               <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
                 <Activity className="h-4 w-4 text-violet-400" />
                 Activité horaire (dernières 12h)
@@ -499,7 +499,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Top commands */}
-            <div className="surface-card p-6">
+            <div className="card p-6">
               <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
                 <Terminal className="h-4 w-4 text-violet-400" />
                 Commandes les plus utilisées
@@ -521,7 +521,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Messages & errors */}
-            <div className="surface-card p-6">
+            <div className="card p-6">
               <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
                 <MessageCircle className="h-4 w-4 text-cyan-400" />
                 Messages &amp; Erreurs
@@ -554,7 +554,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Server list */}
-            <div className="surface-card p-6">
+            <div className="card p-6">
               <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
                 <Server className="h-4 w-4 text-violet-400" />
                 Serveurs connectés

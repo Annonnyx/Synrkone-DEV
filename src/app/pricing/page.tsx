@@ -110,7 +110,7 @@ export default function PricingPage() {
         {kroneOffers.map((offer) => (
           <div
             key={offer.krone}
-            className={`surface-card relative p-5 ${
+            className={`card relative p-5 ${
               offer.popular
                 ? "border-primary/30 glow-primary scale-[1.02]"
                 : offer.color === "premium"
@@ -169,7 +169,7 @@ export default function PricingPage() {
       </div>
 
       {/* Module points explanation */}
-      <div className="mt-16 surface-card p-6">
+      <div className="mt-16 card p-6">
         <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
           <Coins className="h-5 w-5 text-violet-400" />
           Comment fonctionnent les points de modules ?
@@ -222,7 +222,7 @@ export default function PricingPage() {
           {hostingOptions.map((option) => (
             <div
               key={option.name}
-              className={`surface-card relative p-6 ${option.recommended ? "border-primary/30" : ""}`}
+              className={`card relative p-6 ${option.recommended ? "border-primary/30" : ""}`}
             >
               {option.recommended && (
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-violet-500 px-3 py-1 text-xs font-bold text-white shadow-lg shadow-violet-500/30">
@@ -282,7 +282,7 @@ export default function PricingPage() {
           {microTransactions.map((micro) => (
             <div
               key={micro.name}
-              className="surface-card group p-5 hover:border-accent/30"
+              className="card group p-5 hover:border-accent/30"
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400">
@@ -328,7 +328,7 @@ export default function PricingPage() {
               a: "Oui, à tout moment depuis le Dashboard. Désactivez un module pour récupérer ses points et les allouer ailleurs.",
             },
           ].map((faq) => (
-            <div key={faq.q} className="surface-card p-5">
+            <div key={faq.q} className="card p-5">
               <h3 className="font-semibold text-white text-sm">{faq.q}</h3>
               <p className="mt-2 text-sm text-white/60">{faq.a}</p>
             </div>
