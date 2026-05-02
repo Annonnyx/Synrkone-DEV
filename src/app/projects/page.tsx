@@ -25,15 +25,15 @@ const bots = [
     name: "Vex",
     version: "v2.4.1",
     category: "Bot Multifonction",
-    description: "Bot complet avec modération, utilitaires, fun et économie. Le tout-en-un de Synkrone.",
+    description: "Modération, utilitaires, fun et économie.",
     href: "https://discord.com/oauth2/authorize?client_id=1367891720871874560",
     color: "violet",
     stats: "2.4K serveurs",
+    avatarUrl: null, // URL avatar Discord: "https://cdn.discordapp.com/avatars/ID/avatar.png"
     features: [
       "Modération auto",
-      "Économie complète",
-      "Musique YouTube/Spotify",
-      "Giveaways automatiques",
+      "Économie",
+      "Musique",
     ],
   },
   {
@@ -41,15 +41,15 @@ const bots = [
     name: "Asuna",
     version: "v1.8.2",
     category: "Bot Modération",
-    description: "Spécialisé dans la modération avancée. Anti-raid, anti-spam, sanctions intelligentes.",
+    description: "Anti-raid, anti-spam, sanctions auto.",
     href: "https://discord.com/oauth2/authorize?client_id=1428865683986452640",
     color: "violet",
     stats: "1.8K serveurs",
+    avatarUrl: null, // URL avatar Discord
     features: [
-      "Auto-modération IA",
-      "Détection anti-raid",
-      "Logs complets",
-      "Sanctions graduées",
+      "Auto-modération",
+      "Anti-raid",
+      "Logs",
     ],
   },
   {
@@ -57,15 +57,15 @@ const bots = [
     name: "Kayaba",
     version: "v1.5.0",
     category: "Bot Utilitaires",
-    description: "Outils de gestion serveur puissants. Embeds, annonces, sondages, rôles automatiques.",
+    description: "Embeds, annonces, sondages, tickets.",
     href: "https://discord.com/oauth2/authorize?client_id=1385913159717621780",
     color: "violet",
     stats: "900+ serveurs",
+    avatarUrl: null, // URL avatar Discord
     features: [
-      "Embeds avancés",
+      "Embeds",
       "Auto-rôles",
-      "Sondages interactifs",
-      "Tickets support",
+      "Tickets",
     ],
   },
   {
@@ -73,15 +73,15 @@ const bots = [
     name: "Yui",
     version: "v1.0.0",
     category: "Bot Fun & Jeux",
-    description: "Mini-jeux, économie fun, interactions sociales. Pour animer votre communauté.",
+    description: "Mini-jeux, économie fun, interactions.",
     href: "https://discord.com/oauth2/authorize?client_id=1460012999912853810",
     color: "rose",
     stats: "Nouveau",
+    avatarUrl: null, // URL avatar Discord
     features: [
-      "Casino & mini-jeux",
-      "Niveaux & XP",
-      "Mariage & relations",
-      "Custom commands",
+      "Casino",
+      "Niveaux",
+      "Relations",
     ],
   },
 ];
@@ -246,8 +246,12 @@ export default function ProjectsPage() {
                   style={{ animationDelay: `${i * 0.1}s` }}
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${colors.bg} ${colors.text} transition-all duration-300 group-hover:scale-110`}>
-                      <bot.icon className="h-6 w-6" />
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${colors.bg} ${colors.text} transition-all duration-300 group-hover:scale-110 overflow-hidden`}>
+                      {bot.avatarUrl ? (
+                        <img src={bot.avatarUrl} alt={bot.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <bot.icon className="h-6 w-6" />
+                      )}
                     </div>
                     <div className="text-right">
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium ${colors.bg} ${colors.text}`}>

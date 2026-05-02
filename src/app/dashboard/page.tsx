@@ -430,25 +430,6 @@ export default function DashboardPage() {
               />
             </div>
             
-            {/* Points cost examples */}
-            <div className="mt-5 grid grid-cols-3 gap-3 text-center">
-              <div className="rounded-lg bg-white/5 p-3">
-                <div className="text-xs text-white/40 mb-1">Simple</div>
-                <div className="font-display text-lg font-bold text-emerald-400">1 pt</div>
-                <div className="text-xs text-white/50">Auto-rôles</div>
-              </div>
-              <div className="rounded-lg bg-white/5 p-3">
-                <div className="text-xs text-white/40 mb-1">Standard</div>
-                <div className="font-display text-lg font-bold text-amber-400">2 pts</div>
-                <div className="text-xs text-white/50">Musique, Modération</div>
-              </div>
-              <div className="rounded-lg bg-white/5 p-3">
-                <div className="text-xs text-white/40 mb-1">Avancé</div>
-                <div className="font-display text-lg font-bold text-rose-400">3 pts</div>
-                <div className="text-xs text-white/50">Économie, IA</div>
-              </div>
-            </div>
-            
             <p className="mt-4 text-xs text-white/60">
               Besoin de plus de points ?{" "}
               <a href="/pricing" className="text-violet-400 hover:text-violet-300 underline underline-offset-2">
@@ -479,15 +460,10 @@ export default function DashboardPage() {
                       <mod.icon className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 className={`text-sm font-semibold flex items-center gap-2 transition-colors ${
+                      <h3 className={`text-sm font-semibold transition-colors ${
                         mod.enabled ? "text-white" : "text-white/80"
                       }`}>
                         {mod.name}
-                        {mod.premium && (
-                          <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-400 border border-amber-500/30">
-                            PRO
-                          </span>
-                        )}
                       </h3>
                       <span className={`text-[11px] transition-colors ${
                         mod.enabled ? "text-violet-400" : "text-white/50"
@@ -509,9 +485,6 @@ export default function DashboardPage() {
                     />
                   </button>
                 </div>
-                <p className={`mt-3 text-xs transition-colors ${
-                  mod.enabled ? "text-white/70" : "text-white/50"
-                }`}>{mod.description}</p>
               </div>
             ))}
           </div>

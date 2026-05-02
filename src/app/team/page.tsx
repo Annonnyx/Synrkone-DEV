@@ -6,24 +6,24 @@ const teamMembers = [
     name: "VEX",
     role: "Co-fondateur & Lead Dev",
     avatar: "🔮",
+    avatarUrl: null, // Mettre l'URL de l'image ici: "/team/vex.png" ou lien Discord
     color: "violet",
-    description: "Développeur principal et fondateur de Synkrone. En charge de l'architecture logicielle et du développement des fonctionnalités core.",
-    skills: ["Full-Stack", "Architecture", "Bots Discord"],
+    description: "Lead dev. Architecture logicielle et bots Discord.",
+    skills: ["Full-Stack", "Bots"],
     links: [
       { href: "https://github.com/vex", label: "GitHub" },
-      { href: "https://twitter.com/vex", label: "Twitter" },
     ],
   },
   {
     name: "ONYX",
     role: "Co-fondateur & DevOps",
     avatar: "⚡",
+    avatarUrl: null, // Mettre l'URL de l'image ici: "/team/onyx.png" ou lien Discord
     color: "amber",
-    description: "Responsable Infrastructure et développeur. Gère les serveurs, le cloud et assure la stabilité des systèmes.",
-    skills: ["DevOps", "Cloud", "Sécurité"],
+    description: "Infrastructure & cloud. Stabilité des systèmes.",
+    skills: ["DevOps", "Cloud"],
     links: [
       { href: "https://github.com/onyx", label: "GitHub" },
-      { href: "https://twitter.com/onyx", label: "Twitter" },
     ],
   },
 ];
@@ -103,8 +103,16 @@ export default function TeamPage() {
                 <div className="relative p-8">
                   <div className="flex items-start gap-5">
                     {/* Avatar */}
-                    <div className={`flex-shrink-0 w-20 h-20 rounded-2xl bg-gradient-to-br ${colors.bg} flex items-center justify-center text-4xl border ${colors.border}`}>
-                      {member.avatar}
+                    <div className={`flex-shrink-0 w-20 h-20 rounded-2xl bg-gradient-to-br ${colors.bg} flex items-center justify-center text-4xl border ${colors.border} overflow-hidden`}>
+                      {member.avatarUrl ? (
+                        <img 
+                          src={member.avatarUrl} 
+                          alt={member.name} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        member.avatar
+                      )}
                     </div>
                     
                     <div className="flex-1">
