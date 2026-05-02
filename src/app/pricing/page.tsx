@@ -107,7 +107,7 @@ export default function PricingPage() {
         {kroneOffers.map((offer) => (
           <div
             key={offer.krone}
-            className={`card relative p-6 ${
+            className={`card relative p-6 flex flex-col ${
               offer.popular
                 ? "border-violet-500/40 shadow-xl shadow-violet-500/15 scale-[1.02]"
                 : offer.premium
@@ -122,8 +122,8 @@ export default function PricingPage() {
                   Plus rentable
                 </span>
                 {offer.savings && (
-                  <span className="absolute -top-3 right-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 px-2.5 py-0.5 text-[10px] font-bold text-black flex items-center gap-0.5 shadow-lg">
-                    {offer.savings}
+                  <span className="absolute top-6 right-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 px-2 py-0.5 text-[10px] font-bold text-black flex items-center gap-0.5 shadow-lg">
+                    -35%
                   </span>
                 )}
               </>
@@ -160,8 +160,8 @@ export default function PricingPage() {
             
             <p className="text-sm text-white/50 mb-4">{offer.description}</p>
             
-            {/* Features */}
-            <ul className="space-y-2 mb-5">
+            {/* Features - flex-1 pushes button to bottom */}
+            <ul className="space-y-2 mb-5 flex-1">
               {offer.features.map((feature) => (
                 <li key={feature} className="flex items-center gap-2 text-sm text-white/70">
                   <Check className="h-4 w-4 text-violet-400 flex-shrink-0" />

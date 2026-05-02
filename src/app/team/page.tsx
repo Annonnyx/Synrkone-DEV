@@ -6,7 +6,8 @@ const teamMembers = [
     name: "VEX",
     role: "Co-fondateur & Lead Dev",
     avatar: "🔮",
-    avatarUrl: null, // Mettre l'URL de l'image ici: "/team/vex.png" ou lien Discord
+    discordId: "1366780122891419784",
+    avatarUrl: null, // Récupérer via: https://api.discord.lol/v1/user/1366780122891419784
     color: "violet",
     description: "Lead dev. Architecture logicielle et bots Discord.",
     skills: ["Full-Stack", "Bots"],
@@ -15,10 +16,11 @@ const teamMembers = [
     ],
   },
   {
-    name: "ONYX",
+    name: "ØNYX",
     role: "Co-fondateur & DevOps",
     avatar: "⚡",
-    avatarUrl: null, // Mettre l'URL de l'image ici: "/team/onyx.png" ou lien Discord
+    discordId: "1122092101459517481",
+    avatarUrl: null, // Récupérer via: https://api.discord.lol/v1/user/1122092101459517481
     color: "amber",
     description: "Infrastructure & cloud. Stabilité des systèmes.",
     skills: ["DevOps", "Cloud"],
