@@ -31,7 +31,7 @@ const teamMembers = [
     description: "Infrastructure & cloud. Stabilité des systèmes.",
     skills: ["DevOps", "Cloud"],
     links: [
-      { href: "https://github.com/onyx", label: "GitHub" },
+      { href: "https://github.com/Annonnyx", label: "GitHub" },
     ],
   },
 ];
