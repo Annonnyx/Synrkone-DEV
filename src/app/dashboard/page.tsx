@@ -89,8 +89,8 @@ export default function DashboardPage() {
   const [hosting, setHosting] = useState<HostingOption>("synkrone");
   const [showTokenGuide, setShowTokenGuide] = useState(false);
 
-  const totalPointsUsed = modules.filter((m) => m.enabled).reduce((sum, m) => sum + m.pointCost, 0);
-  const maxPoints = 25;
+  const totalKrUsed = modules.filter((m) => m.enabled).reduce((sum, m) => sum + m.pointCost, 0);
+  const maxKr = 25;
 
   const toggleModule = (id: string) => {
     setModules((prev) =>
@@ -392,7 +392,7 @@ export default function DashboardPage() {
             <div>
               <h2 className="font-display text-xl font-semibold text-white">Modules disponibles</h2>
               <p className="mt-1 text-sm text-white/60">
-                Activez les modules que vous souhaitez. Chaque module consomme des points.
+                Activez les modules que vous souhaitez. Chaque module consomme des Krônes.
               </p>
             </div>
             <div className="flex items-center gap-4 text-xs text-white/60">
@@ -409,29 +409,29 @@ export default function DashboardPage() {
           <div className="mb-6 card p-6">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="font-display text-lg font-semibold text-white">Points de modules</h3>
+                <h3 className="font-display text-lg font-semibold text-white">Krônes utilisés</h3>
                 <p className="text-sm text-white/50 mt-1">
-                  Chaque module consomme des points. Activez selon vos besoins.
+                  Chaque module consomme des Krônes. Activez selon vos besoins.
                 </p>
               </div>
               <div className="text-right">
-                <span className={`font-display text-2xl font-bold ${totalPointsUsed > maxPoints ? "text-red-400" : "text-violet-400"}`}>
-                  {totalPointsUsed}
+                <span className={`font-display text-2xl font-bold ${totalKrUsed > maxKr ? "text-red-400" : "text-violet-400"}`}>
+                  {totalKrUsed}
                 </span>
-                <span className="text-white/40 text-sm"> / {maxPoints} pts</span>
+                <span className="text-white/40 text-sm"> / {maxKr} Kr</span>
               </div>
             </div>
             <div className="h-3 rounded-full bg-white/5 overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${
-                  totalPointsUsed > maxPoints ? "bg-red-500" : "bg-gradient-to-r from-violet-600 to-violet-400"
+                  totalKrUsed > maxKr ? "bg-red-500" : "bg-gradient-to-r from-violet-600 to-violet-400"
                 }`}
-                style={{ width: `${Math.min((totalPointsUsed / maxPoints) * 100, 100)}%` }}
+                style={{ width: `${Math.min((totalKrUsed / maxKr) * 100, 100)}%` }}
               />
             </div>
             
             <p className="mt-4 text-xs text-white/60">
-              Besoin de plus de points ?{" "}
+              Besoin de plus de Krônes ?{" "}
               <a href="/pricing" className="text-violet-400 hover:text-violet-300 underline underline-offset-2">
                 Augmenter votre offre →
               </a>
@@ -467,7 +467,7 @@ export default function DashboardPage() {
                       </h3>
                       <span className={`text-[11px] transition-colors ${
                         mod.enabled ? "text-violet-400" : "text-white/50"
-                      }`}>{mod.pointCost} pt{mod.pointCost > 1 ? "s" : ""}</span>
+                      }`}>{mod.pointCost} Kr</span>
                     </div>
                   </div>
                   <button
@@ -491,7 +491,7 @@ export default function DashboardPage() {
 
           <div className="mt-8 flex items-center justify-between">
             <span className="text-sm text-white/60">
-              Total : <span className="font-semibold text-white">{totalPointsUsed} pts</span> utilisés sur {maxPoints}
+              Total : <span className="font-semibold text-white">{totalKrUsed} Kr</span> utilisés sur {maxKr}
             </span>
             <button className="btn-violet rounded-xl px-6 py-2.5 text-sm font-semibold text-white">
               Sauvegarder la configuration
