@@ -1,0 +1,259 @@
+import { Check, Crown, Zap, Bot, Coins, ShoppingCart, Plus, Star } from "lucide-react";
+import Link from "next/link";
+
+const kroneOffers = [
+  {
+    krone: 30,
+    modulePoints: 10,
+    price: "2,99 €",
+    description: "Très limité, idéal pour tester.",
+    color: "muted",
+    icon: Zap,
+    popular: false,
+  },
+  {
+    krone: 60,
+    modulePoints: 25,
+    price: "4,99 €",
+    minEuros: "2 €",
+    description: "Pour les petits serveurs.",
+    color: "primary",
+    icon: Bot,
+    popular: true,
+  },
+  {
+    krone: 110,
+    modulePoints: 50,
+    price: "8,99 €",
+    description: "Pour les communautés moyennes.",
+    color: "primary",
+    icon: Star,
+    popular: false,
+  },
+  {
+    krone: 150,
+    modulePoints: 75,
+    price: "11,99 €",
+    description: "Pour les gros serveurs.",
+    color: "premium",
+    icon: Crown,
+    popular: false,
+  },
+  {
+    krone: 200,
+    modulePoints: 100,
+    price: "15,99 €",
+    description: "Accès complet, aucune limite.",
+    color: "premium",
+    icon: Crown,
+    popular: false,
+  },
+];
+
+const microTransactions = [
+  { name: "Instance supplémentaire", description: "Ajoutez un bot supplémentaire à votre compte.", price: "1,99 €", icon: Bot },
+  { name: "Profil personnalisé", description: "Personnalisez la page de profil de votre bot.", price: "0,99 €", icon: Star },
+  { name: "Commande Premium", description: "Débloquez une commande Premium spécifique.", price: "1,49 €", icon: Crown },
+  { name: "Pack de points +10", description: "Ajoutez 10 pts de modules à votre offre.", price: "1,99 €", icon: Plus },
+  { name: "Pack de points +25", description: "Ajoutez 25 pts de modules à votre offre.", price: "3,99 €", icon: Plus },
+  { name: "Support prioritaire", description: "Accédez au support dédié pendant 30 jours.", price: "2,99 €", icon: Crown },
+];
+
+const pointExamples = [
+  { feature: "Auto-Rôles (simple)", cost: 1 },
+  { feature: "Messages de bienvenue (simple)", cost: 1 },
+  { feature: "Tickets (simple)", cost: 1 },
+  { feature: "Musique (complet)", cost: 2 },
+  { feature: "Modération (complet)", cost: 2 },
+  { feature: "Giveaways (complet)", cost: 2 },
+  { feature: "Génération IA (avancé)", cost: 3 },
+  { feature: "Économie (avancé)", cost: 3 },
+];
+
+export default function PricingPage() {
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="text-center mb-12">
+        <h1 className="text-3xl font-bold text-foreground">Tarifs</h1>
+        <p className="mt-3 text-muted">
+          Payez en Krônes, dépensez en points de modules. Un système flexible et transparent.
+        </p>
+        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+          <Coins className="h-4 w-4" />
+          1 Krône ≈ 0,08 €
+        </div>
+      </div>
+
+      {/* Krône offers */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        {kroneOffers.map((offer) => (
+          <div
+            key={offer.krone}
+            className={`relative rounded-2xl border bg-card p-5 transition-all ${
+              offer.popular
+                ? "border-primary shadow-xl shadow-primary-glow scale-[1.02]"
+                : offer.color === "premium"
+                ? "border-premium/30 hover:border-premium/50"
+                : "border-border hover:border-primary/20"
+            }`}
+          >
+            {offer.popular && (
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-xs font-bold text-white">
+                Populaire
+              </span>
+            )}
+            <div className="flex items-center gap-2 mb-3">
+              <div
+                className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                  offer.color === "premium"
+                    ? "bg-premium/10 text-premium"
+                    : offer.color === "primary"
+                    ? "bg-primary/10 text-primary"
+                    : "bg-muted/10 text-muted"
+                }`}
+              >
+                <offer.icon className="h-4 w-4" />
+              </div>
+              <span className="text-lg font-bold text-foreground">{offer.krone} Kr</span>
+            </div>
+            <div className="mb-2">
+              <span className="text-2xl font-extrabold text-foreground">{offer.price}</span>
+            </div>
+            <p className="text-xs text-muted mb-3">{offer.description}</p>
+            <div className="rounded-lg border border-border bg-background p-3 mb-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted">Points de modules</span>
+                <span className="text-sm font-bold text-primary">{offer.modulePoints} pts</span>
+              </div>
+            </div>
+            {offer.minEuros && (
+              <p className="text-[10px] text-warning mb-2">
+                Min. {offer.minEuros} d&apos;achat requis
+              </p>
+            )}
+            <Link
+              href="/dashboard"
+              className={`block w-full rounded-lg px-3 py-2 text-center text-xs font-semibold transition-colors ${
+                offer.popular
+                  ? "bg-primary text-white hover:bg-primary-hover"
+                  : offer.color === "premium"
+                  ? "bg-premium/10 text-premium hover:bg-premium/20 border border-premium/30"
+                  : "border border-border text-foreground hover:bg-card"
+              }`}
+            >
+              Choisir
+            </Link>
+          </div>
+        ))}
+      </div>
+
+      {/* Module points explanation */}
+      <div className="mt-16 rounded-2xl border border-border bg-card p-6">
+        <h2 className="text-xl font-bold text-foreground mb-2 flex items-center gap-2">
+          <Coins className="h-5 w-5 text-primary" />
+          Comment fonctionnent les points de modules ?
+        </h2>
+        <p className="text-sm text-muted mb-6">
+          Chaque offre vous donne un nombre de points de modules. Vous répartissez ces points
+          entre les modules de votre choix. Une feature simple coûte 1 pt, une feature complète
+          coûte 2-3 pts.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="py-3 text-left font-semibold text-foreground">Feature</th>
+                <th className="py-3 text-right font-semibold text-foreground">Coût en pts</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pointExamples.map((ex) => (
+                <tr key={ex.feature} className="border-b border-border/50">
+                  <td className="py-2.5 text-muted">{ex.feature}</td>
+                  <td className="py-2.5 text-right">
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                      ex.cost === 1 ? "bg-success/10 text-success" :
+                      ex.cost === 2 ? "bg-primary/10 text-primary" :
+                      "bg-premium/10 text-premium"
+                    }`}>
+                      {ex.cost} pt{ex.cost > 1 ? "s" : ""}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Micro-transactions */}
+      <div className="mt-16">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
+            <ShoppingCart className="h-6 w-6 text-accent" />
+            Micro-transactions
+          </h2>
+          <p className="mt-2 text-muted">
+            Ajoutez des éléments à la carte, sans engagement.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {microTransactions.map((micro) => (
+            <div
+              key={micro.name}
+              className="group rounded-2xl border border-border bg-card p-5 transition-all hover:border-accent/40 hover:bg-card-hover"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/10 text-accent">
+                  <micro.icon className="h-4 w-4" />
+                </div>
+                <h3 className="text-sm font-semibold text-foreground">{micro.name}</h3>
+              </div>
+              <p className="text-xs text-muted mb-3">{micro.description}</p>
+              <div className="flex items-center justify-between">
+                <span className="text-lg font-bold text-foreground">{micro.price}</span>
+                <button className="rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/20 transition-colors">
+                  Acheter
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* FAQ */}
+      <div className="mt-16 text-center">
+        <h2 className="text-2xl font-bold text-foreground">Questions fréquentes</h2>
+        <div className="mt-8 mx-auto max-w-2xl space-y-4 text-left">
+          {[
+            {
+              q: "Qu'est-ce qu'un Krône ?",
+              a: "Le Krône est la monnaie virtuelle de Synkrone. 1 Krône ≈ 0,08 €. Vous achetez des Krônes puis les échangez contre des points de modules.",
+            },
+            {
+              q: "Puis-je changer d'offre à tout moment ?",
+              a: "Oui, vous pouvez upgrader à tout moment. La différence sera calculée au prorata. Les points non utilisés sont reportés.",
+            },
+            {
+              q: "Que se passe-t-il si je dépasse mes points de modules ?",
+              a: "Vous pouvez acheter des packs de points supplémentaires en micro-transaction, ou upgrader votre offre.",
+            },
+            {
+              q: "Les points de modules sont-ils réinitialisés chaque mois ?",
+              a: "Non, vos points sont conservés tant que votre abonnement est actif. Seule la répartition peut changer.",
+            },
+            {
+              q: "Puis-je répartir mes points différemment ?",
+              a: "Oui, à tout moment depuis le Dashboard. Désactivez un module pour récupérer ses points et les allouer ailleurs.",
+            },
+          ].map((faq) => (
+            <div key={faq.q} className="rounded-xl border border-border bg-card p-5">
+              <h3 className="font-semibold text-foreground text-sm">{faq.q}</h3>
+              <p className="mt-2 text-sm text-muted">{faq.a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
