@@ -95,11 +95,11 @@ export default function PricingPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="text-center mb-12">
-        <h1 className="text-3xl font-bold text-foreground">Tarifs</h1>
-        <p className="mt-3 text-muted">
+        <h1 className="text-3xl font-bold text-white">Tarifs</h1>
+        <p className="mt-3 text-white/60">
           Payez en Krônes, dépensez en points de modules. Un système flexible et transparent.
         </p>
-        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-violet-500/10 px-4 py-1.5 text-sm font-medium text-violet-400">
           <Coins className="h-4 w-4" />
           1 Krône ≈ 0,08 €
         </div>
@@ -110,7 +110,7 @@ export default function PricingPage() {
         {kroneOffers.map((offer) => (
           <div
             key={offer.krone}
-            className={`bento-item relative p-5 ${
+            className={`surface-card relative p-5 ${
               offer.popular
                 ? "border-primary/30 glow-primary scale-[1.02]"
                 : offer.color === "premium"
@@ -127,24 +127,24 @@ export default function PricingPage() {
               <div
                 className={`flex h-8 w-8 items-center justify-center rounded-lg ${
                   offer.color === "premium"
-                    ? "bg-premium/10 text-premium"
+                    ? "bg-amber-500/10 text-amber-400"
                     : offer.color === "primary"
-                    ? "bg-primary/10 text-primary"
-                    : "bg-muted/10 text-muted"
+                    ? "bg-violet-500/10 text-violet-400"
+                    : "bg-muted/10 text-white/60"
                 }`}
               >
                 <offer.icon className="h-4 w-4" />
               </div>
-              <span className="text-lg font-bold text-foreground">{offer.krone} Kr</span>
+              <span className="text-lg font-bold text-white">{offer.krone} Kr</span>
             </div>
             <div className="mb-2">
-              <span className="text-2xl font-extrabold text-foreground">{offer.price}</span>
+              <span className="text-2xl font-extrabold text-white">{offer.price}</span>
             </div>
-            <p className="text-xs text-muted mb-3">{offer.description}</p>
-            <div className="rounded-xl border border-glass-border bg-white/3 p-3 mb-3">
+            <p className="text-xs text-white/60 mb-3">{offer.description}</p>
+            <div className="rounded-xl border border-white/10 bg-white/3 p-3 mb-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-muted">Points de modules</span>
-                <span className="text-sm font-bold text-primary">{offer.modulePoints} pts</span>
+                <span className="text-xs text-white/60">Points de modules</span>
+                <span className="text-sm font-bold text-violet-400">{offer.modulePoints} pts</span>
               </div>
             </div>
             {offer.minEuros && (
@@ -158,8 +158,8 @@ export default function PricingPage() {
                 offer.popular
                   ? "btn-shiny text-white"
                   : offer.color === "premium"
-                  ? "bg-premium/10 text-premium hover:bg-premium/20 border border-premium/30"
-                  : "glass text-foreground hover:bg-white/8"
+                  ? "bg-amber-500/10 text-amber-400 hover:bg-premium/20 border border-premium/30"
+                  : "glass text-white hover:bg-white/8"
               }`}
             >
               Choisir
@@ -169,12 +169,12 @@ export default function PricingPage() {
       </div>
 
       {/* Module points explanation */}
-      <div className="mt-16 bento-item p-6">
-        <h2 className="text-xl font-bold text-foreground mb-2 flex items-center gap-2">
-          <Coins className="h-5 w-5 text-primary" />
+      <div className="mt-16 surface-card p-6">
+        <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+          <Coins className="h-5 w-5 text-violet-400" />
           Comment fonctionnent les points de modules ?
         </h2>
-        <p className="text-sm text-muted mb-6">
+        <p className="text-sm text-white/60 mb-6">
           Chaque offre vous donne un nombre de points de modules. Vous répartissez ces points
           entre les modules de votre choix. Une feature simple coûte 1 pt, une feature complète
           coûte 2-3 pts.
@@ -182,20 +182,20 @@ export default function PricingPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-glass-border">
-                <th className="py-3 text-left font-semibold text-foreground">Feature</th>
-                <th className="py-3 text-right font-semibold text-foreground">Coût en pts</th>
+              <tr className="border-b border-white/10">
+                <th className="py-3 text-left font-semibold text-white">Feature</th>
+                <th className="py-3 text-right font-semibold text-white">Coût en pts</th>
               </tr>
             </thead>
             <tbody>
               {pointExamples.map((ex) => (
-                <tr key={ex.feature} className="border-b border-glass-border/50">
-                  <td className="py-2.5 text-muted">{ex.feature}</td>
+                <tr key={ex.feature} className="border-b border-white/10/50">
+                  <td className="py-2.5 text-white/60">{ex.feature}</td>
                   <td className="py-2.5 text-right">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                      ex.cost === 1 ? "bg-success/10 text-success" :
-                      ex.cost === 2 ? "bg-primary/10 text-primary" :
-                      "bg-premium/10 text-premium"
+                      ex.cost === 1 ? "bg-emerald-500/10 text-emerald-400" :
+                      ex.cost === 2 ? "bg-violet-500/10 text-violet-400" :
+                      "bg-amber-500/10 text-amber-400"
                     }`}>
                       {ex.cost} pt{ex.cost > 1 ? "s" : ""}
                     </span>
@@ -210,11 +210,11 @@ export default function PricingPage() {
       {/* Hosting Options */}
       <div className="mt-16">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
-            <Server className="h-6 w-6 text-primary" />
+          <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
+            <Server className="h-6 w-6 text-violet-400" />
             Options d&apos;hébergement
           </h2>
-          <p className="mt-2 text-muted">
+          <p className="mt-2 text-white/60">
             Choisissez l&apos;hébergement qui vous convient. Cloud managé ou auto-hébergé.
           </p>
         </div>
@@ -222,7 +222,7 @@ export default function PricingPage() {
           {hostingOptions.map((option) => (
             <div
               key={option.name}
-              className={`bento-item relative p-6 ${option.recommended ? "border-primary/30" : ""}`}
+              className={`surface-card relative p-6 ${option.recommended ? "border-primary/30" : ""}`}
             >
               {option.recommended && (
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-violet-500 px-3 py-1 text-xs font-bold text-white shadow-lg shadow-violet-500/30">
@@ -234,21 +234,21 @@ export default function PricingPage() {
                   <option.icon className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground">{option.name}</h3>
-                  <p className="text-xs text-muted">{option.priceNote}</p>
+                  <h3 className="text-lg font-semibold text-white">{option.name}</h3>
+                  <p className="text-xs text-white/60">{option.priceNote}</p>
                 </div>
               </div>
-              <p className="text-sm text-muted mb-4">{option.description}</p>
+              <p className="text-sm text-white/60 mb-4">{option.description}</p>
               <ul className="space-y-2 mb-6">
                 {option.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2 text-sm text-foreground">
+                  <li key={feature} className="flex items-center gap-2 text-sm text-white">
                     <Check className={`h-4 w-4 ${option.recommended ? "text-violet-400" : "text-amber-400"}`} />
                     {feature}
                   </li>
                 ))}
               </ul>
               <div className="flex items-center justify-between">
-                <span className={`text-2xl font-bold ${option.recommended ? "text-foreground" : "text-amber-400"}`}>
+                <span className={`text-2xl font-bold ${option.recommended ? "text-white" : "text-amber-400"}`}>
                   {option.price}
                 </span>
                 <Link
@@ -270,11 +270,11 @@ export default function PricingPage() {
       {/* Micro-transactions */}
       <div className="mt-16">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
-            <ShoppingCart className="h-6 w-6 text-accent" />
+          <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
+            <ShoppingCart className="h-6 w-6 text-cyan-400" />
             Micro-transactions
           </h2>
-          <p className="mt-2 text-muted">
+          <p className="mt-2 text-white/60">
             Ajoutez des éléments à la carte, sans engagement.
           </p>
         </div>
@@ -282,18 +282,18 @@ export default function PricingPage() {
           {microTransactions.map((micro) => (
             <div
               key={micro.name}
-              className="bento-item group p-5 hover:border-accent/30"
+              className="surface-card group p-5 hover:border-accent/30"
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/10 text-accent">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400">
                   <micro.icon className="h-4 w-4" />
                 </div>
-                <h3 className="text-sm font-semibold text-foreground">{micro.name}</h3>
+                <h3 className="text-sm font-semibold text-white">{micro.name}</h3>
               </div>
-              <p className="text-xs text-muted mb-3">{micro.description}</p>
+              <p className="text-xs text-white/60 mb-3">{micro.description}</p>
               <div className="flex items-center justify-between">
-                <span className="text-lg font-bold text-foreground">{micro.price}</span>
-                <button className="rounded-xl border border-accent/30 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/20 transition-all">
+                <span className="text-lg font-bold text-white">{micro.price}</span>
+                <button className="rounded-xl border border-accent/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-semibold text-cyan-400 hover:bg-accent/20 transition-all">
                   Acheter
                 </button>
               </div>
@@ -304,7 +304,7 @@ export default function PricingPage() {
 
       {/* FAQ */}
       <div className="mt-16 text-center">
-        <h2 className="text-2xl font-bold text-foreground">Questions fréquentes</h2>
+        <h2 className="text-2xl font-bold text-white">Questions fréquentes</h2>
         <div className="mt-8 mx-auto max-w-2xl space-y-4 text-left">
           {[
             {
@@ -328,9 +328,9 @@ export default function PricingPage() {
               a: "Oui, à tout moment depuis le Dashboard. Désactivez un module pour récupérer ses points et les allouer ailleurs.",
             },
           ].map((faq) => (
-            <div key={faq.q} className="bento-item p-5">
-              <h3 className="font-semibold text-foreground text-sm">{faq.q}</h3>
-              <p className="mt-2 text-sm text-muted">{faq.a}</p>
+            <div key={faq.q} className="surface-card p-5">
+              <h3 className="font-semibold text-white text-sm">{faq.q}</h3>
+              <p className="mt-2 text-sm text-white/60">{faq.a}</p>
             </div>
           ))}
         </div>
