@@ -119,7 +119,7 @@ export default function PricingPage() {
             {offer.popular ? (
               <>
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-violet-500 px-4 py-1 text-xs font-bold text-white shadow-lg shadow-violet-500/30 z-10">
-                  Plus rentable
+                  Plus populaire
                 </span>
                 {offer.savings && (
                   <span className="absolute top-6 right-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 px-2 py-0.5 text-[10px] font-bold text-black flex items-center gap-0.5 shadow-lg">
