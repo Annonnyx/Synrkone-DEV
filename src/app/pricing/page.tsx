@@ -10,6 +10,7 @@ const kroneOffers = [
     savings: null,
     icon: Zap,
     popular: false,
+    premium: false,
     features: ["2-3 modules actifs", "Support communautaire"],
   },
   {
@@ -20,6 +21,7 @@ const kroneOffers = [
     savings: "Économisez 20%",
     icon: Bot,
     popular: false,
+    premium: false,
     features: ["4-6 modules actifs", "Support email", "Stats avancées"],
   },
   {
@@ -30,6 +32,7 @@ const kroneOffers = [
     savings: "Économisez 35%",
     icon: Star,
     popular: true,
+    premium: false,
     features: ["Modules illimités", "Support prioritaire", "API access"],
   },
   {
@@ -40,6 +43,7 @@ const kroneOffers = [
     savings: "Économisez 40%",
     icon: Crown,
     popular: false,
+    premium: true,
     features: ["Modules illimités", "Support prioritaire", "Instance supplémentaire", "Webhook custom"],
   },
   {
@@ -50,6 +54,7 @@ const kroneOffers = [
     savings: "Économisez 45%",
     icon: Crown,
     popular: false,
+    premium: true,
     features: ["Tout inclus", "2 instances", "Support dédié", "Early access"],
   },
 ];
@@ -105,33 +110,44 @@ export default function PricingPage() {
             className={`card relative p-6 ${
               offer.popular
                 ? "border-violet-500/40 shadow-xl shadow-violet-500/15 scale-[1.02]"
+                : offer.premium
+                ? "border-amber-500/40 shadow-xl shadow-amber-500/15 bg-gradient-to-br from-amber-500/5 to-transparent"
                 : ""
             }`}
           >
-            {/* Savings badge */}
-            {offer.savings && (
-              <span className="absolute -top-3 right-3 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 px-3 py-1 text-xs font-bold text-black flex items-center gap-1 shadow-lg">
-                <Percent className="h-3 w-3" />
-                {offer.savings}
-              </span>
-            )}
-            
-            {offer.popular && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-violet-500 px-4 py-1 text-xs font-bold text-white shadow-lg shadow-violet-500/30">
-                Plus rentable
-              </span>
+            {/* Badges */}
+            {offer.popular ? (
+              <>
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600 to-violet-500 px-4 py-1 text-xs font-bold text-white shadow-lg shadow-violet-500/30 z-10">
+                  Plus rentable
+                </span>
+                {offer.savings && (
+                  <span className="absolute -top-3 right-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 px-2.5 py-0.5 text-[10px] font-bold text-black flex items-center gap-0.5 shadow-lg">
+                    {offer.savings}
+                  </span>
+                )}
+              </>
+            ) : (
+              offer.savings && (
+                <span className="absolute -top-3 right-3 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 px-3 py-1 text-xs font-bold text-black flex items-center gap-1 shadow-lg">
+                  <Percent className="h-3 w-3" />
+                  {offer.savings}
+                </span>
+              )
             )}
             
             <div className="flex items-center gap-2 mb-4">
               <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
                 offer.popular 
                   ? "bg-gradient-to-br from-violet-500/20 to-amber-500/10 text-violet-300"
+                  : offer.premium
+                  ? "bg-gradient-to-br from-amber-500/30 to-amber-600/10 text-amber-300"
                   : "bg-white/5 text-violet-300"
               }`}>
                 <offer.icon className="h-5 w-5" />
               </div>
               <div>
-                <span className="font-display text-2xl font-bold text-white">{offer.krone}</span>
+                <span className={`font-display text-2xl font-bold ${offer.premium ? "text-amber-400" : "text-white"}`}>{offer.krone}</span>
                 <span className="text-sm text-white/40 ml-1">Kr</span>
               </div>
             </div>
@@ -159,6 +175,8 @@ export default function PricingPage() {
               className={`block w-full text-center rounded-xl py-3 text-sm font-medium transition-all ${
                 offer.popular
                   ? "bg-gradient-to-r from-violet-600 to-violet-500 text-white hover:shadow-lg hover:shadow-violet-500/25"
+                  : offer.premium
+                  ? "bg-gradient-to-r from-amber-500 to-amber-400 text-black hover:shadow-lg hover:shadow-amber-500/25 font-semibold"
                   : "border border-white/10 bg-white/5 text-white hover:bg-white/10"
               }`}
             >

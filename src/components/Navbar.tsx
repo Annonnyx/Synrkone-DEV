@@ -8,6 +8,7 @@ const navLinks = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/projects", label: "Projets" },
   { href: "/pricing", label: "Krônes" },
+  { href: "/team", label: "Équipe" },
 ];
 
 export default function Navbar() {
