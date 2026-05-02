@@ -65,36 +65,38 @@ export default function WebsiteCreatorPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="text-center mb-12">
-        <h1 className="text-3xl font-bold text-foreground">Créateur de sites web</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Créateur de sites web</h1>
         <p className="mt-3 text-muted">
           Créez un site web pour votre serveur ou projet : presets ou code custom.
         </p>
       </div>
 
       {/* Mode selector */}
-      <div className="mb-8 flex justify-center gap-2">
-        <button
-          onClick={() => setMode("preset")}
-          className={`rounded-lg px-5 py-2.5 text-sm font-medium transition-colors ${
-            mode === "preset"
-              ? "bg-primary text-white"
-              : "border border-border text-muted hover:bg-card"
-          }`}
-        >
-          <Layout className="mr-2 inline h-4 w-4" />
-          Presets
-        </button>
-        <button
-          onClick={() => setMode("custom")}
-          className={`rounded-lg px-5 py-2.5 text-sm font-medium transition-colors ${
-            mode === "custom"
-              ? "bg-primary text-white"
-              : "border border-border text-muted hover:bg-card"
-          }`}
-        >
-          <Code className="mr-2 inline h-4 w-4" />
-          Code custom
-        </button>
+      <div className="mb-8 flex justify-center">
+        <div className="glass flex gap-1.5 rounded-2xl p-1.5">
+          <button
+            onClick={() => setMode("preset")}
+            className={`rounded-xl px-5 py-2.5 text-sm font-medium transition-all ${
+              mode === "preset"
+                ? "bg-primary text-white shadow-lg shadow-primary-glow"
+                : "text-muted hover:text-foreground"
+            }`}
+          >
+            <Layout className="mr-2 inline h-4 w-4" />
+            Presets
+          </button>
+          <button
+            onClick={() => setMode("custom")}
+            className={`rounded-xl px-5 py-2.5 text-sm font-medium transition-all ${
+              mode === "custom"
+                ? "bg-primary text-white shadow-lg shadow-primary-glow"
+                : "text-muted hover:text-foreground"
+            }`}
+          >
+            <Code className="mr-2 inline h-4 w-4" />
+            Code custom
+          </button>
+        </div>
       </div>
 
       {mode === "preset" ? (
@@ -102,7 +104,7 @@ export default function WebsiteCreatorPage() {
           {presets.map((preset) => (
             <div
               key={preset.id}
-              className="group rounded-2xl border border-border bg-card p-6 transition-all hover:border-primary/40 hover:bg-card-hover hover:shadow-lg hover:shadow-primary-glow"
+              className="bento-item group p-6 hover:border-primary/30"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -116,13 +118,13 @@ export default function WebsiteCreatorPage() {
               </div>
               <h3 className="text-lg font-semibold text-foreground">{preset.name}</h3>
               <p className="mt-1 text-sm text-muted">{preset.description}</p>
-              <div className="mt-4 rounded-lg border border-border bg-background p-3">
+              <div className="mt-4 rounded-xl border border-glass-border bg-white/3 p-3">
                 <p className="text-xs text-muted flex items-center gap-1.5">
                   <Eye className="h-3 w-3" />
                   {preset.preview}
                 </p>
               </div>
-              <button className="mt-4 w-full rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary/10 hover:text-primary hover:border-primary/30">
+              <button className="mt-4 w-full rounded-xl border border-glass-border px-4 py-2 text-sm font-medium text-foreground transition-all hover:bg-primary/10 hover:text-primary hover:border-primary/30">
                 Utiliser ce preset
               </button>
             </div>
@@ -130,7 +132,7 @@ export default function WebsiteCreatorPage() {
         </div>
       ) : (
         <div className="mx-auto max-w-2xl">
-          <div className="rounded-2xl border border-border bg-card p-6">
+          <div className="bento-item p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-accent">
                 <Code className="h-5 w-5" />
@@ -151,7 +153,7 @@ export default function WebsiteCreatorPage() {
               <input
                 type="text"
                 placeholder="mon-site"
-                className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-xl border border-glass-border bg-white/3 px-4 py-2.5 text-sm text-foreground placeholder:text-muted/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all"
               />
               <p className="mt-1 text-xs text-muted">
                 Sera utilisé dans <code className="text-primary">/setup mon-site</code>
@@ -167,7 +169,7 @@ export default function WebsiteCreatorPage() {
                 onChange={(e) => setCodeSnippet(e.target.value)}
                 rows={10}
                 placeholder="<!DOCTYPE html>&#10;<html>&#10;  <head>...</head>&#10;  <body>...</body>&#10;</html>"
-                className="w-full rounded-lg border border-border bg-background px-4 py-3 font-mono text-sm text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-xl border border-glass-border bg-white/3 px-4 py-3 font-mono text-sm text-foreground placeholder:text-muted/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all"
               />
             </div>
 
@@ -185,7 +187,7 @@ export default function WebsiteCreatorPage() {
               </ol>
             </div>
 
-            <button className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover">
+            <button className="btn-shiny w-full rounded-xl px-4 py-3 text-sm font-semibold text-white">
               Déployer le site
             </button>
           </div>
@@ -193,7 +195,9 @@ export default function WebsiteCreatorPage() {
       )}
 
       {/* CTA */}
-      <div className="mt-16 rounded-3xl border border-border bg-gradient-to-br from-accent/5 via-card to-primary/5 p-10 text-center">
+      <div className="mt-16 bento-item relative p-10 text-center overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-primary/5" />
+        <div className="relative z-10">
         <h2 className="text-2xl font-bold text-foreground">
           Besoin d&apos;aide pour votre site ?
         </h2>
@@ -204,11 +208,12 @@ export default function WebsiteCreatorPage() {
           href="https://discord.gg/nuFNvVybGE"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
+          className="btn-shiny mt-6 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white"
         >
           Support Discord
           <ArrowRight className="h-4 w-4" />
         </a>
+        </div>
       </div>
     </div>
   );

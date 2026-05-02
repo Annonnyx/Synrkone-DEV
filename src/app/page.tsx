@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  Bot,
   Zap,
   Shield,
   Layers,
@@ -8,153 +7,205 @@ import {
   Sparkles,
   Crown,
   Globe,
+  Bot,
+  Coins,
+  Code2,
+  BarChart3,
+  Users,
+  Terminal,
 } from "lucide-react";
 
-const features = [
+const bentoFeatures = [
   {
     icon: Layers,
     title: "Modules pré-codés",
-    description:
-      "Auto-rôles, génération d'images, modération, économie… Activez ce que vous voulez en un clic.",
+    description: "Auto-rôles, génération, modération, économie… Activez ce que vous voulez en un clic.",
+    span: "col-span-2",
+    accent: "primary",
   },
   {
     icon: Zap,
-    title: "Configuration instantanée",
-    description:
-      "Pas besoin de coder. Branchez votre token Discord et votre bot est opérationnel en secondes.",
+    title: "Zero code requis",
+    description: "Branchez votre token et votre bot tourne en secondes.",
+    span: "col-span-1",
+    accent: "accent",
   },
   {
     icon: Shield,
-    title: "Fiable et sécurisé",
-    description:
-      "Hébergement garanti, token chiffré, redémarrage automatique en cas de crash.",
+    title: "Hébergement & sécurité",
+    description: "Token chiffré, redémarrage auto, uptime 99.7% garanti.",
+    span: "col-span-1",
+    accent: "success",
   },
   {
     icon: Crown,
-    title: "Premium sur demande",
-    description:
-      "Certains modules et commandes avancées sont disponibles en Premium pour ceux qui veulent plus.",
+    title: "Krônes & Premium",
+    description: "Système de points flexible. Payez uniquement pour ce que vous utilisez.",
+    span: "col-span-1",
+    accent: "premium",
   },
   {
     icon: Globe,
-    title: "Créateur de sites web",
-    description:
-      "Créez un site web pour votre serveur : code custom ou presets, intégré via un simple /setup.",
+    title: "Créateur Web intégré",
+    description: "Sites web pour vos serveurs avec presets ou code custom. Intégration via /setup.",
+    span: "col-span-2",
+    accent: "accent",
   },
   {
-    icon: Sparkles,
-    title: "Communauté active",
-    description:
-      "Rejoignez notre support Discord et profitez de l'aide de la communauté Synkrone.",
+    icon: BarChart3,
+    title: "Statistiques temps réel",
+    description: "Serveurs, commandes, latence, uptime — tout est visible depuis le dashboard.",
+    span: "col-span-1",
+    accent: "primary",
   },
 ];
 
 const bots = [
-  { name: "Vex", href: "https://discord.com/oauth2/authorize?client_id=1367891720871874560", desc: "Bot multifonction" },
-  { name: "Asuna", href: "https://discord.com/oauth2/authorize?client_id=1428865683986452640", desc: "Modération avancée" },
-  { name: "Kayaba", href: "https://discord.com/oauth2/authorize?client_id=1385913159717621780", desc: "Utilitaires serveur" },
-  { name: "Yui", href: "https://discord.com/oauth2/authorize?client_id=1460012999912853810", desc: "Fun & mini-jeux" },
+  { name: "Vex", href: "https://discord.com/oauth2/authorize?client_id=1367891720871874560", desc: "Multifonction", color: "from-primary/20 to-primary/5" },
+  { name: "Asuna", href: "https://discord.com/oauth2/authorize?client_id=1428865683986452640", desc: "Modération", color: "from-accent/20 to-accent/5" },
+  { name: "Kayaba", href: "https://discord.com/oauth2/authorize?client_id=1385913159717621780", desc: "Utilitaires", color: "from-success/20 to-success/5" },
+  { name: "Yui", href: "https://discord.com/oauth2/authorize?client_id=1460012999912853810", desc: "Fun & Jeux", color: "from-premium/20 to-premium/5" },
 ];
+
+const accentMap: Record<string, { icon: string; badge: string; glow: string }> = {
+  primary: { icon: "text-primary", badge: "bg-primary/10 text-primary", glow: "group-hover:shadow-primary/20" },
+  accent: { icon: "text-accent", badge: "bg-accent/10 text-accent", glow: "group-hover:shadow-accent/20" },
+  success: { icon: "text-success", badge: "bg-success/10 text-success", glow: "group-hover:shadow-success/20" },
+  premium: { icon: "text-premium", badge: "bg-premium/10 text-premium", glow: "group-hover:shadow-premium/20" },
+};
 
 export default function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--primary-glow)_0%,_transparent_60%)]" />
-        <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8 lg:py-40">
-          <div className="text-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
-              <Bot className="h-4 w-4" />
-              Nouveau : Créateur de sites web intégré
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+        {/* Background orbs */}
+        <div className="absolute inset-0 mesh-gradient" />
+        <div className="absolute top-1/4 left-1/4 h-[500px] w-[500px] rounded-full bg-primary/10 blur-[120px] animate-float" />
+        <div className="absolute bottom-1/4 right-1/4 h-[400px] w-[400px] rounded-full bg-accent/8 blur-[100px] animate-float-delayed" />
+
+        <div className="relative z-10 mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+          {/* Badge */}
+          <div className="animate-slide-up mb-8 inline-flex items-center gap-2 rounded-full border border-glass-border glass px-4 py-2 text-sm font-medium text-muted">
+            <Sparkles className="h-3.5 w-3.5 text-premium" />
+            <span>Nouveau</span>
+            <span className="text-foreground">Créateur de sites web intégré</span>
+            <ArrowRight className="h-3 w-3" />
+          </div>
+
+          {/* Title */}
+          <h1 className="animate-slide-up text-5xl font-extrabold tracking-tight sm:text-7xl lg:text-8xl" style={{ animationDelay: "0.1s" }}>
+            <span className="text-foreground">Créez votre</span>
+            <br />
+            <span className="text-gradient">bot Discord</span>
+          </h1>
+
+          {/* Subtitle */}
+          <p className="animate-slide-up mx-auto mt-6 max-w-2xl text-lg text-muted leading-relaxed sm:text-xl" style={{ animationDelay: "0.2s" }}>
+            Modules pré-codés, configuration instantanée, statistiques temps réel.
+            <br className="hidden sm:block" />
+            <span className="text-foreground/70"> Pas besoin de savoir coder.</span>
+          </p>
+
+          {/* CTAs */}
+          <div className="animate-slide-up mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center" style={{ animationDelay: "0.3s" }}>
+            <Link
+              href="/dashboard"
+              className="btn-shiny inline-flex items-center gap-2 rounded-2xl px-8 py-4 text-base font-semibold text-white"
+            >
+              Créer mon bot
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/pricing"
+              className="glass inline-flex items-center gap-2 rounded-2xl px-8 py-4 text-base font-semibold text-foreground transition-all hover:bg-white/8"
+            >
+              Voir les tarifs
+            </Link>
+          </div>
+
+          {/* Stats bar */}
+          <div className="animate-slide-up mt-16 flex flex-wrap items-center justify-center gap-8 text-sm text-muted sm:gap-12" style={{ animationDelay: "0.4s" }}>
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-success animate-pulse-glow" />
+              <span><span className="font-semibold text-foreground">99.7%</span> uptime</span>
             </div>
-            <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-              Créez votre bot Discord
-              <br />
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                en quelques clics
-              </span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-muted">
-              Synkrone vous permet de créer un bot Discord personnalisé avec des
-              modules pré-codés. Auto-rôles, génération, modération, économie…
-              tout est activable en un clic. Pas besoin de savoir coder.
-            </p>
-            <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-3 text-base font-semibold text-white shadow-lg shadow-primary-glow transition-all hover:bg-primary-hover hover:shadow-xl hover:shadow-primary-glow"
-              >
-                Créer mon bot
-                <ArrowRight className="h-5 w-5" />
-              </Link>
-              <Link
-                href="/pricing"
-                className="inline-flex items-center gap-2 rounded-xl border border-border px-8 py-3 text-base font-semibold text-foreground transition-colors hover:bg-card"
-              >
-                Voir les tarifs
-              </Link>
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-primary" />
+              <span><span className="font-semibold text-foreground">4 800+</span> utilisateurs</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Terminal className="h-4 w-4 text-accent" />
+              <span><span className="font-semibold text-foreground">12 000+</span> commandes/jour</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-foreground">
-            Tout ce dont vous avez besoin
+      {/* Bento Features */}
+      <section className="relative mx-auto max-w-6xl px-4 py-24 sm:px-6 lg:px-8">
+        <div className="mb-16 text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            Tout ce qu&apos;il vous faut
           </h2>
-          <p className="mt-3 text-muted">
-            Des modules pensés pour chaque usage, du plus simple au plus avancé.
+          <p className="mt-3 text-muted text-lg">
+            Des modules pensés pour chaque usage.
           </p>
         </div>
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((feat) => (
-            <div
-              key={feat.title}
-              className="group rounded-2xl border border-border bg-card p-6 transition-all hover:border-primary/40 hover:bg-card-hover hover:shadow-lg hover:shadow-primary-glow"
-            >
-              <feat.icon className="h-8 w-8 text-primary" />
-              <h3 className="mt-4 text-lg font-semibold text-foreground">
-                {feat.title}
-              </h3>
-              <p className="mt-2 text-sm text-muted">{feat.description}</p>
-            </div>
-          ))}
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {bentoFeatures.map((feat) => {
+            const colors = accentMap[feat.accent] || accentMap.primary;
+            return (
+              <div
+                key={feat.title}
+                className={`bento-item group p-6 sm:p-8 ${feat.span} transition-all duration-500`}
+              >
+                <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-2xl ${colors.badge}`}>
+                  <feat.icon className="h-5 w-5" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  {feat.title}
+                </h3>
+                <p className="text-sm text-muted leading-relaxed">
+                  {feat.description}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </section>
 
       {/* Bots showcase */}
-      <section className="border-t border-border bg-card/50">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-foreground">
+      <section className="relative py-24 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/3 to-transparent" />
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-16 text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               Nos bots en action
             </h2>
-            <p className="mt-3 text-muted">
-              Découvrez les bots propulsés par Synkrone et ajoutez-les à votre serveur.
+            <p className="mt-3 text-muted text-lg">
+              Déjà opérationnels. Ajoutez-les à votre serveur.
             </p>
           </div>
-          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {bots.map((bot) => (
               <a
                 key={bot.name}
                 href={bot.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex flex-col items-center rounded-2xl border border-border bg-card p-6 text-center transition-all hover:border-primary/40 hover:bg-card-hover hover:shadow-lg hover:shadow-primary-glow"
+                className="bento-item group p-6 text-center"
               >
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
-                  <Bot className="h-8 w-8" />
+                <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${bot.color} mb-4 transition-transform group-hover:scale-110`}>
+                  <Bot className="h-6 w-6 text-foreground/70" />
                 </div>
-                <h3 className="mt-4 text-lg font-semibold text-foreground">
-                  {bot.name}
-                </h3>
-                <p className="mt-1 text-sm text-muted">{bot.desc}</p>
-                <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary">
-                  Ajouter <ArrowRight className="h-4 w-4" />
-                </span>
+                <h3 className="text-lg font-bold text-foreground">{bot.name}</h3>
+                <p className="mt-1 text-xs text-muted">{bot.desc}</p>
+                <div className="mt-4 flex items-center justify-center gap-1 text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                  Ajouter <ArrowRight className="h-3 w-3" />
+                </div>
               </a>
             ))}
           </div>
@@ -162,31 +213,38 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-        <div className="rounded-3xl border border-border bg-gradient-to-br from-primary/10 via-card to-accent/5 p-10 text-center sm:p-16">
-          <h2 className="text-3xl font-bold text-foreground">
-            Prêt à créer votre bot ?
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-muted">
-            Rejoignez des centaines de serveurs qui utilisent déjà Synkrone.
-            C&apos;est gratuit pour commencer.
-          </p>
-          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-3 text-base font-semibold text-white shadow-lg shadow-primary-glow transition-all hover:bg-primary-hover"
-            >
-              Lancer le Dashboard
-              <ArrowRight className="h-5 w-5" />
-            </Link>
-            <a
-              href="https://discord.gg/nuFNvVybGE"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl border border-border px-8 py-3 text-base font-semibold text-foreground transition-colors hover:bg-card"
-            >
-              Rejoindre le support
-            </a>
+      <section className="relative py-24">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <div className="bento-item relative p-12 text-center sm:p-16 overflow-hidden">
+            {/* Inner glow */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/5" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[1px] w-1/2 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+
+            <div className="relative z-10">
+              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                Prêt à créer votre bot ?
+              </h2>
+              <p className="mx-auto mt-4 max-w-md text-muted text-lg">
+                Commencez gratuitement. Évoluez avec les Krônes.
+              </p>
+              <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+                <Link
+                  href="/dashboard"
+                  className="btn-shiny inline-flex items-center gap-2 rounded-2xl px-8 py-4 text-base font-semibold text-white"
+                >
+                  Lancer le Dashboard
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <a
+                  href="https://discord.gg/nuFNvVybGE"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="glass inline-flex items-center gap-2 rounded-2xl px-8 py-4 text-base font-semibold text-foreground transition-all hover:bg-white/8"
+                >
+                  Support Discord
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>

@@ -77,7 +77,7 @@ export default function ProjectsPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="text-center mb-12">
-        <h1 className="text-3xl font-bold text-foreground">Projets Synkrone</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Projets Synkrone</h1>
         <p className="mt-3 text-muted">
           Découvrez tous les projets de l&apos;écosystème Synkrone : bots, serveurs, sites web.
         </p>
@@ -92,7 +92,7 @@ export default function ProjectsPage() {
               href={project.href}
               target="_blank"
               rel="noopener noreferrer"
-              className={`group rounded-2xl border border-border bg-card p-6 transition-all ${colors.border} hover:bg-card-hover hover:shadow-lg`}
+              className={`bento-item group p-6 ${colors.border}`}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${colors.bg} ${colors.text}`}>
@@ -113,20 +113,23 @@ export default function ProjectsPage() {
       </div>
 
       {/* CTA */}
-      <div className="mt-16 rounded-3xl border border-border bg-gradient-to-br from-accent/5 via-card to-primary/5 p-10 text-center">
-        <h2 className="text-2xl font-bold text-foreground">Vous avez un projet ?</h2>
-        <p className="mx-auto mt-3 max-w-md text-muted">
-          Rejoignez notre communauté et proposez vos idées. Nous sommes toujours à la recherche de nouveaux partenariats.
-        </p>
-        <a
-          href="https://discord.gg/nuFNvVybGE"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
-        >
-          Rejoindre le Discord
-          <ExternalLink className="h-4 w-4" />
-        </a>
+      <div className="mt-16 bento-item relative p-10 text-center overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-primary/5" />
+        <div className="relative z-10">
+          <h2 className="text-2xl font-bold text-foreground">Vous avez un projet ?</h2>
+          <p className="mx-auto mt-3 max-w-md text-muted">
+            Rejoignez notre communauté et proposez vos idées. Nous sommes toujours à la recherche de nouveaux partenariats.
+          </p>
+          <a
+            href="https://discord.gg/nuFNvVybGE"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-shiny mt-6 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white"
+          >
+            Rejoindre le Discord
+            <ExternalLink className="h-4 w-4" />
+          </a>
+        </div>
       </div>
     </div>
   );

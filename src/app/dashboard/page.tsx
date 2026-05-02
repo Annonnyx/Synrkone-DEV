@@ -95,30 +95,30 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="mt-1 text-muted">Créez et gérez votre bot Discord.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
+          <p className="mt-1 text-sm text-muted">Créez et gérez votre bot Discord.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 glass rounded-2xl p-1.5">
           <button
             onClick={() => setStep("setup")}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-              step === "setup" ? "bg-primary text-white" : "border border-border text-muted hover:bg-card"
+            className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+              step === "setup" ? "bg-primary text-white shadow-lg shadow-primary-glow" : "text-muted hover:text-foreground"
             }`}
           >
             Configuration
           </button>
           <button
             onClick={() => setStep("modules")}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-              step === "modules" ? "bg-primary text-white" : "border border-border text-muted hover:bg-card"
+            className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+              step === "modules" ? "bg-primary text-white shadow-lg shadow-primary-glow" : "text-muted hover:text-foreground"
             }`}
           >
             Modules
           </button>
           <button
             onClick={() => setStep("stats")}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-              step === "stats" ? "bg-primary text-white" : "border border-border text-muted hover:bg-card"
+            className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+              step === "stats" ? "bg-primary text-white shadow-lg shadow-primary-glow" : "text-muted hover:text-foreground"
             }`}
           >
             Statistiques
@@ -129,7 +129,7 @@ export default function DashboardPage() {
       {step === "setup" ? (
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Bot creation form */}
-          <div className="rounded-2xl border border-border bg-card p-6">
+          <div className="bento-item p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Bot className="h-5 w-5" />
@@ -147,7 +147,7 @@ export default function DashboardPage() {
                   value={botName}
                   onChange={(e) => setBotName(e.target.value)}
                   placeholder="Mon Bot Synkrone"
-                  className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full rounded-xl border border-glass-border bg-white/3 px-4 py-2.5 text-sm text-foreground placeholder:text-muted/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all"
                 />
               </div>
 
@@ -161,7 +161,7 @@ export default function DashboardPage() {
                     value={token}
                     onChange={(e) => setToken(e.target.value)}
                     placeholder="Collez votre token Discord ici"
-                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 pr-20 text-sm text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full rounded-xl border border-glass-border bg-white/3 px-4 py-2.5 pr-20 text-sm text-foreground placeholder:text-muted/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all"
                   />
                   <button
                     onClick={() => setShowToken(!showToken)}
@@ -184,7 +184,7 @@ export default function DashboardPage() {
                 </p>
               </div>
 
-              <div className="rounded-xl border border-border bg-background p-4">
+              <div className="rounded-xl border border-glass-border bg-white/3 p-4">
                 <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
                   <Key className="h-4 w-4 text-warning" />
                   Options requises sur Discord Dev
@@ -205,7 +205,7 @@ export default function DashboardPage() {
                 </ul>
               </div>
 
-              <button className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover">
+              <button className="btn-shiny w-full rounded-xl px-4 py-3 text-sm font-semibold text-white">
                 <Zap className="mr-2 inline h-4 w-4" />
                 Créer et démarrer le bot
               </button>
@@ -213,7 +213,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Or let us create it */}
-          <div className="rounded-2xl border border-border bg-card p-6">
+          <div className="bento-item p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-accent">
                 <Plus className="h-5 w-5" />
@@ -251,20 +251,20 @@ export default function DashboardPage() {
               )}
             </div>
 
-            <button className="w-full rounded-lg border border-primary bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20">
+            <button className="w-full rounded-xl border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary transition-all hover:bg-primary/20 hover:border-primary/50">
               Commander la création
             </button>
           </div>
 
           {/* Existing bots */}
-          <div className="rounded-2xl border border-border bg-card p-6 lg:col-span-2">
+          <div className="bento-item p-6 lg:col-span-2">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-foreground">Vos bots</h2>
-              <button className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted hover:bg-card-hover hover:text-foreground transition-colors">
+              <button className="rounded-xl border border-glass-border px-3 py-1.5 text-xs font-medium text-muted hover:bg-white/5 hover:text-foreground transition-all">
                 + Nouveau bot
               </button>
             </div>
-            <div className="rounded-xl border border-dashed border-border p-8 text-center">
+            <div className="rounded-xl border border-dashed border-glass-border p-8 text-center">
               <Bot className="mx-auto h-12 w-12 text-muted/30" />
               <p className="mt-3 text-sm text-muted">Aucun bot créé pour le moment.</p>
               <p className="text-xs text-muted/60">Configurez votre premier bot ci-dessus pour commencer.</p>
@@ -292,7 +292,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Points bar */}
-          <div className="mb-6 rounded-2xl border border-border bg-card p-5">
+          <div className="mb-6 bento-item p-5">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-foreground">Points de modules utilisés</span>
               <span className={`text-sm font-bold ${totalPointsUsed > maxPoints ? "text-danger" : "text-primary"}`}>
@@ -319,10 +319,8 @@ export default function DashboardPage() {
             {modules.map((mod) => (
               <div
                 key={mod.id}
-                className={`group rounded-2xl border bg-card p-5 transition-all ${
-                  mod.enabled
-                    ? "border-primary/40 shadow-md shadow-primary-glow"
-                    : "border-border hover:border-primary/20"
+                className={`bento-item group p-5 ${
+                  mod.enabled ? "border-primary/30 glow-primary" : ""
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -368,7 +366,7 @@ export default function DashboardPage() {
             <span className="text-sm text-muted">
               Total : <span className="font-semibold text-foreground">{totalPointsUsed} pts</span> utilisés sur {maxPoints}
             </span>
-            <button className="rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover">
+            <button className="btn-shiny rounded-xl px-6 py-2.5 text-sm font-semibold text-white">
               Sauvegarder la configuration
             </button>
           </div>
@@ -391,7 +389,7 @@ export default function DashboardPage() {
               { label: "Commandes aujourd&apos;hui", value: mockStats.commandsToday.toString(), icon: Terminal, color: "text-success" },
               { label: "Commandes totales", value: mockStats.totalCommands.toLocaleString(), icon: BarChart3, color: "text-premium" },
             ].map((metric) => (
-              <div key={metric.label} className="rounded-2xl border border-border bg-card p-5">
+              <div key={metric.label} className="bento-item p-5">
                 <div className="flex items-center justify-between">
                   <metric.icon className={`h-5 w-5 ${metric.color}`} />
                   <TrendingUp className="h-4 w-4 text-success" />
@@ -410,7 +408,7 @@ export default function DashboardPage() {
               { label: "Mémoire", value: mockStats.memory, icon: Cpu, status: "success" },
               { label: "CPU", value: mockStats.cpu, icon: Activity, status: "success" },
             ].map((perf) => (
-              <div key={perf.label} className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
+              <div key={perf.label} className="bento-item p-4 flex items-center gap-3">
                 <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${
                   perf.status === "success" ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
                 }`}>
@@ -426,7 +424,7 @@ export default function DashboardPage() {
 
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Activity chart (simplified) */}
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="bento-item p-6">
               <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
                 <Activity className="h-4 w-4 text-primary" />
                 Activité horaire (dernières 12h)
@@ -445,7 +443,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Top commands */}
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="bento-item p-6">
               <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
                 <Terminal className="h-4 w-4 text-primary" />
                 Commandes les plus utilisées
@@ -454,7 +452,7 @@ export default function DashboardPage() {
                 {mockStats.topCommands.map((cmd, i) => (
                   <div key={cmd.name} className="flex items-center gap-3">
                     <span className="text-xs font-bold text-muted w-4">#{i + 1}</span>
-                    <code className="flex-1 text-sm text-foreground bg-background rounded px-2 py-1 border border-border">
+                    <code className="flex-1 text-sm text-foreground bg-white/3 rounded-lg px-2.5 py-1 border border-glass-border">
                       {cmd.name}
                     </code>
                     <div className="flex items-center gap-2">
@@ -467,23 +465,23 @@ export default function DashboardPage() {
             </div>
 
             {/* Messages & errors */}
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="bento-item p-6">
               <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
                 <MessageCircle className="h-4 w-4 text-accent" />
                 Messages &amp; Erreurs
               </h3>
               <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-xl border border-border bg-background p-4 text-center">
+                <div className="rounded-xl border border-glass-border bg-white/3 p-4 text-center">
                   <p className="text-xl font-bold text-foreground">{mockStats.messagesProcessed.toLocaleString()}</p>
                   <p className="text-xs text-muted">Messages traités</p>
                 </div>
-                <div className="rounded-xl border border-border bg-background p-4 text-center">
+                <div className="rounded-xl border border-glass-border bg-white/3 p-4 text-center">
                   <p className={`text-xl font-bold ${mockStats.errors > 0 ? "text-warning" : "text-success"}`}>
                     {mockStats.errors}
                   </p>
                   <p className="text-xs text-muted">Erreurs (24h)</p>
                 </div>
-                <div className="rounded-xl border border-border bg-background p-4 text-center col-span-2">
+                <div className="rounded-xl border border-glass-border bg-white/3 p-4 text-center col-span-2">
                   <div className="flex items-center justify-center gap-2">
                     {mockStats.errors === 0 ? (
                       <CheckCircle2 className="h-4 w-4 text-success" />
@@ -500,14 +498,14 @@ export default function DashboardPage() {
             </div>
 
             {/* Server list */}
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="bento-item p-6">
               <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
                 <Server className="h-4 w-4 text-primary" />
                 Serveurs connectés
               </h3>
               <div className="space-y-2">
                 {["Serveur Principal", "Communauté FR", "Test Bot"].map((server, i) => (
-                  <div key={server} className="flex items-center justify-between rounded-xl border border-border bg-background px-4 py-3">
+                  <div key={server} className="flex items-center justify-between rounded-xl border border-glass-border bg-white/3 px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
                         {server[0]}

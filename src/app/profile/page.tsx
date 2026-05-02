@@ -15,11 +15,11 @@ import {
 export default function ProfilePage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold text-foreground mb-8">Profil</h1>
+      <h1 className="text-3xl font-bold tracking-tight text-foreground mb-8">Profil</h1>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* User card */}
-        <div className="rounded-2xl border border-border bg-card p-6 text-center lg:col-span-1">
+        <div className="bento-item p-6 text-center lg:col-span-1">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary">
             <User className="h-10 w-10" />
           </div>
@@ -39,27 +39,27 @@ export default function ProfilePage() {
         {/* Details */}
         <div className="space-y-6 lg:col-span-2">
           {/* Account info */}
-          <div className="rounded-2xl border border-border bg-card p-6">
+          <div className="bento-item p-6">
             <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
               <User className="h-5 w-5 text-primary" />
               Informations du compte
             </h3>
             <div className="mt-4 space-y-3">
-              <div className="flex items-center justify-between rounded-lg border border-border bg-background px-4 py-3">
+              <div className="flex items-center justify-between rounded-xl border border-glass-border bg-white/3 px-4 py-3">
                 <div>
                   <p className="text-xs text-muted">Nom d&apos;utilisateur</p>
                   <p className="text-sm font-medium text-foreground">Utilisateur</p>
                 </div>
                 <button className="text-xs text-primary hover:underline">Modifier</button>
               </div>
-              <div className="flex items-center justify-between rounded-lg border border-border bg-background px-4 py-3">
+              <div className="flex items-center justify-between rounded-xl border border-glass-border bg-white/3 px-4 py-3">
                 <div>
                   <p className="text-xs text-muted">Email</p>
                   <p className="text-sm font-medium text-foreground">utilisateur@exemple.com</p>
                 </div>
                 <button className="text-xs text-primary hover:underline">Modifier</button>
               </div>
-              <div className="flex items-center justify-between rounded-lg border border-border bg-background px-4 py-3">
+              <div className="flex items-center justify-between rounded-xl border border-glass-border bg-white/3 px-4 py-3">
                 <div>
                   <p className="text-xs text-muted">Discord ID</p>
                   <p className="text-sm font-medium text-foreground">Non lié</p>
@@ -70,19 +70,19 @@ export default function ProfilePage() {
           </div>
 
           {/* Subscription */}
-          <div className="rounded-2xl border border-border bg-card p-6">
+          <div className="bento-item p-6">
             <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
               <Crown className="h-5 w-5 text-premium" />
               Abonnement
             </h3>
-            <div className="mt-4 flex items-center justify-between rounded-lg border border-border bg-background px-4 py-3">
+            <div className="mt-4 flex items-center justify-between rounded-xl border border-glass-border bg-white/3 px-4 py-3">
               <div>
                 <p className="text-sm font-medium text-foreground">Plan Gratuit</p>
                 <p className="text-xs text-muted">Bots limités, modules de base</p>
               </div>
               <a
                 href="/pricing"
-                className="rounded-lg bg-premium/10 px-3 py-1.5 text-xs font-semibold text-premium hover:bg-premium/20 transition-colors"
+                className="rounded-xl bg-premium/10 px-3 py-1.5 text-xs font-semibold text-premium hover:bg-premium/20 transition-all"
               >
                 Passer Premium
               </a>
@@ -90,12 +90,12 @@ export default function ProfilePage() {
           </div>
 
           {/* Bots */}
-          <div className="rounded-2xl border border-border bg-card p-6">
+          <div className="bento-item p-6">
             <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
               <Bot className="h-5 w-5 text-primary" />
               Vos bots
             </h3>
-            <div className="mt-4 rounded-xl border border-dashed border-border p-6 text-center">
+            <div className="mt-4 rounded-xl border border-dashed border-glass-border p-6 text-center">
               <Bot className="mx-auto h-10 w-10 text-muted/30" />
               <p className="mt-2 text-sm text-muted">Aucun bot pour le moment.</p>
               <a href="/dashboard" className="mt-2 inline-block text-xs text-primary hover:underline">
@@ -106,15 +106,15 @@ export default function ProfilePage() {
 
           {/* Quick links */}
           <div className="grid grid-cols-2 gap-3">
-            <button className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 text-sm text-muted transition-colors hover:bg-card-hover hover:text-foreground">
+            <button className="flex items-center gap-3 rounded-xl border border-glass-border bg-white/3 p-4 text-sm text-muted transition-all hover:bg-white/6 hover:text-foreground">
               <Settings className="h-5 w-5" />
               Paramètres
             </button>
-            <button className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 text-sm text-muted transition-colors hover:bg-card-hover hover:text-foreground">
+            <button className="flex items-center gap-3 rounded-xl border border-glass-border bg-white/3 p-4 text-sm text-muted transition-all hover:bg-white/6 hover:text-foreground">
               <Bell className="h-5 w-5" />
               Notifications
             </button>
-            <button className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 text-sm text-muted transition-colors hover:bg-card-hover hover:text-foreground">
+            <button className="flex items-center gap-3 rounded-xl border border-glass-border bg-white/3 p-4 text-sm text-muted transition-all hover:bg-white/6 hover:text-foreground">
               <CreditCard className="h-5 w-5" />
               Facturation
             </button>
