@@ -90,7 +90,7 @@ export default function DashboardPage() {
   const [showTokenGuide, setShowTokenGuide] = useState(false);
 
   const totalKrUsed = modules.filter((m) => m.enabled).reduce((sum, m) => sum + m.pointCost, 0);
-  const maxKr = 25;
+  const maxKr = 30; // Correspond au plan gratuit (30 Krônes)
 
   const toggleModule = (id: string) => {
     setModules((prev) =>
