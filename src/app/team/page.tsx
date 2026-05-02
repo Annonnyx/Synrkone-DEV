@@ -1,13 +1,20 @@
 import { Users, Code, Server, Sparkles, Mail, ArrowRight, Zap, Shield, Globe } from "lucide-react";
 import Link from "next/link";
 
+// Pour ajouter les avatars Discord:
+// 1. Méthode manuelle: Click droit sur l'avatar Discord → "Copier l'adresse de l'image"
+//    URL: https://cdn.discordapp.com/avatars/USER_ID/AVATAR_HASH.png
+// 2. Télécharger et placer dans /public/avatars/vex.png et onyx.png
+// 3. OU utiliser l'URL directe dans avatarUrl ci-dessous
+
 const teamMembers = [
   {
     name: "VEX",
     role: "Co-fondateur & Lead Dev",
     avatar: "🔮",
     discordId: "1366780122891419784",
-    avatarUrl: null, // Récupérer via: https://api.discord.lol/v1/user/1366780122891419784
+    // Exemple avec URL Discord CDN: avatarUrl: "https://cdn.discordapp.com/avatars/1366780122891419784/AVATAR_HASH.png"
+    avatarUrl: null, // Remplacer par l'URL ou "/avatars/vex.png" si fichier local
     color: "violet",
     description: "Lead dev. Architecture logicielle et bots Discord.",
     skills: ["Full-Stack", "Bots"],
@@ -20,7 +27,8 @@ const teamMembers = [
     role: "Co-fondateur & DevOps",
     avatar: "⚡",
     discordId: "1122092101459517481",
-    avatarUrl: null, // Récupérer via: https://api.discord.lol/v1/user/1122092101459517481
+    // Exemple avec URL Discord CDN: avatarUrl: "https://cdn.discordapp.com/avatars/1122092101459517481/AVATAR_HASH.png"
+    avatarUrl: null, // Remplacer par l'URL ou "/avatars/onyx.png" si fichier local
     color: "amber",
     description: "Infrastructure & cloud. Stabilité des systèmes.",
     skills: ["DevOps", "Cloud"],

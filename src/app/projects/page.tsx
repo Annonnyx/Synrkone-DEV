@@ -19,6 +19,12 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
+// Pour ajouter les avatars des bots:
+// 1. Aller sur Discord → serveur avec les bots
+// 2. Click droit sur l'avatar du bot → "Copier l'adresse de l'image"
+// 3. URL: https://cdn.discordapp.com/avatars/BOT_ID/AVATAR_HASH.png
+// 4. Placer dans /public/avatars/ ou utiliser l'URL directe
+
 const bots = [
   {
     icon: Bot,
@@ -29,7 +35,8 @@ const bots = [
     href: "https://discord.com/oauth2/authorize?client_id=1367891720871874560",
     color: "violet",
     stats: "2.4K serveurs",
-    avatarUrl: null, // URL avatar Discord: "https://cdn.discordapp.com/avatars/ID/avatar.png"
+    discordId: "1367891720871874560",
+    avatarUrl: null, // Ex: "https://cdn.discordapp.com/avatars/1367891720871874560/HASH.png" ou "/avatars/vex-bot.png"
     features: [
       "Modération auto",
       "Économie",
@@ -45,7 +52,8 @@ const bots = [
     href: "https://discord.com/oauth2/authorize?client_id=1428865683986452640",
     color: "violet",
     stats: "1.8K serveurs",
-    avatarUrl: null, // URL avatar Discord
+    discordId: "1428865683986452640",
+    avatarUrl: null, // Ex: "/avatars/asuna.png"
     features: [
       "Auto-modération",
       "Anti-raid",
@@ -61,7 +69,8 @@ const bots = [
     href: "https://discord.com/oauth2/authorize?client_id=1385913159717621780",
     color: "violet",
     stats: "900+ serveurs",
-    avatarUrl: null, // URL avatar Discord
+    discordId: "1385913159717621780",
+    avatarUrl: null, // Ex: "/avatars/kayaba.png"
     features: [
       "Embeds",
       "Auto-rôles",
@@ -77,7 +86,8 @@ const bots = [
     href: "https://discord.com/oauth2/authorize?client_id=1460012999912853810",
     color: "rose",
     stats: "Nouveau",
-    avatarUrl: null, // URL avatar Discord
+    discordId: "1460012999912853810",
+    avatarUrl: null, // Ex: "/avatars/yui.png"
     features: [
       "Casino",
       "Niveaux",
