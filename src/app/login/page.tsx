@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { signIn, getProviders, getCsrfToken } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Sparkles, Zap, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-export default function LoginPage() {
+function LoginContent() {
   const [providers, setProviders] = useState<Record<string, { id: string; name: string }> | null>(null);
   const [csrfToken, setCsrfToken] = useState<string>("");
   const searchParams = useSearchParams();
@@ -155,5 +155,31 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function LoginSkeleton() {
+  return (
+    <div className="min-h-screen bg-[#050507] flex items-center justify-center p-4">
+      <div className="relative w-full max-w-md">
+        <div className="relative bg-[rgba(255,255,255,0.03)] backdrop-blur-2xl border border-white/[0.08] rounded-3xl p-8 md:p-10">
+          <div className="flex justify-center mb-8">
+            <div className="flex h-12 w-12 animate-pulse bg-violet-600/30 rounded-2xl" />
+          </div>
+          <div className="space-y-4">
+            <div className="h-4 bg-white/10 rounded animate-pulse" />
+            <div className="h-12 bg-[#5865F2]/30 rounded-xl animate-pulse" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginSkeleton />}>
+      <LoginContent />
+    </Suspense>
   );
 }
