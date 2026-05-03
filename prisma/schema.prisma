@@ -76,7 +76,7 @@ model User {
   sessions Session[]
 
   // Box personnelle (uniquement pour DEV+)
-  box Box?
+  box Box? @relation("UserBox")
 
   // Fichiers uploadés
   uploadedFiles File[]
@@ -102,7 +102,7 @@ model Box {
 
   // Propriétaire (un utilisateur = une box max)
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation("UserBox", fields: [userId], references: [id])
 
   // Fichiers dans la box
   files File[]
