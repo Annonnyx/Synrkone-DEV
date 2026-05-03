@@ -33,6 +33,15 @@ import {
   HelpCircle,
   Copy,
   Check,
+  FolderOpen,
+  File,
+  FileText,
+  FileImage,
+  FileCode,
+  Download,
+  Upload,
+  Trash2,
+  RefreshCw,
 } from "lucide-react";
 
 interface Module {
@@ -80,11 +89,26 @@ const mockStats = {
 
 type HostingOption = "synkrone" | "self";
 
+type DashboardStep = "setup" | "modules" | "stats" | "files";
+
+interface FileEntry {
+  id: string;
+  name: string;
+  mimeType: string;
+  sizeBytes: string;
+  location: string;
+  createdAt: string;
+  uploaderId: string;
+}
+
 export default function DashboardPage() {
   const [modules, setModules] = useState(defaultModules);
   const [botName, setBotName] = useState("");
   const [token, setToken] = useState("");
-  const [step, setStep] = useState<"setup" | "modules" | "stats">("setup");
+  const [step, setStep] = useState<DashboardStep>("setup");
+  const [files, setFiles] = useState<FileEntry[]>([]);
+  const [loadingFiles, setLoadingFiles] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
   const [showToken, setShowToken] = useState(false);
   const [hosting, setHosting] = useState<HostingOption>("synkrone");
   const [showTokenGuide, setShowTokenGuide] = useState(false);
@@ -98,6 +122,66 @@ export default function DashboardPage() {
     );
   };
 
+  const loadFiles = async () => {
+    setLoadingFiles(true);
+    try {
+      const res = await fetch("/api/files?location=PROJECT");
+      if (res.ok) {
+        const data = await res.json();
+        setFiles(data);
+      }
+    } catch (err) {
+      console.error("Erreur chargement fichiers:", err);
+    } finally {
+      setLoadingFiles(false);
+    }
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingFile(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("location", "PROJECT");
+      const res = await fetch("/api/files", { method: "POST", body: formData });
+      if (res.ok) loadFiles();
+    } catch (err) {
+      console.error("Erreur upload:", err);
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Supprimer ce fichier ?")) return;
+    try {
+      const res = await fetch("/api/files", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (res.ok) loadFiles();
+    } catch (err) {
+      console.error("Erreur suppression:", err);
+    }
+  };
+
+  const getFileIcon = (mimeType: string) => {
+    if (mimeType.startsWith("image/")) return FileImage;
+    if (mimeType.startsWith("text/") || mimeType.includes("json") || mimeType.includes("xml")) return FileText;
+    if (mimeType.includes("javascript") || mimeType.includes("typescript")) return FileCode;
+    return File;
+  };
+
+  const formatSize = (bytes: string | number) => {
+    const b = Number(bytes);
+    if (b < 1024) return `${b} o`;
+    if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} Ko`;
+    return `${(b / (1024 * 1024)).toFixed(1)} Mo`;
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
       {/* Header */}
@@ -106,7 +190,7 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-semibold text-white">Dashboard</h1>
           <p className="mt-1 text-sm text-white/50">Créez et gérez votre bot Discord.</p>
         </div>
-        <div className="flex gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
+        <div className="flex flex-wrap gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
           <button
             onClick={() => setStep("setup")}
             className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
@@ -130,6 +214,14 @@ export default function DashboardPage() {
             }`}
           >
             Statistiques
+          </button>
+          <button
+            onClick={() => { setStep("files"); loadFiles(); }}
+            className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+              step === "files" ? "bg-violet-600 text-white" : "text-white/60 hover:text-white"
+            }`}
+          >
+            Fichiers
           </button>
         </div>
       </div>
@@ -498,7 +590,7 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
-      ) : (
+      ) : step === "stats" ? (
         /* Stats view */
         <div id="stats">
           <div className="mb-6">
@@ -652,7 +744,90 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-      )}
+      ) : step === "files" ? (
+        /* Files view */
+        <div id="files">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="font-display text-xl font-semibold text-white">Fichiers du projet</h2>
+              <p className="mt-1 text-sm text-white/60">
+                Gérez les fichiers stockés sur le VPS. Vous pouvez voir et importer des fichiers.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={loadFiles}
+                className="rounded-xl border border-white/10 px-3 py-2 text-sm text-white/60 hover:bg-white/5 hover:text-white transition-all"
+              >
+                <RefreshCw className={`h-4 w-4 ${loadingFiles ? "animate-spin" : ""}`} />
+              </button>
+              <label className="btn-violet cursor-pointer rounded-xl px-4 py-2 text-sm font-semibold text-white flex items-center gap-2">
+                <Upload className="h-4 w-4" />
+                {uploadingFile ? "Envoi en cours..." : "Importer un fichier"}
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={handleUpload}
+                  disabled={uploadingFile}
+                />
+              </label>
+            </div>
+          </div>
+
+          {loadingFiles ? (
+            <div className="card p-12 text-center">
+              <RefreshCw className="mx-auto h-8 w-8 text-violet-400 animate-spin" />
+              <p className="mt-4 text-sm text-white/60">Chargement des fichiers...</p>
+            </div>
+          ) : files.length === 0 ? (
+            <div className="card p-12 text-center">
+              <FolderOpen className="mx-auto h-12 w-12 text-white/20" />
+              <p className="mt-4 text-sm text-white/60">Aucun fichier pour le moment.</p>
+              <p className="text-xs text-white/40 mt-1">Importez votre premier fichier ci-dessus.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {files.map((file) => {
+                const Icon = getFileIcon(file.mimeType);
+                return (
+                  <div
+                    key={file.id}
+                    className="card group flex items-center justify-between px-5 py-4 hover:bg-white/[0.03]"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-white">{file.name}</p>
+                        <p className="text-xs text-white/40">
+                          {formatSize(file.sizeBytes)} · {new Date(file.createdAt).toLocaleDateString("fr-FR")}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <a
+                        href={`/api/files/${file.id}/download`}
+                        className="rounded-lg border border-white/10 p-2 text-white/60 hover:bg-white/5 hover:text-white transition-all"
+                        title="Télécharger"
+                      >
+                        <Download className="h-4 w-4" />
+                      </a>
+                      <button
+                        onClick={() => handleDelete(file.id)}
+                        className="rounded-lg border border-red-500/20 p-2 text-red-400/60 hover:bg-red-500/10 hover:text-red-400 transition-all"
+                        title="Supprimer"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }

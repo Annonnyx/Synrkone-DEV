@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X, Zap } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { Menu, X, Zap, HardDrive, Shield, LogOut } from "lucide-react";
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard" },
@@ -13,6 +14,20 @@ const navLinks = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const { data: session, status } = useSession();
+  const userRole = session?.user?.role ?? "USER";
+  const isAuthenticated = status === "authenticated";
+
+  // Liens spéciaux par rôle
+  const roleLinks = [];
+
+  if (userRole === "DEV" || userRole === "ADMIN" || userRole === "OWNER") {
+    roleLinks.push({ href: "/my-box", label: "Ma Box", icon: HardDrive });
+  }
+
+  if (userRole === "ADMIN" || userRole === "OWNER") {
+    roleLinks.push({ href: "/boxes", label: "Boxes", icon: Shield });
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50">
@@ -42,22 +57,44 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+            {/* Role-specific links */}
+            {roleLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="rounded-lg px-4 py-2 text-sm text-[#a79eb5] transition-colors hover:text-white flex items-center gap-1.5"
+              >
+                <link.icon className="h-4 w-4" />
+                {link.label}
+              </Link>
+            ))}
           </div>
 
           {/* Desktop actions */}
           <div className="hidden items-center gap-3 md:flex">
-            <Link
-              href="/profile"
-              className="rounded-lg px-4 py-2 text-sm text-[#a79eb5] transition-colors hover:text-white"
-            >
-              Profil
-            </Link>
-            <Link
-              href="/dashboard"
-              className="rounded-lg bg-gradient-to-r from-violet-600 to-violet-500 px-5 py-2 text-sm font-medium text-white transition-all hover:shadow-lg hover:shadow-violet-500/25 hover:-translate-y-0.5"
-            >
-              Lancer
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <Link
+                  href="/profile"
+                  className="rounded-lg px-4 py-2 text-sm text-[#a79eb5] transition-colors hover:text-white"
+                >
+                  Profil
+                </Link>
+                <button
+                  onClick={() => signOut()}
+                  className="rounded-lg px-3 py-2 text-sm text-red-400/70 transition-colors hover:text-red-400 hover:bg-red-500/10 flex items-center gap-1.5"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/api/auth/signin"
+                className="rounded-lg bg-gradient-to-r from-violet-600 to-violet-500 px-5 py-2 text-sm font-medium text-white transition-all hover:shadow-lg hover:shadow-violet-500/25 hover:-translate-y-0.5"
+              >
+                Connexion
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -82,21 +119,45 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+            {/* Mobile role links */}
+            {roleLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-[#a79eb5] transition-colors hover:text-white hover:bg-white/5"
+              >
+                <link.icon className="h-4 w-4" />
+                {link.label}
+              </Link>
+            ))}
             <div className="mt-3 flex flex-col gap-2 border-t border-white/5 pt-3">
-              <Link
-                href="/profile"
-                onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm text-[#a79eb5] transition-colors hover:text-white hover:bg-white/5"
-              >
-                Profil
-              </Link>
-              <Link
-                href="/dashboard"
-                onClick={() => setOpen(false)}
-                className="rounded-lg bg-violet-600 px-3 py-2.5 text-center text-sm font-medium text-white"
-              >
-                Lancer le Dashboard
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    href="/profile"
+                    onClick={() => setOpen(false)}
+                    className="rounded-lg px-3 py-2.5 text-sm text-[#a79eb5] transition-colors hover:text-white hover:bg-white/5"
+                  >
+                    Profil
+                  </Link>
+                  <button
+                    onClick={() => { setOpen(false); signOut(); }}
+                    className="flex items-center gap-2 rounded-lg border border-red-500/20 px-3 py-2.5 text-sm text-red-400 transition-colors hover:bg-red-500/10"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Déconnexion
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/api/auth/signin"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg bg-violet-600 px-3 py-2.5 text-center text-sm font-medium text-white"
+                >
+                  Connexion
+                </Link>
+              )}
             </div>
           </div>
         )}
