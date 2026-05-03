@@ -42,7 +42,7 @@ export default function MyBoxPage() {
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    if (status === "unauthenticated") router.push("/api/auth/signin");
+    if (status === "unauthenticated") router.push("/login");
     if (status === "authenticated") loadBox();
   }, [status, router]);
 

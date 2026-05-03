@@ -48,7 +48,7 @@ export default function BoxesPage() {
   const [selectedBox, setSelectedBox] = useState<BoxData | null>(null);
 
   useEffect(() => {
-    if (status === "unauthenticated") router.push("/api/auth/signin");
+    if (status === "unauthenticated") router.push("/login");
     if (status === "authenticated") loadBoxes();
   }, [status, router]);
 

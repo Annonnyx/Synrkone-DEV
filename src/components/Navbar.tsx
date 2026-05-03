@@ -89,7 +89,7 @@ export default function Navbar() {
               </>
             ) : (
               <Link
-                href="/api/auth/signin"
+                href="/login"
                 className="rounded-lg bg-gradient-to-r from-violet-600 to-violet-500 px-5 py-2 text-sm font-medium text-white transition-all hover:shadow-lg hover:shadow-violet-500/25 hover:-translate-y-0.5"
               >
                 Connexion
@@ -151,7 +151,7 @@ export default function Navbar() {
                 </>
               ) : (
                 <Link
-                  href="/api/auth/signin"
+                  href="/login"
                   onClick={() => setOpen(false)}
                   className="rounded-lg bg-violet-600 px-3 py-2.5 text-center text-sm font-medium text-white"
                 >

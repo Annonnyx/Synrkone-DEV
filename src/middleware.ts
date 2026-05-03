@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
 
   // Pas connecté → redirect signin
   if (!token) {
-    const signInUrl = new URL("/api/auth/signin", request.url);
+    const signInUrl = new URL("/login", request.url);
     signInUrl.searchParams.set("callbackUrl", request.url);
     return NextResponse.redirect(signInUrl);
   }
