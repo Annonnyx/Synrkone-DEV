@@ -18,6 +18,19 @@ const PROTECTED_ROUTES: Record<string, string> = {
 };
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  
+  // Exclure les routes OAuth et statiques
+  if (
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/favicon") ||
+    pathname === "/"
+  ) {
+    return NextResponse.next();
+  }
+
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
 
   // Pas connecté → redirect signin
@@ -28,7 +41,6 @@ export async function middleware(request: NextRequest) {
   }
 
   const userRole = (token.role as string) ?? "USER";
-  const pathname = request.nextUrl.pathname;
 
   // Vérifie chaque route protégée
   for (const [route, requiredRole] of Object.entries(PROTECTED_ROUTES)) {
