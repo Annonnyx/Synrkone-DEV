@@ -69,12 +69,6 @@ export async function POST(request: Request) {
       },
     });
 
-    // Mettre à jour l'utilisateur avec le boxId
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: { boxId: box.id },
-    });
-
     return NextResponse.json(box, { status: 201 });
   } catch (error) {
     console.error("Erreur création box:", error);

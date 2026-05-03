@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Bot,
   Plus,
@@ -44,48 +44,59 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-interface Module {
+// Mapping des icônes Lucide par nom
+const iconMap: Record<string, React.ElementType> = {
+  Users, Image, Shield, Coins, Music, Ticket, MessageSquare, Crown,
+  Bot, Zap, Activity, Server, UsersRound, Terminal, Clock, Cpu, Wifi,
+  BarChart3, MessageCircle, Hash, AlertTriangle, CheckCircle2, XCircle,
+  ChevronDown, HelpCircle, Copy, Check,
+};
+
+interface ModuleDef {
   id: string;
+  moduleId: string;
   name: string;
   description: string;
-  icon: React.ElementType;
+  icon: string;
   premium: boolean;
   enabled: boolean;
+  category: string;
   pointCost: number;
 }
 
-const defaultModules: Module[] = [
-  { id: "autorole", name: "Auto-Rôles", description: "Attribue automatiquement des rôles à l'arrivée des membres.", icon: Users, premium: false, enabled: true, pointCost: 1 },
-  { id: "generation", name: "Génération IA", description: "Génération d'images et de textes via l'IA.", icon: Image, premium: true, enabled: false, pointCost: 3 },
-  { id: "moderation", name: "Modération", description: "Auto-mod, anti-spam, anti-raid, filtrage de contenu.", icon: Shield, premium: false, enabled: true, pointCost: 2 },
-  { id: "economy", name: "Économie", description: "Système de monnaie, boutique, transactions entre membres.", icon: Coins, premium: true, enabled: false, pointCost: 3 },
-  { id: "music", name: "Musique", description: "Lecture de musique depuis YouTube, Spotify et plus.", icon: Music, premium: false, enabled: false, pointCost: 2 },
-  { id: "tickets", name: "Tickets", description: "Système de tickets de support avec catégories.", icon: Ticket, premium: false, enabled: true, pointCost: 1 },
-  { id: "welcome", name: "Messages de bienvenue", description: "Messages personnalisés d'arrivée et de départ.", icon: MessageSquare, premium: false, enabled: false, pointCost: 1 },
-  { id: "giveaway", name: "Giveaways", description: "Organisez des tirages au sort automatiques.", icon: Crown, premium: true, enabled: false, pointCost: 2 },
-];
+interface ModuleInstance {
+  id: string;
+  enabled: boolean;
+  module: ModuleDef;
+}
 
-const mockStats = {
-  servers: 12,
-  users: 4820,
-  commandsToday: 347,
-  totalCommands: 12893,
-  uptime: "99.7%",
-  latency: "42ms",
-  memory: "128 MB",
-  cpu: "3.2%",
-  messagesProcessed: 8421,
-  errors: 2,
-  lastRestart: "Il y a 3j 14h",
-  topCommands: [
-    { name: "/help", uses: 89 },
-    { name: "/rank", uses: 64 },
-    { name: "/ticket", uses: 51 },
-    { name: "/autorole", uses: 38 },
-    { name: "/mod warn", uses: 27 },
-  ],
-  dailyActivity: [12, 18, 25, 31, 45, 52, 48, 67, 82, 74, 58, 43],
-};
+interface BotData {
+  id: string;
+  name: string;
+  token?: string;
+  hosting: string;
+  status: string;
+  maxKr: number;
+  usedKr: number;
+  modules: ModuleInstance[];
+  stats?: BotStats;
+}
+
+interface BotStats {
+  servers: number;
+  users: number;
+  commandsToday: number;
+  totalCommands: number;
+  uptime: string;
+  latency: string;
+  memory: string;
+  cpu: string;
+  messagesProcessed: number;
+  errors: number;
+  lastRestart: string;
+  topCommands: { name: string; uses: number }[];
+  dailyActivity: number[];
+}
 
 type HostingOption = "synkrone" | "self";
 
@@ -102,7 +113,13 @@ interface FileEntry {
 }
 
 export default function DashboardPage() {
-  const [modules, setModules] = useState(defaultModules);
+  const [bot, setBot] = useState<BotData | null>(null);
+  const [modules, setModules] = useState<ModuleInstance[]>([]);
+  const [availableModules, setAvailableModules] = useState<ModuleDef[]>([]);
+  const [stats, setStats] = useState<BotStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  
   const [botName, setBotName] = useState("");
   const [token, setToken] = useState("");
   const [step, setStep] = useState<DashboardStep>("setup");
@@ -113,13 +130,90 @@ export default function DashboardPage() {
   const [hosting, setHosting] = useState<HostingOption>("synkrone");
   const [showTokenGuide, setShowTokenGuide] = useState(false);
 
-  const totalKrUsed = modules.filter((m) => m.enabled).reduce((sum, m) => sum + m.pointCost, 0);
-  const maxKr = 30; // Correspond au plan gratuit (30 Krônes)
+  const totalKrUsed = bot?.usedKr || 0;
+  const maxKr = bot?.maxKr || 30;
 
-  const toggleModule = (id: string) => {
-    setModules((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, enabled: !m.enabled } : m))
-    );
+  // Charger les données au montage
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      // Charger le bot et ses modules
+      const botRes = await fetch("/api/bot");
+      if (botRes.ok) {
+        const botData = await botRes.json();
+        if (botData) {
+          setBot(botData);
+          setBotName(botData.name);
+          setModules(botData.modules || []);
+          setStats(botData.stats || null);
+          setHosting(botData.hosting as HostingOption);
+        }
+      }
+
+      // Charger les modules disponibles
+      const modsRes = await fetch("/api/modules");
+      if (modsRes.ok) {
+        setAvailableModules(await modsRes.json());
+      }
+    } catch (err) {
+      console.error("Erreur chargement données:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleModule = async (instanceId: string, newEnabled: boolean) => {
+    try {
+      const res = await fetch("/api/bot/modules", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ moduleInstanceId: instanceId, enabled: newEnabled }),
+      });
+
+      if (res.ok) {
+        // Mettre à jour localement
+        setModules((prev) =>
+          prev.map((m) => (m.id === instanceId ? { ...m, enabled: newEnabled } : m))
+        );
+        // Recharger le bot pour avoir les Krônes à jour
+        loadData();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Erreur lors de l'activation du module");
+      }
+    } catch (err) {
+      console.error("Erreur toggle module:", err);
+    }
+  };
+
+  const saveBot = async () => {
+    setSaving(true);
+    try {
+      const method = bot ? "PATCH" : "POST";
+      const res = await fetch("/api/bot", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: botName, token, hosting }),
+      });
+
+      if (res.ok) {
+        const saved = await res.json();
+        setBot(saved);
+        if (!bot) {
+          // Premier créé, passer aux modules
+          setStep("modules");
+          loadData();
+        }
+      }
+    } catch (err) {
+      console.error("Erreur sauvegarde bot:", err);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const loadFiles = async () => {
@@ -530,64 +624,75 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {modules.map((mod) => (
-              <div
-                key={mod.id}
-                className={`card group p-5 transition-all duration-300 ${
-                  mod.enabled 
-                    ? "border-violet-500/40 shadow-lg shadow-violet-500/10 bg-gradient-to-br from-violet-500/5 to-transparent" 
-                    : "border-white/10 hover:border-white/20"
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
-                        mod.enabled 
-                          ? "bg-gradient-to-br from-violet-500/30 to-violet-600/10 text-violet-300 shadow-lg shadow-violet-500/20" 
-                          : "bg-white/5 text-white/50"
-                      }`}
-                    >
-                      <mod.icon className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h3 className={`text-sm font-semibold transition-colors ${
-                        mod.enabled ? "text-white" : "text-white/80"
-                      }`}>
-                        {mod.name}
-                      </h3>
-                      <span className={`text-[11px] transition-colors ${
-                        mod.enabled ? "text-violet-400" : "text-white/50"
-                      }`}>{mod.pointCost} Kr</span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => toggleModule(mod.id)}
-                    className={`relative h-7 w-12 flex-shrink-0 rounded-full transition-all duration-300 ${
-                      mod.enabled 
-                        ? "bg-gradient-to-r from-violet-600 to-violet-500 shadow-lg shadow-violet-500/30" 
-                        : "bg-white/10 hover:bg-white/15"
+          {loading ? (
+            <div className="card p-12 text-center">
+              <RefreshCw className="mx-auto h-8 w-8 text-violet-400 animate-spin" />
+              <p className="mt-4 text-sm text-white/60">Chargement des modules...</p>
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {modules.map((modInstance) => {
+                const mod = modInstance.module;
+                const IconComponent = iconMap[mod.icon] || Bot;
+                return (
+                  <div
+                    key={modInstance.id}
+                    className={`card group p-5 transition-all duration-300 ${
+                      modInstance.enabled 
+                        ? "border-violet-500/40 shadow-lg shadow-violet-500/10 bg-gradient-to-br from-violet-500/5 to-transparent" 
+                        : "border-white/10 hover:border-white/20"
                     }`}
                   >
-                    <span
-                      className={`absolute top-1 left-0 h-5 w-5 rounded-full bg-white shadow-md transition-all duration-300 ${
-                        mod.enabled ? "translate-x-[26px]" : "translate-x-1"
-                      }`}
-                    />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
+                            modInstance.enabled 
+                              ? "bg-gradient-to-br from-violet-500/30 to-violet-600/10 text-violet-300 shadow-lg shadow-violet-500/20" 
+                              : "bg-white/5 text-white/50"
+                          }`}
+                        >
+                          <IconComponent className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h3 className={`text-sm font-semibold transition-colors ${
+                            modInstance.enabled ? "text-white" : "text-white/80"
+                          }`}>
+                            {mod.name}
+                          </h3>
+                          <span className={`text-[11px] transition-colors ${
+                            modInstance.enabled ? "text-violet-400" : "text-white/50"
+                          }`}>{mod.pointCost} Kr{mod.premium && " (Premium)"}</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => toggleModule(modInstance.id, !modInstance.enabled)}
+                        className={`relative h-7 w-12 flex-shrink-0 rounded-full transition-all duration-300 ${
+                          modInstance.enabled 
+                            ? "bg-gradient-to-r from-violet-600 to-violet-500 shadow-lg shadow-violet-500/30" 
+                            : "bg-white/10 hover:bg-white/15"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-1 left-0 h-5 w-5 rounded-full bg-white shadow-md transition-all duration-300 ${
+                            modInstance.enabled ? "translate-x-[26px]" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           <div className="mt-8 flex items-center justify-between">
             <span className="text-sm text-white/60">
               Total : <span className="font-semibold text-white">{totalKrUsed} Kr</span> utilisés sur {maxKr}
             </span>
-            <button className="btn-violet rounded-xl px-6 py-2.5 text-sm font-semibold text-white">
-              Sauvegarder la configuration
-            </button>
+            <span className="text-xs text-white/40">
+              {bot ? `Bot: ${bot.name} (${bot.status})` : "Créez d'abord un bot"}
+            </span>
           </div>
         </div>
       ) : step === "stats" ? (
@@ -603,10 +708,10 @@ export default function DashboardPage() {
           {/* Key metrics */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
             {[
-              { label: "Serveurs", value: mockStats.servers.toString(), icon: Server, color: "text-violet-400" },
-              { label: "Utilisateurs atteints", value: mockStats.users.toLocaleString(), icon: UsersRound, color: "text-cyan-400" },
-              { label: "Commandes aujourd&apos;hui", value: mockStats.commandsToday.toString(), icon: Terminal, color: "text-emerald-400" },
-              { label: "Commandes totales", value: mockStats.totalCommands.toLocaleString(), icon: BarChart3, color: "text-violet-400" },
+              { label: "Serveurs", value: (stats?.servers || 0).toString(), icon: Server, color: "text-violet-400" },
+              { label: "Utilisateurs atteints", value: (stats?.users || 0).toLocaleString(), icon: UsersRound, color: "text-cyan-400" },
+              { label: "Commandes aujourd'hui", value: (stats?.commandsToday || 0).toString(), icon: Terminal, color: "text-emerald-400" },
+              { label: "Commandes totales", value: (stats?.totalCommands || 0).toLocaleString(), icon: BarChart3, color: "text-violet-400" },
             ].map((metric) => (
               <div key={metric.label} className="card p-5">
                 <div className="flex items-center justify-between">
@@ -622,10 +727,10 @@ export default function DashboardPage() {
           {/* Performance metrics */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
             {[
-              { label: "Uptime", value: mockStats.uptime, icon: Clock, status: "success" },
-              { label: "Latence", value: mockStats.latency, icon: Wifi, status: "success" },
-              { label: "Mémoire", value: mockStats.memory, icon: Cpu, status: "success" },
-              { label: "CPU", value: mockStats.cpu, icon: Activity, status: "success" },
+              { label: "Uptime", value: stats?.uptime || "0%", icon: Clock, status: "success" },
+              { label: "Latence", value: stats?.latency || "0ms", icon: Wifi, status: "success" },
+              { label: "Mémoire", value: stats?.memory || "0 MB", icon: Cpu, status: "success" },
+              { label: "CPU", value: stats?.cpu || "0%", icon: Activity, status: "success" },
             ].map((perf) => (
               <div key={perf.label} className="card p-4 flex items-center gap-3">
                 <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${
@@ -649,7 +754,7 @@ export default function DashboardPage() {
                 Activité horaire (dernières 12h)
               </h3>
               <div className="flex items-end gap-2 h-32">
-                {mockStats.dailyActivity.map((val, i) => (
+                {(stats?.dailyActivity || []).map((val: number, i: number) => (
                   <div key={i} className="flex-1 flex flex-col items-center gap-1">
                     <div
                       className="w-full rounded-t bg-primary/60 hover:bg-primary transition-colors"
@@ -668,7 +773,7 @@ export default function DashboardPage() {
                 Commandes les plus utilisées
               </h3>
               <div className="space-y-3">
-                {mockStats.topCommands.map((cmd, i) => (
+                {(stats?.topCommands || []).map((cmd: {name: string, uses: number}, i: number) => (
                   <div key={cmd.name} className="flex items-center gap-3">
                     <span className="text-xs font-bold text-white/60 w-4">#{i + 1}</span>
                     <code className="flex-1 text-sm text-white bg-white/5 rounded-lg px-2.5 py-1 border border-white/10">
@@ -691,27 +796,27 @@ export default function DashboardPage() {
               </h3>
               <div className="grid grid-cols-2 gap-4">
                 <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-center">
-                  <p className="text-xl font-bold text-white">{mockStats.messagesProcessed.toLocaleString()}</p>
+                  <p className="text-xl font-bold text-white">{(stats?.messagesProcessed || 0).toLocaleString()}</p>
                   <p className="text-xs text-white/60">Messages traités</p>
                 </div>
                 <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-center">
-                  <p className={`text-xl font-bold ${mockStats.errors > 0 ? "text-warning" : "text-emerald-400"}`}>
-                    {mockStats.errors}
+                  <p className={`text-xl font-bold ${(stats?.errors || 0) > 0 ? "text-warning" : "text-emerald-400"}`}>
+                    {stats?.errors || 0}
                   </p>
                   <p className="text-xs text-white/60">Erreurs (24h)</p>
                 </div>
                 <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-center col-span-2">
                   <div className="flex items-center justify-center gap-2">
-                    {mockStats.errors === 0 ? (
+                    {(stats?.errors || 0) === 0 ? (
                       <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                     ) : (
                       <AlertTriangle className="h-4 w-4 text-warning" />
                     )}
                     <p className="text-sm text-white">
-                      {mockStats.errors === 0 ? "Aucune erreur récente" : `${mockStats.errors} erreurs détectées`}
+                      {(stats?.errors || 0) === 0 ? "Aucune erreur récente" : `${stats?.errors} erreurs détectées`}
                     </p>
                   </div>
-                  <p className="text-xs text-white/60 mt-1">Dernier redémarrage : {mockStats.lastRestart}</p>
+                  <p className="text-xs text-white/60 mt-1">Dernier redémarrage : {stats?.lastRestart || "Jamais"}</p>
                 </div>
               </div>
             </div>
