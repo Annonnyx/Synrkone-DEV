@@ -76,11 +76,13 @@ model User {
   sessions Session[]
 
   // Box personnelle (uniquement pour DEV+)
-  boxId String? @unique
-  box   Box?    @relation(fields: [boxId], references: [id])
+  box Box?
 
   // Fichiers uploadés
   uploadedFiles File[]
+  
+  // Bots créés par l'utilisateur
+  bots          Bot[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -100,7 +102,7 @@ model Box {
 
   // Propriétaire (un utilisateur = une box max)
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
 
   // Fichiers dans la box
   files File[]
@@ -141,4 +143,118 @@ model File {
   updatedAt DateTime @updatedAt
 
   @@map("files")
+}
+
+// =====================
+// MODULES (Bot modules)
+// =====================
+
+enum ModuleCategory {
+  MANAGEMENT
+  MODERATION
+  UTILITY
+  FUN
+  ECONOMY
+  MUSIC
+  AI
+  WEB
+  CUSTOM
+}
+
+model ModuleDef {
+  id          String          @id @default(cuid())
+  moduleId    String          @unique // "autorole", "generation", etc.
+  name        String
+  description String
+  icon        String          // Nom de l'icône Lucide
+  premium     Boolean         @default(false)
+  enabled     Boolean         @default(true)
+  category    ModuleCategory
+  pointCost   Int             @default(1) // Coût en Krônes
+  
+  // Relations
+  instances   ModuleInstance[]
+  
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@map("modules")
+}
+
+model ModuleInstance {
+  id        String   @id @default(cuid())
+  enabled   Boolean  @default(false)
+  config    Json?    // Configuration spécifique du module pour ce bot
+  
+  // Relations
+  moduleId  String
+  module    ModuleDef @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  botId     String
+  bot       Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([moduleId, botId]) // Un module unique par bot
+  @@map("module_instances")
+}
+
+// =====================
+// BOTS
+// =====================
+
+model Bot {
+  id          String   @id @default(cuid())
+  name        String
+  token       String?  // Encrypted token storage
+  hosting     String   @default("synkrone") // "synkrone" | "self"
+  status      String   @default("offline") // "online" | "offline" | "error"
+  
+  // Krônes / Points system
+  maxKr       Int      @default(30) // Points maximum selon le plan
+  usedKr      Int      @default(0)  // Points utilisés
+  
+  // Relations
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  modules     ModuleInstance[]
+  stats       BotStats?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("bots")
+}
+
+model BotStats {
+  id                String   @id @default(cuid())
+  
+  // Métriques principales
+  servers           Int      @default(0)
+  users             Int      @default(0)
+  commandsToday     Int      @default(0)
+  totalCommands     Int      @default(0)
+  
+  // Performance
+  uptime            String   @default("0%")
+  latency           String   @default("0ms")
+  memory            String   @default("0 MB")
+  cpu               String   @default("0%")
+  
+  // Activité
+  messagesProcessed Int      @default(0)
+  errors            Int      @default(0)
+  lastRestart       String   @default("Jamais")
+  
+  // Top commandes (stocké comme JSON)
+  topCommands       Json     @default("[]")
+  dailyActivity     Json     @default("[]")
+  
+  // Relations
+  botId             String   @unique
+  bot               Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+  
+  updatedAt         DateTime @updatedAt
+
+  @@map("bot_stats")
 }
