@@ -17,7 +17,7 @@ export function hasRole(userRole: string, requiredRole: UserRole): boolean {
 
 export async function requireAuth() {
   const session = await getServerSession(authOptions);
-  if (!session?.user) redirect("/auth/signin");
+  if (!session?.user) redirect("/api/auth/signin");
   return session;
 }
 
