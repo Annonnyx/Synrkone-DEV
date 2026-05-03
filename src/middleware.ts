@@ -19,6 +19,7 @@ const PROTECTED_ROUTES: Record<string, string> = {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  console.log("🔧 Middleware", { pathname, url: request.url });
   
   // Exclure les routes OAuth et statiques
   if (
@@ -28,15 +29,18 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/favicon") ||
     pathname === "/"
   ) {
+    console.log("✅ Middleware: route excluded", { pathname });
     return NextResponse.next();
   }
 
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+  console.log("🔧 Middleware: token check", { hasToken: !!token, userEmail: token?.email });
 
   // Pas connecté → redirect signin
   if (!token) {
     const signInUrl = new URL("/login", request.url);
     signInUrl.searchParams.set("callbackUrl", request.url);
+    console.log("🔄 Middleware: redirecting to login", { from: request.url, to: signInUrl.toString() });
     return NextResponse.redirect(signInUrl);
   }
 
