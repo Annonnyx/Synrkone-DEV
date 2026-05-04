@@ -1,12 +1,19 @@
 import type { NextAuthOptions } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
 import { prisma } from "@/lib/prisma";
+import { syncDiscordRoles } from "@/lib/discord-sync";
+
+// Scopes Discord : guilds permet de vérifier la présence sur le serveur Synkrone
+const DISCORD_SCOPES = "identify email guilds guilds.members.read";
 
 export const authOptions: NextAuthOptions = {
   providers: [
     DiscordProvider({
       clientId: process.env.DISCORD_CLIENT_ID!,
       clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+      authorization: {
+        params: { scope: DISCORD_SCOPES },
+      },
     }),
   ],
   callbacks: {
@@ -28,6 +35,16 @@ export const authOptions: NextAuthOptions = {
             },
           });
           console.log("✅ User synced to DB", { userId: result.id, email: result.email, discordId: result.discordId });
+
+          // Sync des rôles Discord → rôle site
+          if (account.access_token) {
+            try {
+              await syncDiscordRoles(account.providerAccountId, account.access_token);
+              console.log("✅ Discord roles synced");
+            } catch (syncError) {
+              console.error("⚠️ Discord role sync failed (non-blocking)", syncError);
+            }
+          }
         } catch (error) {
           console.error("❌ DB upsert failed", error);
           // Si l'upsert échoue on laisse quand même passer
@@ -36,27 +53,35 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async session({ session, token }) {
-      console.log("🔐 session callback", { sessionUser: session.user?.email, tokenSub: token.sub });
-      
       if (session.user && token.sub) {
-        // Récupérer le rôle depuis la DB
-        const dbUser = await prisma.user.findUnique({
-          where: { id: token.sub },
-          select: { role: true },
-        });
         session.user.id = token.sub;
-        session.user.role = dbUser?.role ?? "USER";
-        console.log("✅ Session created", { userId: token.sub, role: dbUser?.role ?? "USER" });
+        session.user.role = (token.role as string) ?? "USER";
+        session.user.discordId = (token.discordId as string) ?? null;
+        session.user.isOnSynkroneServer = (token.isOnSynkroneServer as boolean) ?? false;
       }
       return session;
     },
-    async jwt({ token, user }) {
-      console.log("🔐 jwt callback", { userEmail: user?.email, currentTokenSub: token.sub });
-      
+    async jwt({ token, user, account }) {
+      // Premier login : stocker les infos dans le JWT
       if (user) {
         token.sub = user.id;
-        console.log("✅ JWT token updated", { userId: user.id });
+
+        // Récupérer les données depuis la DB
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { role: true, discordId: true, isOnSynkroneServer: true },
+        });
+
+        token.role = dbUser?.role ?? "USER";
+        token.discordId = dbUser?.discordId ?? null;
+        token.isOnSynkroneServer = dbUser?.isOnSynkroneServer ?? false;
       }
+
+      // Stocker l'access_token Discord pour les appels API ultérieurs
+      if (account?.access_token) {
+        token.accessToken = account.access_token;
+      }
+
       return token;
     },
   },
@@ -82,7 +107,7 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-// Type augmentation pour inclure role dans session
+// Type augmentation pour inclure role et Discord info dans session
 declare module "next-auth" {
   interface Session {
     user: {
@@ -91,6 +116,17 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       role: string;
+      discordId?: string | null;
+      isOnSynkroneServer: boolean;
     };
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    role?: string;
+    discordId?: string | null;
+    isOnSynkroneServer?: boolean;
+    accessToken?: string;
   }
 }

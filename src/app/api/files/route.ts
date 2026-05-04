@@ -97,6 +97,21 @@ export async function POST(request: Request) {
       if (box.userId !== session.user.id && !hasRole(userRole, "ADMIN")) {
         return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
       }
+
+      // Vérifier le quota avant upload
+      const usedStorage = await prisma.file.aggregate({
+        where: { boxId },
+        _sum: { sizeBytes: true },
+      });
+      const currentUsedBytes = Number(usedStorage._sum.sizeBytes ?? 0);
+      const maxBytes = box.maxSizeMb * 1024 * 1024;
+      if (currentUsedBytes + file.size > maxBytes) {
+        return NextResponse.json(
+          { error: `Quota dépassé : ${(currentUsedBytes / 1024 / 1024).toFixed(1)} Mo utilisés sur ${box.maxSizeMb} Mo` },
+          { status: 400 }
+        );
+      }
+
       dirPath = box.path;
     } else if (location === "VPS_ROOT") {
       dirPath = path.join(STORAGE_ROOT, "vps-root");

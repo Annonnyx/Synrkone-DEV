@@ -57,8 +57,8 @@ export async function PATCH(request: Request) {
     });
 
     const currentUsed = allModules
-      .filter(m => m.id !== moduleInstanceId)
-      .reduce((sum, m) => sum + m.module.pointCost, 0);
+      .filter((m: { id: string }) => m.id !== moduleInstanceId)
+      .reduce((sum: number, m: { module: { pointCost: number } }) => sum + m.module.pointCost, 0);
 
     const newUsed = enabled ? currentUsed + instance.module.pointCost : currentUsed;
 

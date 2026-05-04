@@ -70,6 +70,8 @@ model User {
   image         String?
   role          UserRole @default(USER)
   discordId     String?  @unique
+  discordRoles  Json     @default("[]")   // IDs des rôles Discord sur le serveur Synkrone
+  isOnSynkroneServer Boolean @default(false) // Est membre du serveur Discord Synkrone
 
   // Relations NextAuth
   accounts Account[]

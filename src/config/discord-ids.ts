@@ -1,4 +1,4 @@
-// Configuration des IDs Discord pour les avatars
+// Configuration des IDs Discord pour les avatars et le serveur
 // Pour obtenir un avatar : https://cdn.discordapp.com/avatars/{user_id}/{avatar_hash}.png
 
 export const DISCORD_IDS = {
@@ -38,19 +38,30 @@ export const DISCORD_IDS = {
     },
   },
 
-  // Serveurs (à compléter)
+  // Serveurs
   SERVERS: {
     SYNKRONE_SUPPORT: {
-      // ID du serveur Synkrone Support (logo principal)
-      // Récupérable depuis l'URL d'invitation ou les paramètres du serveur
-      id: "", // TODO: Récupérer l'ID
+      // ID du serveur Synkrone Support
+      // ⚠️ À remplir avec l'ID réel (ou utiliser DISCORD_GUILD_ID dans .env)
+      id: process.env.DISCORD_GUILD_ID ?? "",
       name: "Synkrone Support",
+      inviteUrl: "https://discord.gg/zfBeYvudbu",
     },
     FRENCH_BAGUETTE: {
       // Minecraft server
       id: "",
       name: "The French Baguette",
     },
+  },
+
+  // Rôles du serveur Synkrone (pour la sync)
+  ROLES: {
+    OWNER:        "1368719335534887023",
+    ADMIN:        "1368620965403299890",
+    DEV:          "1369430431212114002",
+    APPRENTI_DEV: "1474871058166448280",
+    PARTENAIRE:   "1440840910241005740",
+    MEMBRE:       "1478386520766546156",
   },
 };
 

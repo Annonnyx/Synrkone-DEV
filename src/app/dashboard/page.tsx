@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
   Bot,
   Plus,
@@ -113,6 +115,8 @@ interface FileEntry {
 }
 
 export default function DashboardPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [bot, setBot] = useState<BotData | null>(null);
   const [modules, setModules] = useState<ModuleInstance[]>([]);
   const [availableModules, setAvailableModules] = useState<ModuleDef[]>([]);
@@ -133,10 +137,11 @@ export default function DashboardPage() {
   const totalKrUsed = bot?.usedKr || 0;
   const maxKr = bot?.maxKr || 30;
 
-  // Charger les données au montage
+  // Vérifier l'auth et charger les données au montage
   useEffect(() => {
-    loadData();
-  }, []);
+    if (status === "unauthenticated") router.push("/login");
+    if (status === "authenticated") loadData();
+  }, [status, router]);
 
   const loadData = async () => {
     setLoading(true);
@@ -505,9 +510,13 @@ export default function DashboardPage() {
                 </ul>
               </div>
 
-              <button className="btn-violet w-full rounded-xl px-4 py-3 text-sm font-semibold text-white">
+              <button
+                onClick={saveBot}
+                disabled={saving || !botName.trim()}
+                className="btn-violet w-full rounded-xl px-4 py-3 text-sm font-semibold text-white"
+              >
                 <Zap className="mr-2 inline h-4 w-4" />
-                {hosting === "synkrone" ? "Créer et héberger le bot" : "Créer et recevoir le code"}
+                {saving ? "Création en cours..." : hosting === "synkrone" ? "Créer et héberger le bot" : "Créer et recevoir le code"}
               </button>
             </div>
           </div>
@@ -827,25 +836,20 @@ export default function DashboardPage() {
                 <Server className="h-4 w-4 text-violet-400" />
                 Serveurs connectés
               </h3>
-              <div className="space-y-2">
-                {["Serveur Principal", "Communauté FR", "Test Bot"].map((server, i) => (
-                  <div key={server} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-lg bg-violet-500/10 text-violet-400 flex items-center justify-center text-xs font-bold">
-                        {server[0]}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-white">{server}</p>
-                        <p className="text-[11px] text-white/60">{[320, 1850, 5][i]} membres</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="h-2 w-2 rounded-full bg-success" />
-                      <span className="text-[11px] text-emerald-400">En ligne</span>
-                    </div>
+              {(stats?.servers || 0) === 0 ? (
+                <div className="py-6 text-center">
+                  <Server className="mx-auto h-8 w-8 text-white/20" />
+                  <p className="mt-2 text-sm text-white/60">Aucun serveur connecté.</p>
+                  <p className="text-xs text-white/40 mt-1">Invitez votre bot sur un serveur Discord pour voir les stats.</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-center">
+                    <p className="text-2xl font-bold text-white">{stats?.servers}</p>
+                    <p className="text-xs text-white/60">serveurs connectés</p>
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

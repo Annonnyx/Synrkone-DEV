@@ -34,6 +34,10 @@
   --color-muted: var(--text-secondary);
   --color-violet: var(--violet);
   --color-amber: var(--amber);
+  --color-primary: var(--violet);
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-premium: #f59e0b;
   --font-sans: var(--font-geist-sans);
   --font-display: var(--font-syne);
 }

@@ -19,7 +19,10 @@ export async function GET() {
     // Admin/Owner voient toutes les boxes
     if (hasRole(userRole, "ADMIN")) {
       const boxes = await prisma.box.findMany({
-        include: { user: { select: { id: true, name: true, email: true, image: true } } },
+        include: {
+          user: { select: { id: true, name: true, email: true, image: true } },
+          files: true,
+        },
         orderBy: { createdAt: "desc" },
       });
       return NextResponse.json(boxes);
@@ -29,7 +32,10 @@ export async function GET() {
     if (hasRole(userRole, "DEV")) {
       const box = await prisma.box.findUnique({
         where: { userId: session.user.id },
-        include: { user: { select: { id: true, name: true, email: true, image: true } } },
+        include: {
+          user: { select: { id: true, name: true, email: true, image: true } },
+          files: true,
+        },
       });
       return NextResponse.json(box ? [box] : []);
     }
@@ -55,7 +61,14 @@ export async function POST(request: Request) {
     const existing = await prisma.box.findUnique({ where: { userId: session.user.id } });
     if (existing) return NextResponse.json({ error: "Vous avez déjà une box" }, { status: 400 });
 
-    const body = await request.json();
+    // Gérer le body vide (le front peut appeler sans body)
+    let body: { name?: string } = {};
+    try {
+      body = await request.json();
+    } catch {
+      // Body vide ou invalide — on utilise les valeurs par défaut
+    }
+
     const name = body.name ?? `Box de ${session.user.name ?? "Utilisateur"}`;
 
     const boxPath = path.join(STORAGE_ROOT, "boxes", session.user.id);
