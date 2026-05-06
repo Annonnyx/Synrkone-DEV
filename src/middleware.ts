@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/favicon") ||
     pathname === "/"
   ) {
-    console.log("✅Middleware: route excluded", { pathname });
+    console.log("✅ Middleware: route excluded", { pathname });
     return NextResponse.next();
   }
 
