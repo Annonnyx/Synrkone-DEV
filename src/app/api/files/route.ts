@@ -29,6 +29,33 @@ export async function GET(request: Request) {
       return NextResponse.json(files.map((f: { sizeBytes: bigint; [key: string]: unknown }) => ({ ...f, sizeBytes: Number(f.sizeBytes) })));
     }
 
+    // Fichiers de box — accessibles selon permissions
+    if (location === "BOX" && boxId) {
+      // Vérifier que la box existe
+      const box = await prisma.box.findUnique({
+        where: { id: boxId },
+        include: { user: true }
+      });
+      
+      if (!box) {
+        return NextResponse.json({ error: "Box introuvable" }, { status: 404 });
+      }
+
+      // Vérifier les permissions
+      const isOwner = box.userId === session.user.id;
+      const isAdmin = hasRole(userRole, "ADMIN");
+      
+      if (!isOwner && !isAdmin) {
+        return NextResponse.json({ error: "Accès non autorisé à cette box" }, { status: 403 });
+      }
+
+      const files = await prisma.file.findMany({
+        where: { location: "BOX", boxId },
+        orderBy: { createdAt: "desc" },
+      });
+      return NextResponse.json(files.map((f: { sizeBytes: bigint; [key: string]: unknown }) => ({ ...f, sizeBytes: Number(f.sizeBytes) })));
+    }
+
     // Fichiers d'une box spécifique
     if (location === "BOX" && boxId) {
       const box = await prisma.box.findUnique({ where: { id: boxId } });

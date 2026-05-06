@@ -28,7 +28,7 @@ export async function GET() {
       return NextResponse.json(boxes);
     }
 
-    // Dev voit uniquement sa box
+    // Dev voit sa box
     if (hasRole(userRole, "DEV")) {
       const box = await prisma.box.findUnique({
         where: { userId: session.user.id },
@@ -47,6 +47,20 @@ export async function GET() {
   }
 }
 
+// Fonction pour obtenir les limites de boxes par rôle
+function getBoxLimits(role: string) {
+  switch (role) {
+    case "DEV":
+      return { maxBoxes: 1, defaultSizeMb: 500, maxSizeMb: 1000 };
+    case "ADMIN":
+      return { maxBoxes: 2, defaultSizeMb: 1000, maxSizeMb: 5000 };
+    case "OWNER":
+      return { maxBoxes: 999, defaultSizeMb: 2000, maxSizeMb: 10000 };
+    default:
+      return { maxBoxes: 0, defaultSizeMb: 0, maxSizeMb: 0 };
+  }
+}
+
 // POST /api/boxes — Créer une box (dev+ pour soi-même, admin+ pour n'importe qui)
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
@@ -54,7 +68,7 @@ export async function POST(request: Request) {
 
   try {
     // Gérer le body
-    let body: { name?: string; userId?: string } = {};
+    let body: { name?: string; userId?: string; maxSizeMb?: number } = {};
     try {
       body = await request.json();
     } catch {
@@ -63,9 +77,10 @@ export async function POST(request: Request) {
 
     let targetUserId = session.user.id;
     let isAdminCreating = false;
+    const userRole = session.user.role;
 
     // Admin peut créer une box pour un autre utilisateur
-    if (hasRole(session.user.role, "ADMIN") && body.userId) {
+    if (hasRole(userRole, "ADMIN") && body.userId) {
       targetUserId = body.userId;
       isAdminCreating = true;
       
@@ -74,20 +89,38 @@ export async function POST(request: Request) {
       if (!targetUser) {
         return NextResponse.json({ error: "Utilisateur cible introuvable" }, { status: 404 });
       }
-    } else if (!hasRole(session.user.role, "DEV")) {
+    } else if (!hasRole(userRole, "DEV")) {
       return NextResponse.json({ error: "Rôle DEV requis" }, { status: 403 });
     }
 
-    // Vérifier si l'utilisateur cible a déjà une box
-    const existing = await prisma.box.findUnique({ where: { userId: targetUserId } });
-    if (existing) {
+    // Vérifier les limites de boxes pour l'utilisateur cible
+    const targetUser = await prisma.user.findUnique({ where: { id: targetUserId } });
+    if (!targetUser) {
+      return NextResponse.json({ error: "Utilisateur cible introuvable" }, { status: 404 });
+    }
+
+    const limits = getBoxLimits(targetUser.role);
+    
+    // Compter les boxes existantes pour cet utilisateur
+    const existingBoxes = await prisma.box.count({ where: { userId: targetUserId } });
+    
+    if (existingBoxes >= limits.maxBoxes) {
       return NextResponse.json({ 
-        error: isAdminCreating ? "Cet utilisateur a déjà une box" : "Vous avez déjà une box" 
+        error: isAdminCreating 
+          ? `Cet utilisateur a atteint sa limite de ${limits.maxBoxes} box(s)` 
+          : `Vous avez atteint votre limite de ${limits.maxBoxes} box(s)` 
       }, { status: 400 });
     }
 
-    const targetUser = await prisma.user.findUnique({ where: { id: targetUserId } });
-    const name = body.name ?? `Box de ${targetUser?.name ?? "Utilisateur"}`;
+    // Vérifier la taille demandée
+    const requestedSize = body.maxSizeMb ?? limits.defaultSizeMb;
+    if (requestedSize > limits.maxSizeMb) {
+      return NextResponse.json({ 
+        error: `Taille maximale autorisée : ${limits.maxSizeMb} Mo` 
+      }, { status: 400 });
+    }
+
+    const name = body.name ?? `Box de ${targetUser.name ?? "Utilisateur"}`;
 
     const boxPath = path.join(STORAGE_ROOT, "boxes", targetUserId);
     await fs.mkdir(boxPath, { recursive: true });
@@ -97,6 +130,7 @@ export async function POST(request: Request) {
         name,
         path: boxPath,
         userId: targetUserId,
+        maxSizeMb: requestedSize,
       },
       include: {
         user: { select: { id: true, name: true, email: true, image: true } },
@@ -106,6 +140,69 @@ export async function POST(request: Request) {
     return NextResponse.json(box, { status: 201 });
   } catch (error) {
     console.error("Erreur création box:", error);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  }
+}
+
+// PATCH /api/boxes — Modifier une box (taille, etc.) (ADMIN+ uniquement)
+export async function PATCH(request: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+
+  if (!hasRole(session.user.role, "ADMIN")) {
+    return NextResponse.json({ error: "Rôle ADMIN requis" }, { status: 403 });
+  }
+
+  try {
+    const { id, maxSizeMb } = await request.json();
+    
+    if (!id) {
+      return NextResponse.json({ error: "ID de box requis" }, { status: 400 });
+    }
+
+    const box = await prisma.box.findUnique({ where: { id } });
+    if (!box) return NextResponse.json({ error: "Box introuvable" }, { status: 404 });
+
+    // Vérifier les limites de taille pour le propriétaire de la box
+    const boxOwner = await prisma.user.findUnique({ where: { id: box.userId } });
+    if (!boxOwner) {
+      return NextResponse.json({ error: "Propriétaire introuvable" }, { status: 404 });
+    }
+
+    const limits = getBoxLimits(boxOwner.role);
+    
+    if (maxSizeMb && maxSizeMb > limits.maxSizeMb) {
+      return NextResponse.json({ 
+        error: `Taille maximale autorisée pour ce rôle : ${limits.maxSizeMb} Mo` 
+      }, { status: 400 });
+    }
+
+    // Vérifier l'espace utilisé actuel
+    const usedSpace = await prisma.file.aggregate({
+      where: { boxId: id },
+      _sum: { sizeBytes: true }
+    });
+
+    const usedSpaceMb = Number(usedSpace._sum.sizeBytes || 0) / (1024 * 1024);
+    
+    if (maxSizeMb && maxSizeMb < usedSpaceMb) {
+      return NextResponse.json({ 
+        error: `Impossible de réduire la taille en dessous de l'espace utilisé (${usedSpaceMb.toFixed(1)} Mo)` 
+      }, { status: 400 });
+    }
+
+    const updatedBox = await prisma.box.update({
+      where: { id },
+      data: { maxSizeMb },
+      include: {
+        user: { select: { id: true, name: true, email: true, image: true } },
+        files: true,
+      },
+    });
+
+    return NextResponse.json(updatedBox);
+  } catch (error) {
+    console.error("Erreur modification box:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }

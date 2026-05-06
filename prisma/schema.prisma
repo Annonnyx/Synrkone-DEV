@@ -85,6 +85,9 @@ model User {
   
   // Bots créés par l'utilisateur
   bots          Bot[]
+  
+  // Boxes partagées avec l'utilisateur
+  sharedBoxes BoxShare[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -108,6 +111,9 @@ model Box {
 
   // Fichiers dans la box
   files File[]
+
+  // Partages de la box avec d'autres utilisateurs
+  shares BoxShare[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -145,6 +151,28 @@ model File {
   updatedAt DateTime @updatedAt
 
   @@map("files")
+}
+
+// =====================
+// BOX SHARES (Partage de boxes)
+// =====================
+
+model BoxShare {
+  id     String @id @default(cuid())
+  boxId  String
+  userId String
+  
+  box Box @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Permissions
+  canRead  Boolean @default(true)   // Peut voir et télécharger
+  canWrite Boolean @default(false) // Peut uploader/modifier/supprimer
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([boxId, userId])
+  @@map("box_shares")
 }
 
 // =====================
