@@ -56,6 +56,10 @@ export default function BoxesPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedBox, setSelectedBox] = useState<Box | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [creatingForUser, setCreatingForUser] = useState(false);
+  const [targetUserId, setTargetUserId] = useState("");
+  const [targetUserName, setTargetUserName] = useState("");
+  const [allUsers, setAllUsers] = useState<Array<{id: string, name: string, email: string}>>([]);
 
   // Vérifier les permissions (DEV+)
   useEffect(() => {
@@ -86,16 +90,48 @@ export default function BoxesPage() {
     }
   };
 
+  const loadAllUsers = async () => {
+    if (!["ADMIN", "OWNER"].includes(session?.user?.role || "")) return;
+    
+    try {
+      // Charger tous les utilisateurs sans box
+      const res = await fetch("/api/users?withoutBox=true");
+      if (res.ok) {
+        const data = await res.json();
+        setAllUsers(data);
+      }
+    } catch (err) {
+      console.error("Erreur chargement utilisateurs:", err);
+    }
+  };
+
+  // Charger les utilisateurs quand le modal s'ouvre pour les admins
+  useEffect(() => {
+    if (showCreateModal && ["ADMIN", "OWNER"].includes(session?.user?.role || "")) {
+      loadAllUsers();
+    }
+  }, [showCreateModal, session]);
+
   const createBox = async (name: string) => {
     try {
+      const body: any = { name };
+      
+      // Si admin crée pour un autre utilisateur
+      if (creatingForUser && targetUserId) {
+        body.userId = targetUserId;
+      }
+
       const res = await fetch("/api/boxes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify(body),
       });
 
       if (res.ok) {
         setShowCreateModal(false);
+        setCreatingForUser(false);
+        setTargetUserId("");
+        setTargetUserName("");
         loadBoxes();
       } else {
         const error = await res.json();
@@ -148,7 +184,7 @@ export default function BoxesPage() {
 
   const canManageBox = (box: Box) => {
     const userRole = session?.user?.role;
-    return userRole === "OWNER" || box.userId === session?.user?.id;
+    return userRole === "OWNER" || userRole === "ADMIN" || box.userId === session?.user?.id;
   };
 
   if (loading) {
@@ -167,20 +203,36 @@ export default function BoxesPage() {
       {/* Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-white">Boxes Personnelles</h1>
+          <h1 className="text-3xl font-semibold text-white">
+            {["ADMIN", "OWNER"].includes(session?.user?.role || "") ? "Gestion des Boxes" : "Ma Box"}
+          </h1>
           <p className="mt-1 text-sm text-white/50">
-            Stockage personnel pour vos fichiers de développement.
+            {["ADMIN", "OWNER"].includes(session?.user?.role || "") 
+              ? "Gérez toutes les boxes du système et créez-en pour les utilisateurs."
+              : "Stockage personnel pour vos fichiers de développement."
+            }
           </p>
         </div>
-        {["DEV", "ADMIN", "OWNER"].includes(session?.user?.role || "") && (
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="btn-violet rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
-          >
-            <Plus className="mr-2 inline h-4 w-4" />
-            Créer ma box
-          </button>
-        )}
+        <div className="flex gap-2">
+          {["ADMIN", "OWNER"].includes(session?.user?.role || "") && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="btn-violet rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
+            >
+              <Plus className="mr-2 inline h-4 w-4" />
+              Créer une box
+            </button>
+          )}
+          {["DEV"].includes(session?.user?.role || "") && boxes.length === 0 && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="btn-violet rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
+            >
+              <Plus className="mr-2 inline h-4 w-4" />
+              Créer ma box
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Stats */}
@@ -328,12 +380,77 @@ export default function BoxesPage() {
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="card max-w-md w-full mx-4 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Créer ma box</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">
+              {creatingForUser ? "Créer une box pour un utilisateur" : "Créer ma box"}
+            </h3>
             <p className="text-sm text-white/60 mb-6">
-              Votre box personnelle vous donnera accès à {session?.user?.role === "DEV" ? "500 Mo" : "1 Go"} 
-              de stockage pour vos fichiers de développement.
+              {creatingForUser 
+                ? "Créez une box personnelle pour un utilisateur du système."
+                : `Votre box personnelle vous donnera accès à ${session?.user?.role === "DEV" ? "500 Mo" : "1 Go"} 
+                   de stockage pour vos fichiers de développement.`
+              }
             </p>
             <div className="space-y-4">
+              {/* Admin option to create for other users */}
+              {["ADMIN", "OWNER"].includes(session?.user?.role || "") && (
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-white">
+                    Créer pour
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setCreatingForUser(false);
+                        setTargetUserId("");
+                        setTargetUserName("");
+                      }}
+                      className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                        !creatingForUser
+                          ? "bg-violet-500/20 border border-violet-500/50 text-violet-400"
+                          : "border border-white/10 bg-white/5 text-white/60 hover:border-white/20"
+                      }`}
+                    >
+                      Moi-même
+                    </button>
+                    <button
+                      onClick={() => setCreatingForUser(true)}
+                      className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                        creatingForUser
+                          ? "bg-violet-500/20 border border-violet-500/50 text-violet-400"
+                          : "border border-white/10 bg-white/5 text-white/60 hover:border-white/20"
+                      }`}
+                    >
+                      Un utilisateur
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* User selection for admins */}
+              {creatingForUser && ["ADMIN", "OWNER"].includes(session?.user?.role || "") && (
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-white">
+                    Sélectionner l'utilisateur
+                  </label>
+                  <select
+                    value={targetUserId}
+                    onChange={(e) => {
+                      const user = allUsers.find(u => u.id === e.target.value);
+                      setTargetUserId(e.target.value);
+                      setTargetUserName(user?.name || "");
+                    }}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all"
+                  >
+                    <option value="">Choisir un utilisateur...</option>
+                    {allUsers.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.name} ({user.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-white">
                   Nom de la box
@@ -341,13 +458,18 @@ export default function BoxesPage() {
                 <input
                   type="text"
                   id="boxName"
-                  placeholder="Ma Box Personnelle"
+                  placeholder={creatingForUser ? `Box de ${targetUserName || "l'utilisateur"}` : "Ma Box Personnelle"}
                   className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/60/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all"
                 />
               </div>
               <div className="flex gap-3">
                 <button
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setCreatingForUser(false);
+                    setTargetUserId("");
+                    setTargetUserName("");
+                  }}
                   className="flex-1 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-medium text-white/60 hover:bg-white/5 hover:text-white transition-all"
                 >
                   Annuler
@@ -355,9 +477,14 @@ export default function BoxesPage() {
                 <button
                   onClick={() => {
                     const input = document.getElementById("boxName") as HTMLInputElement;
-                    createBox(input.value || `Box de ${session?.user?.name}`);
+                    const boxName = input.value || (creatingForUser 
+                      ? `Box de ${targetUserName || "l'utilisateur"}`
+                      : `Box de ${session?.user?.name}`
+                    );
+                    createBox(boxName);
                   }}
-                  className="flex-1 btn-violet rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
+                  disabled={creatingForUser && !targetUserId}
+                  className="flex-1 btn-violet rounded-xl px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Créer
                 </button>

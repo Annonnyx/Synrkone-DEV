@@ -47,38 +47,59 @@ export async function GET() {
   }
 }
 
-// POST /api/boxes — Créer une box (dev+ uniquement, une par utilisateur)
+// POST /api/boxes — Créer une box (dev+ pour soi-même, admin+ pour n'importe qui)
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
-  if (!hasRole(session.user.role, "DEV")) {
-    return NextResponse.json({ error: "Rôle DEV requis" }, { status: 403 });
-  }
-
   try {
-    // Vérifier si l'utilisateur a déjà une box
-    const existing = await prisma.box.findUnique({ where: { userId: session.user.id } });
-    if (existing) return NextResponse.json({ error: "Vous avez déjà une box" }, { status: 400 });
-
-    // Gérer le body vide (le front peut appeler sans body)
-    let body: { name?: string } = {};
+    // Gérer le body
+    let body: { name?: string; userId?: string } = {};
     try {
       body = await request.json();
     } catch {
       // Body vide ou invalide — on utilise les valeurs par défaut
     }
 
-    const name = body.name ?? `Box de ${session.user.name ?? "Utilisateur"}`;
+    let targetUserId = session.user.id;
+    let isAdminCreating = false;
 
-    const boxPath = path.join(STORAGE_ROOT, "boxes", session.user.id);
+    // Admin peut créer une box pour un autre utilisateur
+    if (hasRole(session.user.role, "ADMIN") && body.userId) {
+      targetUserId = body.userId;
+      isAdminCreating = true;
+      
+      // Vérifier que l'utilisateur cible existe
+      const targetUser = await prisma.user.findUnique({ where: { id: targetUserId } });
+      if (!targetUser) {
+        return NextResponse.json({ error: "Utilisateur cible introuvable" }, { status: 404 });
+      }
+    } else if (!hasRole(session.user.role, "DEV")) {
+      return NextResponse.json({ error: "Rôle DEV requis" }, { status: 403 });
+    }
+
+    // Vérifier si l'utilisateur cible a déjà une box
+    const existing = await prisma.box.findUnique({ where: { userId: targetUserId } });
+    if (existing) {
+      return NextResponse.json({ 
+        error: isAdminCreating ? "Cet utilisateur a déjà une box" : "Vous avez déjà une box" 
+      }, { status: 400 });
+    }
+
+    const targetUser = await prisma.user.findUnique({ where: { id: targetUserId } });
+    const name = body.name ?? `Box de ${targetUser?.name ?? "Utilisateur"}`;
+
+    const boxPath = path.join(STORAGE_ROOT, "boxes", targetUserId);
     await fs.mkdir(boxPath, { recursive: true });
 
     const box = await prisma.box.create({
       data: {
         name,
         path: boxPath,
-        userId: session.user.id,
+        userId: targetUserId,
+      },
+      include: {
+        user: { select: { id: true, name: true, email: true, image: true } },
       },
     });
 
@@ -89,13 +110,13 @@ export async function POST(request: Request) {
   }
 }
 
-// DELETE /api/boxes — Supprimer une box (OWNER uniquement)
+// DELETE /api/boxes — Supprimer une box (ADMIN+ pour n'importe qui, OWNER pour la sienne)
 export async function DELETE(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
-  if (!hasRole(session.user.role, "OWNER")) {
-    return NextResponse.json({ error: "Rôle OWNER requis" }, { status: 403 });
+  if (!hasRole(session.user.role, "ADMIN")) {
+    return NextResponse.json({ error: "Rôle ADMIN requis" }, { status: 403 });
   }
 
   try {
