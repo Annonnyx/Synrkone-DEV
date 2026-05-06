@@ -11,8 +11,10 @@ const ROLE_HIERARCHY: Record<string, number> = {
 
 // Routes protégées par rôle minimum
 const PROTECTED_ROUTES: Record<string, string> = {
-  "/dashboard/files": "USER",
-  "/dashboard/code": "DEV",
+  "/dashboard": "USER",
+  "/profile": "USER",
+  "/projects": "USER",
+  "/website-creator": "USER",
   "/my-box": "DEV",
   "/boxes": "ADMIN",
 };
@@ -60,8 +62,14 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/dashboard",
     "/dashboard/:path*",
+    "/profile",
+    "/projects",
+    "/website-creator",
+    "/my-box",
     "/my-box/:path*",
+    "/boxes",
     "/boxes/:path*",
   ],
 };

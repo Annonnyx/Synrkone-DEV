@@ -15,12 +15,16 @@ export const SYNKRONE_GUILD_ID = process.env.DISCORD_GUILD_ID ?? "";
  * Classés par priorité (le premier match gagne)
  */
 export const DISCORD_ROLE_MAP = [
-  { discordRoleId: "1368719335534887023", name: "Owner",       siteRole: "OWNER" as const },
-  { discordRoleId: "1368620965403299890", name: "ADMIN",       siteRole: "ADMIN" as const },
-  { discordRoleId: "1369430431212114002", name: "Dev",         siteRole: "DEV"   as const },
-  { discordRoleId: "1474871058166448280", name: "Apprenti-dev",siteRole: "DEV"   as const },
-  { discordRoleId: "1440840910241005740", name: "Partenaire",  siteRole: "USER"  as const },
-  { discordRoleId: "1478386520766546156", name: "Membre",      siteRole: "USER"  as const },
+  // Ordre = priorité (du plus haut au plus bas)
+  { discordRoleId: "1368719335534887023", name: "Owner",        siteRole: "OWNER" as const },
+  { discordRoleId: "1368620965403299890", name: "ADMIN",        siteRole: "ADMIN" as const },
+  { discordRoleId: "1500974364114423858", name: "Modérateur+",  siteRole: "ADMIN" as const },
+  { discordRoleId: "1500974295134896369", name: "Modérateur",   siteRole: "DEV"   as const },
+  { discordRoleId: "1369430431212114002", name: "Dev",          siteRole: "DEV"   as const },
+  { discordRoleId: "1474871058166448280", name: "Apprenti-dev", siteRole: "DEV"   as const },
+  { discordRoleId: "1437851473516957756", name: "Membre+",      siteRole: "USER"  as const },
+  { discordRoleId: "1440840910241005740", name: "Partenaire",   siteRole: "USER"  as const },
+  { discordRoleId: "1478386520766546156", name: "Membre",       siteRole: "USER"  as const },
 ];
 
 /**
