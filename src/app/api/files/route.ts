@@ -26,7 +26,7 @@ export async function GET(request: Request) {
         where: { location: "PROJECT" },
         orderBy: { createdAt: "desc" },
       });
-      return NextResponse.json(files.map(f => ({ ...f, sizeBytes: Number(f.sizeBytes) })));
+      return NextResponse.json(files.map((f: { sizeBytes: bigint; [key: string]: unknown }) => ({ ...f, sizeBytes: Number(f.sizeBytes) })));
     }
 
     // Fichiers d'une box spécifique
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
         where: { boxId, location: "BOX" },
         orderBy: { createdAt: "desc" },
       });
-      return NextResponse.json(files.map(f => ({ ...f, sizeBytes: Number(f.sizeBytes) })));
+      return NextResponse.json(files.map((f: { sizeBytes: bigint; [key: string]: unknown }) => ({ ...f, sizeBytes: Number(f.sizeBytes) })));
     }
 
     // Fichiers racine du VPS — admin/owner uniquement
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
         where: { location: "VPS_ROOT" },
         orderBy: { createdAt: "desc" },
       });
-      return NextResponse.json(files.map(f => ({ ...f, sizeBytes: Number(f.sizeBytes) })));
+      return NextResponse.json(files.map((f: { sizeBytes: bigint; [key: string]: unknown }) => ({ ...f, sizeBytes: Number(f.sizeBytes) })));
     }
 
     return NextResponse.json({ error: "Location invalide" }, { status: 400 });
@@ -80,6 +80,11 @@ export async function POST(request: Request) {
     const boxId = formData.get("boxId") as string | null;
 
     if (!file) return NextResponse.json({ error: "Aucun fichier" }, { status: 400 });
+
+    // Les utilisateurs de base ne peuvent pas uploader
+    if (!hasRole(userRole, "DEV")) {
+      return NextResponse.json({ error: "Rôle DEV requis pour importer des fichiers" }, { status: 403 });
+    }
 
     // Vérification des permissions
     if (location === "BOX" && !hasRole(userRole, "DEV")) {

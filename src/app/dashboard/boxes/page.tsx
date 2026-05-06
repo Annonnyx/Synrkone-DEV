@@ -310,7 +310,7 @@ export default function BoxesPage() {
                   </button>
                   {canManage && (
                     <button
-                      onClick={() => router.push(`/dashboard/boxes/${box.id}/files`)}
+                      onClick={() => setSelectedBox(box)}
                       className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-white/60 hover:bg-white/10 hover:text-white transition-colors"
                     >
                       <Upload className="h-3 w-3" />

@@ -403,7 +403,7 @@ export default function DashboardPage() {
                   Préfixe de commande
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {["!", "?", "&", ".", ",", "-", "+", "~", "$", "%", "#", "@", ";", ":", "*"].map((p) => (
+                  {["!", "?", "&", ".", ",", "-", "+", "~", "$", "%", ";", ":", "*"].map((p) => (
                     <button
                       key={p}
                       onClick={() => setPrefix(p)}
@@ -945,16 +945,18 @@ export default function DashboardPage() {
               >
                 <RefreshCw className={`h-4 w-4 ${loadingFiles ? "animate-spin" : ""}`} />
               </button>
-              <label className="btn-violet cursor-pointer rounded-xl px-4 py-2 text-sm font-semibold text-white flex items-center gap-2">
-                <Upload className="h-4 w-4" />
-                {uploadingFile ? "Envoi en cours..." : "Importer un fichier"}
-                <input
-                  type="file"
-                  className="hidden"
-                  onChange={handleUpload}
-                  disabled={uploadingFile}
-                />
-              </label>
+              {["DEV", "ADMIN", "OWNER"].includes(session?.user?.role || "") && (
+                <label className="btn-violet cursor-pointer rounded-xl px-4 py-2 text-sm font-semibold text-white flex items-center gap-2">
+                  <Upload className="h-4 w-4" />
+                  {uploadingFile ? "Envoi en cours..." : "Importer un fichier"}
+                  <input
+                    type="file"
+                    className="hidden"
+                    onChange={handleUpload}
+                    disabled={uploadingFile}
+                  />
+                </label>
+              )}
             </div>
           </div>
 
