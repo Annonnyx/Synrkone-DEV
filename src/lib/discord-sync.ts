@@ -68,17 +68,20 @@ export async function getGuildMemberRoles(discordUserId: string): Promise<string
       { headers: { Authorization: `Bot ${botToken}` } }
     );
 
+    console.log("🔍 Discord API response", { status: res.status, ok: res.ok, guildId: SYNKRONE_GUILD_ID, userId: discordUserId });
+
     if (!res.ok) {
+      const errorText = await res.text();
+      console.error("❌ Discord member API error:", res.status, errorText);
       if (res.status === 404) {
         // L'utilisateur n'est pas sur le serveur
         return [];
       }
-      console.error("❌ Discord member API error:", res.status, await res.text());
       return [];
     }
 
     const member: DiscordGuildMember = await res.json();
-    console.log("🔍 Discord member roles", { discordUserId, roles: member.roles, nick: member.nick });
+    console.log("🔍 Discord member roles", { discordUserId, roles: member.roles, nick: member.nick, rolesCount: member.roles.length });
     return member.roles;
   } catch (error) {
     console.error("❌ Failed to get member roles:", error);
