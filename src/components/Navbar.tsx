@@ -24,11 +24,11 @@ export default function Navbar() {
   const roleLinks = [];
 
   if (userRole === "DEV" || userRole === "ADMIN" || userRole === "OWNER") {
-    roleLinks.push({ href: "/my-box", label: "Ma Box", icon: HardDrive });
+    roleLinks.push({ href: "/dashboard/boxes", label: "Ma Box", icon: HardDrive });
   }
 
   if (userRole === "ADMIN" || userRole === "OWNER") {
-    roleLinks.push({ href: "/boxes", label: "Boxes", icon: Shield });
+    roleLinks.push({ href: "/dashboard/boxes", label: "Boxes", icon: Shield });
   }
 
   return (

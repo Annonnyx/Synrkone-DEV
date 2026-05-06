@@ -26,7 +26,7 @@ export async function GET(request: Request) {
         where: { location: "PROJECT" },
         orderBy: { createdAt: "desc" },
       });
-      return NextResponse.json(files);
+      return NextResponse.json(files.map(f => ({ ...f, sizeBytes: Number(f.sizeBytes) })));
     }
 
     // Fichiers d'une box spécifique
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
         where: { boxId, location: "BOX" },
         orderBy: { createdAt: "desc" },
       });
-      return NextResponse.json(files);
+      return NextResponse.json(files.map(f => ({ ...f, sizeBytes: Number(f.sizeBytes) })));
     }
 
     // Fichiers racine du VPS — admin/owner uniquement
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
         where: { location: "VPS_ROOT" },
         orderBy: { createdAt: "desc" },
       });
-      return NextResponse.json(files);
+      return NextResponse.json(files.map(f => ({ ...f, sizeBytes: Number(f.sizeBytes) })));
     }
 
     return NextResponse.json({ error: "Location invalide" }, { status: 400 });
@@ -140,7 +140,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(dbFile, { status: 201 });
+    return NextResponse.json({ ...dbFile, sizeBytes: Number(dbFile.sizeBytes) }, { status: 201 });
   } catch (error) {
     console.error("Erreur upload:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

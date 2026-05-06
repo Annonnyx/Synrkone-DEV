@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import fs from "fs/promises";
+import path from "path";
+
+const STORAGE_ROOT = process.env.VPS_STORAGE_PATH ?? "/var/lib/synkrone/storage";
+const MODULE_TEMPLATES = process.env.MODULE_TEMPLATES_PATH ?? "/var/lib/synkrone/templates/modules";
 
 // GET /api/bot/modules — Récupère les modules du bot
 export async function GET() {
@@ -80,6 +85,62 @@ export async function PATCH(request: Request) {
       where: { id: bot.id },
       data: { usedKr: newUsed },
     });
+
+    // Copier/supprimer les fichiers du module dans le dossier du bot
+    try {
+      const botDir = path.join(STORAGE_ROOT, "bots", bot.id);
+      const commandsDir = path.join(botDir, "commands");
+      const modulesDir = path.join(botDir, "modules");
+      const moduleTemplateDir = path.join(MODULE_TEMPLATES, instance.module.moduleId);
+
+      if (enabled) {
+        // Copier les fichiers du module vers le dossier commands/ du bot
+        try {
+          const moduleFiles = await fs.readdir(moduleTemplateDir);
+          for (const file of moduleFiles) {
+            const src = path.join(moduleTemplateDir, file);
+            const stat = await fs.stat(src);
+            if (stat.isFile() && file.endsWith(".js")) {
+              // Les fichiers de commandes vont dans commands/
+              await fs.copyFile(src, path.join(commandsDir, file));
+            } else if (stat.isDirectory()) {
+              // Les sous-dossiers (events, etc.) vont dans modules/
+              const destDir = path.join(modulesDir, file);
+              await fs.mkdir(destDir, { recursive: true });
+              const subFiles = await fs.readdir(src);
+              for (const subFile of subFiles) {
+                const subSrc = path.join(src, subFile);
+                const subStat = await fs.stat(subSrc);
+                if (subStat.isFile()) {
+                  await fs.copyFile(subSrc, path.join(destDir, subFile));
+                }
+              }
+            }
+          }
+        } catch {
+          // Pas de template pour ce module, les commandes seront vides
+        }
+      } else {
+        // Supprimer les fichiers du module du dossier commands/
+        try {
+          const moduleFiles = await fs.readdir(moduleTemplateDir);
+          for (const file of moduleFiles) {
+            if (file.endsWith(".js")) {
+              const destFile = path.join(commandsDir, file);
+              try {
+                await fs.unlink(destFile);
+              } catch {
+                // Fichier déjà absent
+              }
+            }
+          }
+        } catch {
+          // Pas de template, rien à supprimer
+        }
+      }
+    } catch (fsError) {
+      console.error("Erreur copie module (non bloquant):", fsError);
+    }
 
     return NextResponse.json(updated);
   } catch (error) {

@@ -211,6 +211,8 @@ model Bot {
   token       String?  // Encrypted token storage
   hosting     String   @default("synkrone") // "synkrone" | "self"
   status      String   @default("offline") // "online" | "offline" | "error"
+  prefix      String?  // Préfixe choisi par l'utilisateur (!, ?, &, etc.)
+  useSlashCommands Boolean @default(false) // /commandes (premium uniquement)
   
   // Krônes / Points system
   maxKr       Int      @default(30) // Points maximum selon le plan

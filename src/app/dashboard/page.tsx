@@ -127,6 +127,8 @@ export default function DashboardPage() {
   
   const [botName, setBotName] = useState("");
   const [token, setToken] = useState("");
+  const [prefix, setPrefix] = useState("!");
+  const [useSlashCommands, setUseSlashCommands] = useState(false);
   const [step, setStep] = useState<DashboardStep>("setup");
   const [files, setFiles] = useState<FileEntry[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
@@ -157,6 +159,8 @@ export default function DashboardPage() {
           setModules(botData.modules || []);
           setStats(botData.stats || null);
           setHosting(botData.hosting as HostingOption);
+          setPrefix(botData.prefix || "!");
+          setUseSlashCommands(botData.useSlashCommands || false);
         }
       }
 
@@ -203,7 +207,7 @@ export default function DashboardPage() {
       const res = await fetch("/api/bot", {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: botName, token, hosting }),
+        body: JSON.stringify({ name: botName, token, hosting, prefix, useSlashCommands }),
       });
 
       if (res.ok) {
@@ -391,6 +395,65 @@ export default function DashboardPage() {
                     <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showTokenGuide ? "rotate-180" : ""}`} />
                   </button>
                 </div>
+              </div>
+
+              {/* Prefix selection */}
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-white">
+                  Préfixe de commande
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {["!", "?", "&", ".", ",", "-", "+", "~", "$", "%", "#", "@", ";", ":", "*"].map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPrefix(p)}
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl border text-lg font-bold transition-all ${
+                        prefix === p
+                          ? "border-violet-500/50 bg-violet-500/10 text-violet-400"
+                          : "border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:text-white"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-white/50">
+                  Les commandes seront accessibles via <code className="text-violet-400">{prefix}commande</code>
+                </p>
+              </div>
+
+              {/* Slash commands toggle */}
+              <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-medium text-white flex items-center gap-2">
+                      <Terminal className="h-4 w-4 text-violet-400" />
+                      /Commandes Discord
+                    </h3>
+                    <p className="text-xs text-white/50 mt-1">
+                      Active les slash commands natives de Discord
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setUseSlashCommands(!useSlashCommands)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      useSlashCommands ? "bg-violet-600" : "bg-white/10"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        useSlashCommands ? "translate-x-6" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+                {useSlashCommands && (
+                  <div className="mt-3 rounded-lg bg-amber-500/10 border border-amber-500/20 p-2.5">
+                    <p className="text-xs text-amber-200/80">
+                      Option réservée aux offres payantes. Les /commandes nécessitent un plan Premium.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Token Guide Accordion */}
