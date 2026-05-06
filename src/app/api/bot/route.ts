@@ -5,8 +5,16 @@ import { prisma } from "@/lib/prisma";
 import fs from "fs/promises";
 import path from "path";
 
-const STORAGE_ROOT = process.env.VPS_STORAGE_PATH ?? "/var/lib/synkrone/storage";
-const BOT_TEMPLATES = process.env.BOT_TEMPLATES_PATH ?? "/var/lib/synkrone/templates/bot";
+const STORAGE_ROOT = process.env.VPS_STORAGE_PATH ?? "/Partage/Synkrone";
+const BOT_TEMPLATES = process.env.BOT_TEMPLATES_PATH ?? "/Partage/Synkrone/templates/bot";
+
+function sanitizeDirName(name: string): string {
+  return name
+    .trim()
+    .replace(/[^a-zA-Z0-9\-_]/g, "_")
+    .replace(/_+/g, "_")
+    .slice(0, 50);
+}
 
 function generateIndexJs(botName: string): string {
   return [
@@ -181,8 +189,10 @@ export async function POST(request: Request) {
     }
 
     // Créer l'architecture du bot sur le VPS
+    // Structure: /Partage/Synkrone/{userId}/{projectName}/
     try {
-      const botDir = path.join(STORAGE_ROOT, "bots", bot.id);
+      const userDir = path.join(STORAGE_ROOT, session.user.id);
+      const botDir = path.join(userDir, sanitizeDirName(name));
       const commandsDir = path.join(botDir, "commands");
       const modulesDir = path.join(botDir, "modules");
       const eventsDir = path.join(botDir, "events");

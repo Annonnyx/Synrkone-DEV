@@ -6,7 +6,7 @@ import { hasRole } from "@/lib/auth-guard";
 import fs from "fs/promises";
 import path from "path";
 
-const STORAGE_ROOT = process.env.VPS_STORAGE_PATH ?? "/var/lib/synkrone/storage";
+const STORAGE_ROOT = process.env.VPS_STORAGE_PATH ?? "/Partage/Synkrone";
 
 // GET /api/boxes — Liste les boxes (la sienne pour dev+, toutes pour admin+)
 export async function GET() {

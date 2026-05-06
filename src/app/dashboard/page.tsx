@@ -139,6 +139,7 @@ export default function DashboardPage() {
   const [showToken, setShowToken] = useState(false);
   const [hosting, setHosting] = useState<HostingOption>("synkrone");
   const [showTokenGuide, setShowTokenGuide] = useState(false);
+  const [botActionCooldown, setBotActionCooldown] = useState(false);
 
   const totalKrUsed = bot?.usedKr || 0;
   const maxKr = bot?.maxKr || 30;
@@ -148,6 +149,13 @@ export default function DashboardPage() {
     if (status === "unauthenticated") router.push("/login");
     if (status === "authenticated") loadData();
   }, [status, router]);
+
+  // Redirection automatique pour le step "boxes"
+  useEffect(() => {
+    if (step === "boxes") {
+      router.push("/dashboard/boxes");
+    }
+  }, [step, router]);
 
   const loadData = async () => {
     setLoading(true);
@@ -230,6 +238,12 @@ export default function DashboardPage() {
   };
 
   const controlBot = async (action: "start" | "stop" | "restart") => {
+    if (botActionCooldown) {
+      alert("Veuillez attendre 30 secondes avant d'effectuer une nouvelle action.");
+      return;
+    }
+
+    setBotActionCooldown(true);
     try {
       const res = await fetch("/api/bot/control", {
         method: "POST",
@@ -247,6 +261,9 @@ export default function DashboardPage() {
       }
     } catch (err) {
       console.error(`Erreur ${action} bot:`, err);
+    } finally {
+      // Cooldown de 30s
+      setTimeout(() => setBotActionCooldown(false), 30000);
     }
   };
 
@@ -818,26 +835,29 @@ export default function DashboardPage() {
                 {bot.status === "offline" ? (
                   <button
                     onClick={() => controlBot("start")}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 text-sm font-medium text-emerald-400 hover:bg-emerald-500/20 transition-all"
+                    disabled={botActionCooldown}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 text-sm font-medium text-emerald-400 hover:bg-emerald-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Play className="h-4 w-4" />
-                    Démarrer
+                    {botActionCooldown ? "Patientez..." : "Démarrer"}
                   </button>
                 ) : (
                   <button
                     onClick={() => controlBot("stop")}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20 transition-all"
+                    disabled={botActionCooldown}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Pause className="h-4 w-4" />
-                    Arrêter
+                    {botActionCooldown ? "Patientez..." : "Arrêter"}
                   </button>
                 )}
                 <button
                   onClick={() => controlBot("restart")}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-violet-500/10 border border-violet-500/20 px-4 py-2 text-sm font-medium text-violet-400 hover:bg-violet-500/20 transition-all"
+                  disabled={botActionCooldown}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-violet-500/10 border border-violet-500/20 px-4 py-2 text-sm font-medium text-violet-400 hover:bg-violet-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <RotateCcw className="h-4 w-4" />
-                  Redémarrer
+                  {botActionCooldown ? "Patientez..." : "Redémarrer"}
                 </button>
                 <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
                   bot.status === "online" ? "bg-emerald-500/10 text-emerald-400" :
@@ -1081,9 +1101,9 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
-      ) : step === "boxes" ? (
-        router.push('/dashboard/boxes')
       ) : null}
     </div>
   );
 }
+
+
