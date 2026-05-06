@@ -27,10 +27,6 @@ export default function Navbar() {
     roleLinks.push({ href: "/dashboard/boxes", label: "Ma Box", icon: HardDrive });
   }
 
-  if (userRole === "ADMIN" || userRole === "OWNER") {
-    roleLinks.push({ href: "/dashboard/boxes/admin", label: "Boxes", icon: Shield });
-  }
-
   return (
     <nav className="fixed top-0 left-0 right-0 z-50">
       {/* Gradient line at top */}
