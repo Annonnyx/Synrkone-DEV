@@ -74,9 +74,6 @@ export default function BoxesPage() {
   const [targetUserName, setTargetUserName] = useState("");
   const [allUsers, setAllUsers] = useState<Array<{id: string, name: string, email: string}>>([]);
 
-  // Simplified states for working file manager
-  const [uploadingFile, setUploadingFile] = useState(false);
-
   // Vérifier les permissions (DEV+)
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
