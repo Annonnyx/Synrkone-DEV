@@ -82,8 +82,9 @@ export const authOptions: NextAuthOptions = {
         }
       }
 
-      // Si le token manque des infos Discord, les récupérer depuis la DB
-      if (token.sub && (!token.discordId || !token.role)) {
+      // Rafraîchir les infos utilisateur depuis la DB à chaque requête
+      // (le rôle peut avoir été mis à jour par Discord sync après le login)
+      if (token.sub) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.sub },
           select: { role: true, discordId: true, isOnSynkroneServer: true },

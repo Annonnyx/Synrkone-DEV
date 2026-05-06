@@ -38,6 +38,9 @@ import {
   FolderOpen,
   File,
   FileText,
+  Play,
+  Pause,
+  RotateCcw,
   FileImage,
   FileCode,
   Download,
@@ -223,6 +226,27 @@ export default function DashboardPage() {
       console.error("Erreur sauvegarde bot:", err);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const controlBot = async (action: "start" | "stop" | "restart") => {
+    try {
+      const res = await fetch("/api/bot/control", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        // Mettre à jour le status localement
+        setBot((prev) => prev ? { ...prev, status: result.status || prev.status } : prev);
+      } else {
+        const error = await res.json();
+        alert(error.error || `Erreur lors du ${action}`);
+      }
+    } catch (err) {
+      console.error(`Erreur ${action} bot:`, err);
     }
   };
 
@@ -782,11 +806,55 @@ export default function DashboardPage() {
       ) : step === "stats" ? (
         /* Stats view */
         <div id="stats">
-          <div className="mb-6">
-            <h2 className="font-display text-xl font-semibold text-white">Statistiques du bot</h2>
-            <p className="mt-1 text-sm text-white/60">
-              Suivez en temps réel les performances et l&apos;activité de votre bot.
-            </p>
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="font-display text-xl font-semibold text-white">Statistiques du bot</h2>
+              <p className="mt-1 text-sm text-white/60">
+                Suivez en temps réel les performances et l&apos;activité de votre bot.
+              </p>
+            </div>
+            {bot && (
+              <div className="flex items-center gap-2">
+                {bot.status === "offline" ? (
+                  <button
+                    onClick={() => controlBot("start")}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 text-sm font-medium text-emerald-400 hover:bg-emerald-500/20 transition-all"
+                  >
+                    <Play className="h-4 w-4" />
+                    Démarrer
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => controlBot("stop")}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20 transition-all"
+                  >
+                    <Pause className="h-4 w-4" />
+                    Arrêter
+                  </button>
+                )}
+                <button
+                  onClick={() => controlBot("restart")}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-violet-500/10 border border-violet-500/20 px-4 py-2 text-sm font-medium text-violet-400 hover:bg-violet-500/20 transition-all"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  Redémarrer
+                </button>
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
+                  bot.status === "online" ? "bg-emerald-500/10 text-emerald-400" :
+                  bot.status === "error" ? "bg-red-500/10 text-red-400" :
+                  "bg-white/5 text-white/60"
+                }`}>
+                  <span className={`h-2 w-2 rounded-full ${
+                    bot.status === "online" ? "bg-emerald-400" :
+                    bot.status === "error" ? "bg-red-400" :
+                    "bg-white/40"
+                  }`} />
+                  {bot.status === "online" ? "En ligne" :
+                   bot.status === "error" ? "Erreur" :
+                   "Hors ligne"}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Key metrics */}
