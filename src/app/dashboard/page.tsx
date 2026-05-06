@@ -150,9 +150,9 @@ export default function DashboardPage() {
     if (status === "authenticated") loadData();
   }, [status, router]);
 
-  // Redirection automatique pour le step "boxes"
+  // Redirection automatique pour le step "boxes" (uniquement si on est sur la page dashboard)
   useEffect(() => {
-    if (step === "boxes") {
+    if (step === "boxes" && window.location.pathname === "/dashboard") {
       router.push("/dashboard/boxes");
     }
   }, [step, router]);

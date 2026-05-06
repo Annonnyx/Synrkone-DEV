@@ -12,6 +12,7 @@ const ROLE_HIERARCHY: Record<string, number> = {
 // Routes protégées par rôle minimum
 const PROTECTED_ROUTES: Record<string, string> = {
   "/dashboard": "USER",
+  "/dashboard/boxes": "DEV",
   "/profile": "USER",
   "/projects": "USER",
   "/website-creator": "USER",
