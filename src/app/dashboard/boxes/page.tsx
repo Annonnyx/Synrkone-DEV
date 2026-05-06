@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
@@ -22,6 +22,18 @@ import {
   FileText,
   Upload,
   Download,
+  Folder,
+  ArrowLeft,
+  ArrowRight,
+  MoreVertical,
+  Move,
+  Search,
+  FolderPlus,
+  Home,
+  ChevronDown,
+  User,
+  Lock,
+  Unlock,
 } from "lucide-react";
 
 interface Box {
@@ -61,6 +73,16 @@ export default function BoxesPage() {
   const [targetUserId, setTargetUserId] = useState("");
   const [targetUserName, setTargetUserName] = useState("");
   const [allUsers, setAllUsers] = useState<Array<{id: string, name: string, email: string}>>([]);
+
+  // File manager states
+  const [currentPath, setCurrentPath] = useState("/");
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const [renamingFile, setRenamingFile] = useState<string | null>(null);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [showNewFolderModal, setShowNewFolderModal] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{x: number, y: number, file: any} | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Vérifier les permissions (DEV+)
   useEffect(() => {
@@ -257,6 +279,172 @@ export default function BoxesPage() {
       alert("Erreur lors de la suppression");
     }
   };
+
+  // Advanced file manager functions
+  const getFilteredFiles = () => {
+    if (!selectedBox) return [];
+    
+    const allItems = [
+      // Add folders first (simulate folder structure)
+      ...selectedBox.files.filter(file => file.name.includes("/")).map(file => ({
+        ...file,
+        isFolder: true,
+        name: file.name.split("/").pop() || file.name,
+        path: file.name,
+      })),
+      // Add files
+      ...selectedBox.files.filter(file => !file.name.includes("/")).map(file => ({
+        ...file,
+        isFolder: false,
+        name: file.name,
+        path: file.name,
+      }))
+    ];
+
+    if (searchQuery) {
+      return allItems.filter(item => 
+        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Filter by current path
+    if (currentPath === "/") return allItems;
+    
+    const pathParts = currentPath.split("/").filter(Boolean);
+    return allItems.filter(item => {
+      const itemPathParts = item.path.split("/").filter(Boolean);
+      return itemPathParts.slice(0, pathParts.length).every((part, index) => part === pathParts[index]);
+    });
+  };
+
+  const handleFileSelect = (fileId: string) => {
+    setSelectedFiles(prev => 
+      prev.includes(fileId) 
+        ? prev.filter(id => id !== fileId)
+        : [...prev, fileId]
+    );
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, file: any) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY, file });
+  };
+
+  const closeContextMenu = () => {
+    setContextMenu(null);
+  };
+
+  const createFolder = async () => {
+    if (!newFolderName.trim() || !selectedBox) return;
+
+    try {
+      const folderPath = currentPath === "/" ? newFolderName : `${currentPath}/${newFolderName}`;
+      
+      // Simulate folder creation (in real implementation, this would create a folder in the backend)
+      const newFolder = {
+        id: `folder-${Date.now()}`,
+        name: newFolderName,
+        path: folderPath,
+        isFolder: true,
+        sizeBytes: 0,
+        mimeType: "folder",
+        location: "BOX",
+        createdAt: new Date().toISOString(),
+        uploaderId: session?.user?.id || "",
+      };
+
+      // In real implementation, this would call the API to create the folder
+      console.log("Creating folder:", newFolder);
+      
+      setNewFolderName("");
+      setShowNewFolderModal(false);
+      loadBoxes();
+    } catch (err) {
+      console.error("Erreur création dossier:", err);
+      alert("Erreur lors de la création du dossier");
+    }
+  };
+
+  const renameFile = async (fileId: string, newName: string) => {
+    if (!newName.trim()) return;
+
+    try {
+      // In real implementation, this would call the API to rename the file/folder
+      console.log("Renaming file:", fileId, "to:", newName);
+      
+      setRenamingFile(null);
+      loadBoxes();
+    } catch (err) {
+      console.error("Erreur renommage:", err);
+      alert("Erreur lors du renommage");
+    }
+  };
+
+  const moveFiles = async (fileIds: string[], targetPath: string) => {
+    try {
+      // In real implementation, this would call to API to move files
+      console.log("Moving files:", fileIds, "to:", targetPath);
+      
+      setSelectedFiles([]);
+      loadBoxes();
+    } catch (err) {
+      console.error("Erreur déplacement:", err);
+      alert("Erreur lors du déplacement");
+    }
+  };
+
+  const updateBoxSize = async (boxId: string, newSizeMb: number) => {
+    try {
+      const res = await fetch("/api/boxes", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: boxId, maxSizeMb: newSizeMb }),
+      });
+
+      if (res.ok) {
+        loadBoxes();
+        // Recharger les détails de la box
+        const updatedBoxes = await fetch("/api/boxes");
+        if (updatedBoxes.ok) {
+          const data = await updatedBoxes.json();
+          const boxes = Array.isArray(data) ? data : (data ? [data] : []);
+          const updatedBox = boxes.find(b => b.id === selectedBox?.id);
+          if (updatedBox) setSelectedBox(updatedBox);
+        }
+      } else {
+        const error = await res.json();
+        alert(error.error || "Erreur lors de la mise à jour de la taille");
+      }
+    } catch (err) {
+      console.error("Erreur mise à jour taille:", err);
+      alert("Erreur lors de la mise à jour de la taille");
+    }
+  };
+
+  // Close context menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => closeContextMenu();
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSelectedFiles([]);
+        closeContextMenu();
+      }
+      if (e.ctrlKey && e.key === "a") {
+        e.preventDefault();
+        const allFileIds = getFilteredFiles().filter(f => !f.isFolder).map(f => f.id);
+        setSelectedFiles(allFileIds);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const formatSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} o`;
@@ -589,9 +777,21 @@ export default function BoxesPage() {
       {/* Box Details Modal */}
       {selectedBox && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="card max-w-2xl w-full mx-4 p-6 max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-white">{selectedBox.name}</h3>
+          <div className="card max-w-4xl w-full mx-4 p-6 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <h3 className="text-xl font-semibold text-white">{selectedBox.name}</h3>
+                {selectedBox.userId === session?.user?.id && (
+                  <span className="px-2 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-medium">
+                    Ma box
+                  </span>
+                )}
+                {selectedBox.userId !== session?.user?.id && ["ADMIN", "OWNER"].includes(session?.user?.role || "") && (
+                  <span className="px-2 py-1 rounded-full bg-violet-500/20 text-violet-400 text-xs font-medium">
+                    Admin
+                  </span>
+                )}
+              </div>
               <button
                 onClick={() => setSelectedBox(null)}
                 className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white transition-colors"
@@ -600,41 +800,47 @@ export default function BoxesPage() {
               </button>
             </div>
             
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-sm font-medium text-white mb-2">Informations</h4>
-                <div className="rounded-lg border border-white/10 bg-white/5 p-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-white/60">Propriétaire:</span>
-                      <span className="ml-2 text-white">{selectedBox.user.name}</span>
-                    </div>
-                    <div>
-                      <span className="text-white/60">Email:</span>
-                      <span className="ml-2 text-white">{selectedBox.user.email}</span>
-                    </div>
-                    <div>
-                      <span className="text-white/60">Créée le:</span>
-                      <span className="ml-2 text-white">{new Date(selectedBox.createdAt).toLocaleDateString()}</span>
-                    </div>
-                    <div>
-                      <span className="text-white/60">Modifiée le:</span>
-                      <span className="ml-2 text-white">{new Date(selectedBox.updatedAt).toLocaleDateString()}</span>
-                    </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Informations */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Informations
+                </h4>
+                <div className="rounded-lg border border-white/10 bg-white/5 p-4 space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-white/60">Propriétaire:</span>
+                    <span className="text-white font-medium">{selectedBox.user.name}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-white/60">Email:</span>
+                    <span className="text-white font-medium text-xs">{selectedBox.user.email}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-white/60">Créée le:</span>
+                    <span className="text-white font-medium">{new Date(selectedBox.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-white/60">Modifiée le:</span>
+                    <span className="text-white font-medium">{new Date(selectedBox.updatedAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
 
-              <div>
-                <h4 className="text-sm font-medium text-white mb-2">Stockage</h4>
-                <div className="rounded-lg border border-white/10 bg-white/5 p-4">
+              {/* Stockage */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+                  <HardDrive className="h-4 w-4" />
+                  Stockage
+                </h4>
+                <div className="rounded-lg border border-white/10 bg-white/5 p-4 space-y-3">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-white/60">Espace utilisé</span>
-                    <span className="text-sm text-white">
+                    <span className="text-sm text-white font-medium">
                       {formatSize(getUsedSpace(selectedBox))} / {selectedBox.maxSizeMb} Mo
                     </span>
                   </div>
-                  <div className="h-3 rounded-full bg-white/5 overflow-hidden">
+                  <div className="h-3 rounded-full bg-white/5 overflow-hidden mb-3">
                     <div
                       className={`h-full rounded-full transition-all ${
                         getStoragePercentage(selectedBox) > 90 ? "bg-red-500" : getStoragePercentage(selectedBox) > 70 ? "bg-amber-500" : "bg-gradient-to-r from-violet-600 to-violet-400"
@@ -642,69 +848,374 @@ export default function BoxesPage() {
                       style={{ width: `${Math.min(getStoragePercentage(selectedBox), 100)}%` }}
                     />
                   </div>
+                  <div className="text-xs text-white/60">
+                    {getStoragePercentage(selectedBox).toFixed(1)}% utilisé
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-sm font-medium text-white">Fichiers ({selectedBox.files.length})</h4>
-                  <label className="btn-violet rounded-lg px-3 py-1.5 text-xs font-semibold text-white cursor-pointer hover:bg-violet-600 transition-colors">
-                    <Upload className="mr-1.5 h-3 w-3" />
-                    Uploader un fichier
-                    <input
-                      type="file"
-                      className="hidden"
-                      onChange={handleFileUpload}
-                      disabled={uploadingFile}
-                    />
-                  </label>
+              {/* Admin/Owner Controls */}
+              {canManageBox(selectedBox) && (
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    {["ADMIN", "OWNER"].includes(session?.user?.role || "") ? "Contrôles Admin" : "Gestion"}
+                  </h4>
+                  <div className="rounded-lg border border-white/10 bg-white/5 p-4 space-y-4">
+                    {/* Size Management */}
+                    <div>
+                      <label className="block text-sm font-medium text-white mb-2">Taille de la box (Mo)</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          defaultValue={selectedBox.maxSizeMb}
+                          placeholder="Taille en Mo"
+                          className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/60 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all"
+                        />
+                        <button
+                          onClick={() => {
+                            const input = document.querySelector('input[type="number"]') as HTMLInputElement;
+                            const newSize = parseInt(input.value);
+                            if (newSize && newSize !== selectedBox.maxSizeMb) {
+                              updateBoxSize(selectedBox.id, newSize);
+                            }
+                          }}
+                          className="btn-violet rounded-lg px-3 py-2 text-sm font-semibold text-white"
+                        >
+                          Mettre à jour
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Owner Actions */}
+                    {selectedBox.userId === session?.user?.id && (
+                      <div className="pt-3 border-t border-white/10">
+                        <h5 className="text-xs font-medium text-white mb-2">Actions propriétaire</h5>
+                        <div className="space-y-2">
+                          <button className="w-full flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/60 hover:bg-white/10 hover:text-white transition-all">
+                            <Users className="h-4 w-4" />
+                            Partager la box
+                          </button>
+                          <button className="w-full flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all">
+                            <Trash2 className="h-4 w-4" />
+                            Supprimer ma box
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Admin Actions */}
+                    {selectedBox.userId !== session?.user?.id && ["ADMIN", "OWNER"].includes(session?.user?.role || "") && (
+                      <div className="pt-3 border-t border-white/10">
+                        <h5 className="text-xs font-medium text-white mb-2">Actions admin</h5>
+                        <div className="space-y-2">
+                          <button className="w-full flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-sm text-amber-400 hover:bg-amber-500/10 hover:text-amber-300 transition-all">
+                            <Lock className="h-4 w-4" />
+                            Révoquer l'accès
+                          </button>
+                          <button 
+                            onClick={() => deleteBox(selectedBox.id)}
+                            className="w-full flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Supprimer cette box
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
+              )}
+
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-4">
+                    <h4 className="text-sm font-medium text-white">Fichiers ({selectedBox.files.length})</h4>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setViewMode(viewMode === "list" ? "grid" : "list")}
+                        className="rounded p-1.5 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+                        title={`Vue ${viewMode === "list" ? "grille" : "liste"}`}
+                      >
+                        {viewMode === "list" ? <Folder className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
+                      </button>
+                      <button
+                        onClick={() => setShowNewFolderModal(true)}
+                        className="rounded p-1.5 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+                        title="Nouveau dossier"
+                      >
+                        <FolderPlus className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 text-white/40" />
+                      <input
+                        type="text"
+                        placeholder="Rechercher des fichiers..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/60 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all w-64"
+                      />
+                    </div>
+                    <label className="btn-violet rounded-lg px-3 py-1.5 text-xs font-semibold text-white cursor-pointer hover:bg-violet-600 transition-colors">
+                      <Upload className="mr-1.5 h-3 w-3" />
+                      Uploader un fichier
+                      <input
+                        type="file"
+                        className="hidden"
+                        onChange={handleFileUpload}
+                        disabled={uploadingFile}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Breadcrumb navigation */}
+                <div className="flex items-center gap-2 mb-4 text-sm text-white/60">
+                  <button
+                    onClick={() => setCurrentPath("/")}
+                    className="flex items-center gap-1 hover:text-white transition-colors"
+                  >
+                    <Home className="h-3 w-3" />
+                    <span>Racine</span>
+                  </button>
+                  {currentPath !== "/" && currentPath.split("/").filter(Boolean).map((part, index, arr) => (
+                    <Fragment key={index}>
+                      <span className="text-white/40">/</span>
+                      <button
+                        onClick={() => setCurrentPath(arr.slice(0, index + 1).join("/"))}
+                        className="flex items-center gap-1 hover:text-white transition-colors"
+                      >
+                        <Folder className="h-3 w-3" />
+                        <span>{part}</span>
+                      </button>
+                    </Fragment>
+                  ))}
+                </div>
+
                 {uploadingFile && (
-                  <div className="mb-2 rounded-lg border border-violet-500/20 bg-violet-500/5 p-3">
+                  <div className="mb-4 rounded-lg border border-violet-500/20 bg-violet-500/5 p-3">
                     <div className="flex items-center gap-2">
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-violet-400 border-t-transparent"></div>
                       <span className="text-sm text-violet-300">Upload en cours...</span>
                     </div>
                   </div>
                 )}
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {selectedBox.files.map((file) => (
-                    <div key={file.id} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-3">
-                      <div className="flex items-center gap-3">
-                        <FileText className="h-4 w-4 text-white/40" />
-                        <div>
-                          <p className="text-sm text-white">{file.name}</p>
-                          <p className="text-xs text-white/60">{formatSize(file.sizeBytes)}</p>
+
+                {/* Files and folders display */}
+                <div 
+                  className={`space-y-2 max-h-96 overflow-y-auto ${
+                    viewMode === "grid" ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" : ""
+                  }`}
+                >
+                  {getFilteredFiles().map((item) => (
+                    <div
+                      key={item.id}
+                      className={`relative group rounded-lg border border-white/10 bg-white/5 p-3 transition-all hover:border-white/20 ${
+                        selectedFiles.includes(item.id) ? "ring-2 ring-violet-500/50" : ""
+                      }`}
+                      onClick={() => handleFileSelect(item.id)}
+                      onContextMenu={(e) => handleContextMenu(e, item)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {item.isFolder ? (
+                            <Folder className="h-4 w-4 text-violet-400" />
+                          ) : (
+                            <FileText className="h-4 w-4 text-white/40" />
+                          )}
+                          <div>
+                            <p className="text-sm text-white">{item.name}</p>
+                            <p className="text-xs text-white/60">
+                              {item.isFolder ? "Dossier" : formatSize(item.sizeBytes)}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {canManageBox(selectedBox) && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setRenamingFile(item.id);
+                              }}
+                              className="rounded p-1 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+                              title="Renommer"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </button>
+                          )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              downloadFile(item.id, item.name);
+                            }}
+                            className="rounded p-1 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+                            title="Télécharger"
+                          >
+                            <Download className="h-3 w-3" />
+                          </button>
+                          {(canManageBox(selectedBox) || item.uploaderId === session?.user?.id) && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteFile(item.id);
+                              }}
+                              className="rounded p-1 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                              title="Supprimer"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setContextMenu({ x: e.clientX, y: e.clientY, file: item });
+                            }}
+                            className="rounded p-1 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+                            title="Plus d'options"
+                          >
+                            <MoreVertical className="h-3 w-3" />
+                          </button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => downloadFile(file.id, file.name)}
-                          className="rounded p-1 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
-                          title="Télécharger"
-                        >
-                          <Download className="h-3 w-3" />
-                        </button>
-                        {(canManageBox(selectedBox) || file.uploaderId === session?.user?.id) && (
-                          <button
-                            onClick={() => deleteFile(file.id)}
-                            className="rounded p-1 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                            title="Supprimer"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                        )}
-                      </div>
-                      <span className="text-xs text-white/40">
-                        {new Date(file.createdAt).toLocaleDateString()}
-                      </span>
+                      {selectedFiles.includes(item.id) && (
+                        <div className="absolute top-1 right-1 w-2 h-2 bg-violet-500 rounded"></div>
+                      )}
                     </div>
                   ))}
-                  {selectedBox.files.length === 0 && (
-                    <p className="text-sm text-white/40 text-center py-4">Aucun fichier dans cette box</p>
-                  )}
                 </div>
+
+                {getFilteredFiles().length === 0 && (
+                  <div className="text-center py-8">
+                    <Folder className="mx-auto h-12 w-12 text-white/20 mb-4" />
+                    <p className="text-sm text-white/40">
+                      {searchQuery ? "Aucun fichier trouvé pour cette recherche" : "Aucun fichier dans ce dossier"}
+                    </p>
+                  </div>
+                )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <div 
+          className="fixed bg-white/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-xl py-2 z-50"
+          style={{ left: contextMenu.x, top: contextMenu.y }}
+          onClick={closeContextMenu}
+        >
+          <button
+            onClick={() => {
+              if (selectedFiles.includes(contextMenu.file.id)) {
+                downloadFile(contextMenu.file.id, contextMenu.file.name);
+              }
+            }}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+          >
+            <Download className="h-4 w-4" />
+            Télécharger
+          </button>
+          <button
+            onClick={() => {
+              if (selectedFiles.includes(contextMenu.file.id)) {
+                setRenamingFile(contextMenu.file.id);
+              }
+            }}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+          >
+            <Edit className="h-4 w-4" />
+            Renommer
+          </button>
+          <button
+            onClick={() => {
+              if (selectedFiles.includes(contextMenu.file.id)) {
+                deleteFile(contextMenu.file.id);
+              }
+            }}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+          >
+            <Trash2 className="h-4 w-4" />
+            Supprimer
+          </button>
+        </div>
+      )}
+
+      {/* Rename Modal */}
+      {renamingFile && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="card max-w-md w-full mx-4 p-6">
+            <h3 className="text-lg font-semibold text-white mb-4">Renommer le fichier/dossier</h3>
+            <input
+              type="text"
+              defaultValue={getFilteredFiles().find(f => f.id === renamingFile)?.name || ""}
+              placeholder="Nouveau nom"
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/60 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  const newName = (e.target as HTMLInputElement).value;
+                  renameFile(renamingFile, newName);
+                }
+                if (e.key === "Escape") {
+                  setRenamingFile(null);
+                }
+              }}
+              autoFocus
+            />
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => setRenamingFile(null)}
+                className="flex-1 rounded-lg border border-white/10 px-4 py-2.5 text-sm font-medium text-white/60 hover:bg-white/5 hover:text-white transition-all"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => {
+                  const input = document.querySelector('input[placeholder="Nouveau nom"]') as HTMLInputElement;
+                  const newName = input.value;
+                  renameFile(renamingFile, newName);
+                }}
+                className="flex-1 btn-violet rounded-lg px-4 py-2.5 text-sm font-semibold text-white"
+              >
+                Renommer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Folder Modal */}
+      {showNewFolderModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="card max-w-md w-full mx-4 p-6">
+            <h3 className="text-lg font-semibold text-white mb-4">Créer un nouveau dossier</h3>
+            <input
+              type="text"
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              placeholder="Nom du dossier"
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/60 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all"
+              autoFocus
+            />
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => {
+                  setShowNewFolderModal(false);
+                  setNewFolderName("");
+                }}
+                className="flex-1 rounded-lg border border-white/10 px-4 py-2.5 text-sm font-medium text-white/60 hover:bg-white/5 hover:text-white transition-all"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => createFolder()}
+                className="flex-1 btn-violet rounded-lg px-4 py-2.5 text-sm font-semibold text-white"
+              >
+                Créer
+              </button>
             </div>
           </div>
         </div>
