@@ -44,6 +44,7 @@ import {
   Upload,
   Trash2,
   RefreshCw,
+  Box,
 } from "lucide-react";
 
 // Mapping des icônes Lucide par nom
@@ -102,7 +103,7 @@ interface BotStats {
 
 type HostingOption = "synkrone" | "self";
 
-type DashboardStep = "setup" | "modules" | "stats" | "files";
+type DashboardStep = "setup" | "modules" | "stats" | "files" | "boxes";
 
 interface FileEntry {
   id: string;
@@ -322,6 +323,17 @@ export default function DashboardPage() {
           >
             Fichiers
           </button>
+          {["DEV", "ADMIN", "OWNER"].includes(session?.user?.role || "") && (
+            <button
+              onClick={() => setStep("boxes")}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                step === "boxes" ? "bg-violet-600 text-white" : "text-white/60 hover:text-white"
+              }`}
+            >
+              <Box className="mr-1.5 inline h-3.5 w-3.5" />
+              Boxes
+            </button>
+          )}
         </div>
       </div>
 
@@ -935,6 +947,22 @@ export default function DashboardPage() {
               })}
             </div>
           )}
+        </div>
+      ) : step === "boxes" ? (
+        /* Boxes view - redirect to dedicated page */
+        <div className="text-center py-12">
+          <Box className="mx-auto h-16 w-16 text-white/20 mb-4" />
+          <h3 className="text-lg font-semibold text-white mb-2">Gestion des Boxes</h3>
+          <p className="text-sm text-white/60 mb-6">
+            Accédez à la gestion complète des serveurs virtuels.
+          </p>
+          <button
+            onClick={() => router.push('/dashboard/boxes')}
+            className="btn-violet rounded-xl px-6 py-3 text-sm font-semibold text-white"
+          >
+            <Box className="mr-2 inline h-4 w-4" />
+            Accéder aux boxes
+          </button>
         </div>
       ) : null}
     </div>
