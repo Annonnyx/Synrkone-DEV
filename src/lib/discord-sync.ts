@@ -78,6 +78,7 @@ export async function getGuildMemberRoles(discordUserId: string): Promise<string
     }
 
     const member: DiscordGuildMember = await res.json();
+    console.log("🔍 Discord member roles", { discordUserId, roles: member.roles, nick: member.nick });
     return member.roles;
   } catch (error) {
     console.error("❌ Failed to get member roles:", error);
@@ -149,6 +150,7 @@ export async function syncDiscordRoles(
 
   // 2. Récupérer les rôles Discord via le Bot token
   const discordRoles = await getGuildMemberRoles(discordUserId);
+  console.log("🔍 syncDiscordRoles raw roles", { discordUserId, discordRoles, count: discordRoles.length });
 
   // Si on a des rôles, l'utilisateur est forcément sur le serveur
   if (discordRoles.length > 0) {
