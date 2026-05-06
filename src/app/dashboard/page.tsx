@@ -1014,21 +1014,7 @@ export default function DashboardPage() {
           )}
         </div>
       ) : step === "boxes" ? (
-        /* Boxes view - redirect to dedicated page */
-        <div className="text-center py-12">
-          <Box className="mx-auto h-16 w-16 text-white/20 mb-4" />
-          <h3 className="text-lg font-semibold text-white mb-2">Gestion des Boxes</h3>
-          <p className="text-sm text-white/60 mb-6">
-            Accédez à la gestion complète des serveurs virtuels.
-          </p>
-          <button
-            onClick={() => router.push('/dashboard/boxes')}
-            className="btn-violet rounded-xl px-6 py-3 text-sm font-semibold text-white"
-          >
-            <Box className="mr-2 inline h-4 w-4" />
-            Accéder aux boxes
-          </button>
-        </div>
+        router.push('/dashboard/boxes')
       ) : null}
     </div>
   );

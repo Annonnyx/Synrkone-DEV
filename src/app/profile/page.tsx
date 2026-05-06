@@ -384,15 +384,17 @@ export default function ProfilePage() {
                 </div>
                 Dashboard
               </Link>
-              <Link
-                href="/my-box"
-                className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white/70 transition-all hover:bg-white/10 hover:text-white"
-              >
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400">
-                  <Settings className="h-4 w-4" />
-                </div>
-                Ma Box
-              </Link>
+              {["DEV", "ADMIN", "OWNER"].includes(session?.user?.role || "") && (
+                <Link
+                  href="/dashboard/boxes"
+                  className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white/70 transition-all hover:bg-white/10 hover:text-white"
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400">
+                    <Settings className="h-4 w-4" />
+                  </div>
+                  Ma Box
+                </Link>
+              )}
               <Link
                 href="/pricing"
                 className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white/70 transition-all hover:bg-white/10 hover:text-white"
