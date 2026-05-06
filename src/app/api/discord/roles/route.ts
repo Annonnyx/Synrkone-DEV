@@ -12,17 +12,37 @@ export async function GET() {
   if (!session?.user) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
   try {
-    const user = await prisma.user.findUnique({
+    // Chercher par ID Prisma (token corrigé) ou par discordId (token ancien)
+    let user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { discordId: true, discordRoles: true, isOnSynkroneServer: true, role: true },
+      select: { id: true, discordId: true, discordRoles: true, isOnSynkroneServer: true, role: true },
     });
 
-    if (!user?.discordId) {
+    // Fallback : si l'ID dans la session est l'ancien Discord ID (token pré-correction)
+    if (!user && session.user.discordId) {
+      user = await prisma.user.findUnique({
+        where: { discordId: session.user.discordId },
+        select: { id: true, discordId: true, discordRoles: true, isOnSynkroneServer: true, role: true },
+      });
+    }
+
+    let discordId = user?.discordId;
+
+    // Fallback : récupérer depuis Account si absent dans User
+    if (!discordId && user) {
+      const account = await prisma.account.findFirst({
+        where: { userId: user.id, provider: "discord" },
+        select: { providerAccountId: true },
+      });
+      discordId = account?.providerAccountId ?? null;
+    }
+
+    if (!discordId) {
       return NextResponse.json({ error: "Pas de Discord ID" }, { status: 400 });
     }
 
     // Récupérer les rôles frais depuis Discord
-    const discordRoles = await getGuildMemberRoles(user.discordId);
+    const discordRoles = await getGuildMemberRoles(discordId);
     const siteRole = mapDiscordRolesToSiteRole(discordRoles);
 
     // Enrichir avec les noms de rôles
@@ -35,9 +55,9 @@ export async function GET() {
 
     return NextResponse.json({
       discordRoles: rolesWithNames,
-      currentSiteRole: user.role,
+      currentSiteRole: user?.role ?? "USER",
       computedSiteRole: siteRole,
-      isOnSynkroneServer: discordRoles.length > 0 || user.isOnSynkroneServer,
+      isOnSynkroneServer: discordRoles.length > 0 || (user?.isOnSynkroneServer ?? false),
     });
   } catch (error) {
     console.error("Erreur Discord roles:", error);

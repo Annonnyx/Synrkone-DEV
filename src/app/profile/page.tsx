@@ -48,18 +48,24 @@ export default function ProfilePage() {
   const { data: session, status } = useSession();
   const [discordInfo, setDiscordInfo] = useState<DiscordInfo | null>(null);
   const [loadingRoles, setLoadingRoles] = useState(false);
+  const [rolesError, setRolesError] = useState<string | null>(null);
 
   const user = session?.user;
 
   const loadDiscordRoles = async () => {
     setLoadingRoles(true);
+    setRolesError(null);
     try {
       const res = await fetch("/api/discord/roles");
       if (res.ok) {
         setDiscordInfo(await res.json());
+      } else {
+        const err = await res.json().catch(() => ({}));
+        setRolesError(err.error || `Erreur ${res.status}`);
       }
     } catch (err) {
       console.error("Erreur chargement rôles Discord:", err);
+      setRolesError("Impossible de contacter le serveur");
     } finally {
       setLoadingRoles(false);
     }
@@ -67,6 +73,7 @@ export default function ProfilePage() {
 
   const syncRoles = async () => {
     setLoadingRoles(true);
+    setRolesError(null);
     try {
       const res = await fetch("/api/discord/sync", { method: "POST" });
       if (res.ok) {
@@ -74,9 +81,13 @@ export default function ProfilePage() {
         setDiscordInfo(data);
         // Recharger la page pour mettre à jour la session
         window.location.reload();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        setRolesError(err.error || `Erreur ${res.status}`);
       }
     } catch (err) {
       console.error("Erreur sync rôles:", err);
+      setRolesError("Impossible de synchroniser");
     } finally {
       setLoadingRoles(false);
     }
@@ -137,10 +148,17 @@ export default function ProfilePage() {
               </div>
 
               {/* Discord status */}
-              <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#5865F2]/10 px-4 py-1.5 text-sm text-[#5865F2] border border-[#5865F2]/20">
-                <MessageCircle className="h-3.5 w-3.5" />
-                Discord lié
-              </div>
+              {user?.discordId ? (
+                <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#5865F2]/10 px-4 py-1.5 text-sm text-[#5865F2] border border-[#5865F2]/20">
+                  <MessageCircle className="h-3.5 w-3.5" />
+                  Discord lié
+                </div>
+              ) : (
+                <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/5 px-4 py-1.5 text-sm text-white/40 border border-white/10">
+                  <MessageCircle className="h-3.5 w-3.5" />
+                  Discord non synchronisé
+                </div>
+              )}
 
               {/* Member since */}
               <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/5 px-4 py-1.5 text-sm text-white/60 border border-white/10">
@@ -237,6 +255,19 @@ export default function ProfilePage() {
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Chargement des rôles...
                 </div>
+              ) : rolesError ? (
+                <div className="text-sm text-white/50 space-y-2">
+                  <p className="text-amber-400 flex items-center gap-2">
+                    <Shield className="h-4 w-4" />
+                    Impossible de vérifier les rôles : {rolesError}
+                  </p>
+                  <button
+                    onClick={loadDiscordRoles}
+                    className="text-xs text-violet-400 hover:text-violet-300 underline"
+                  >
+                    Réessayer
+                  </button>
+                </div>
               ) : discordInfo?.isOnSynkroneServer ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
@@ -270,18 +301,25 @@ export default function ProfilePage() {
                     )}
                   </p>
                 </div>
-              ) : (
-                <div className="text-sm text-white/50">
-                  <p>Vous n&apos;êtes pas membre du serveur Discord Synkrone.</p>
+              ) : discordInfo ? (
+                <div className="text-sm text-white/50 space-y-2">
+                  <p className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-white/30" />
+                    Vous n&apos;êtes pas membre du serveur Discord Synkrone.
+                  </p>
                   <a
                     href="https://discord.gg/p768u2Pgp3"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 mt-2 text-[#5865F2] hover:underline"
+                    className="inline-flex items-center gap-1 text-[#5865F2] hover:underline"
                   >
                     Rejoindre le serveur
                     <ChevronRight className="h-3.5 w-3.5" />
                   </a>
+                </div>
+              ) : (
+                <div className="text-sm text-white/50">
+                  <p>Cliquez sur &quot;Actualiser&quot; pour vérifier vos rôles Discord.</p>
                 </div>
               )}
             </div>

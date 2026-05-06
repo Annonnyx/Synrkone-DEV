@@ -64,17 +64,36 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }) {
       // Premier login : stocker les infos dans le JWT
       if (user) {
-        token.sub = user.id;
-
-        // Récupérer les données depuis la DB
+        // ⚠️ user.id est l'ID Discord OAuth, PAS l'ID Prisma.
+        // On doit récupérer l'utilisateur DB par email pour avoir l'ID Prisma.
         const dbUser = await prisma.user.findUnique({
-          where: { id: user.id },
+          where: { email: user.email ?? "unknown@synkrone.local" },
+          select: { id: true, role: true, discordId: true, isOnSynkroneServer: true },
+        });
+
+        if (dbUser) {
+          token.sub = dbUser.id; // ✅ ID Prisma
+          token.role = dbUser.role ?? "USER";
+          token.discordId = dbUser.discordId ?? null;
+          token.isOnSynkroneServer = dbUser.isOnSynkroneServer ?? false;
+        } else {
+          // Fallback : token créé avant l'upsert (ne devrait pas arriver)
+          token.sub = user.id;
+        }
+      }
+
+      // Si le token manque des infos Discord, les récupérer depuis la DB
+      if (token.sub && (!token.discordId || !token.role)) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub },
           select: { role: true, discordId: true, isOnSynkroneServer: true },
         });
 
-        token.role = dbUser?.role ?? "USER";
-        token.discordId = dbUser?.discordId ?? null;
-        token.isOnSynkroneServer = dbUser?.isOnSynkroneServer ?? false;
+        if (dbUser) {
+          token.role = dbUser.role ?? "USER";
+          token.discordId = dbUser.discordId ?? null;
+          token.isOnSynkroneServer = dbUser.isOnSynkroneServer ?? false;
+        }
       }
 
       // Stocker l'access_token Discord pour les appels API ultérieurs

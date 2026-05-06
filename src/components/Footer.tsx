@@ -12,7 +12,6 @@ const footerLinks = {
     { label: "Discord Support", href: "https://discord.gg/nuFNvVybGE" },
     { label: "Nos bots Discord", href: "/discord" },
     { label: "Minecraft", href: "/minecraft" },
-    { label: "Multivers", href: "/multivers" },
     { label: "The French Baguette", href: "https://discord.gg/jX9mFnEk72" },
     { label: "Maths-App", href: "https://maths-app.com" },
   ],

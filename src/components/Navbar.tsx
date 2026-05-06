@@ -11,7 +11,6 @@ const navLinks = [
   { href: "/pricing", label: "Krônes" },
   { href: "/minecraft", label: "Minecraft" },
   { href: "/discord", label: "Discord" },
-  { href: "/multivers", label: "Multivers" },
   { href: "/team", label: "Équipe" },
 ];
 
