@@ -43,6 +43,7 @@ interface Box {
     sizeBytes: number;
     location: string;
     createdAt: string;
+    uploaderId: string;
   }>;
   createdAt: string;
   updatedAt: string;
@@ -162,6 +163,97 @@ export default function BoxesPage() {
       }
     } catch (err) {
       console.error("Erreur suppression box:", err);
+      alert("Erreur lors de la suppression");
+    }
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !selectedBox) return;
+
+    setUploadingFile(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("location", "BOX");
+      formData.append("boxId", selectedBox.id);
+
+      const res = await fetch("/api/files", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.ok) {
+        loadBoxes();
+        // Recharger les détails de la box
+        const updatedBoxes = await fetch("/api/boxes");
+        if (updatedBoxes.ok) {
+          const data = await updatedBoxes.json();
+          const boxes = Array.isArray(data) ? data : (data ? [data] : []);
+          const updatedBox = boxes.find(b => b.id === selectedBox?.id);
+          if (updatedBox) setSelectedBox(updatedBox);
+        }
+      } else {
+        const error = await res.json();
+        alert(error.error || "Erreur lors de l'upload");
+      }
+    } catch (err) {
+      console.error("Erreur upload fichier:", err);
+      alert("Erreur lors de l'upload");
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  const downloadFile = async (fileId: string, fileName: string) => {
+    try {
+      const res = await fetch(`/api/files/${fileId}/download`);
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        const error = await res.json();
+        alert(error.error || "Erreur lors du téléchargement");
+      }
+    } catch (err) {
+      console.error("Erreur téléchargement fichier:", err);
+      alert("Erreur lors du téléchargement");
+    }
+  };
+
+  const deleteFile = async (fileId: string) => {
+    if (!confirm("Supprimer ce fichier ?")) return;
+
+    try {
+      const res = await fetch("/api/files", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: fileId }),
+      });
+
+      if (res.ok) {
+        loadBoxes();
+        // Recharger les détails de la box
+        const updatedBoxes = await fetch("/api/boxes");
+        if (updatedBoxes.ok) {
+          const data = await updatedBoxes.json();
+          const boxes = Array.isArray(data) ? data : (data ? [data] : []);
+          const updatedBox = boxes.find(b => b.id === selectedBox?.id);
+          if (updatedBox) setSelectedBox(updatedBox);
+        }
+      } else {
+        const error = await res.json();
+        alert(error.error || "Erreur lors de la suppression");
+      }
+    } catch (err) {
+      console.error("Erreur suppression fichier:", err);
       alert("Erreur lors de la suppression");
     }
   };
@@ -554,7 +646,27 @@ export default function BoxesPage() {
               </div>
 
               <div>
-                <h4 className="text-sm font-medium text-white mb-2">Fichiers ({selectedBox.files.length})</h4>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-sm font-medium text-white">Fichiers ({selectedBox.files.length})</h4>
+                  <label className="btn-violet rounded-lg px-3 py-1.5 text-xs font-semibold text-white cursor-pointer hover:bg-violet-600 transition-colors">
+                    <Upload className="mr-1.5 h-3 w-3" />
+                    Uploader un fichier
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                      disabled={uploadingFile}
+                    />
+                  </label>
+                </div>
+                {uploadingFile && (
+                  <div className="mb-2 rounded-lg border border-violet-500/20 bg-violet-500/5 p-3">
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-violet-400 border-t-transparent"></div>
+                      <span className="text-sm text-violet-300">Upload en cours...</span>
+                    </div>
+                  </div>
+                )}
                 <div className="space-y-2 max-h-60 overflow-y-auto">
                   {selectedBox.files.map((file) => (
                     <div key={file.id} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-3">
@@ -564,6 +676,24 @@ export default function BoxesPage() {
                           <p className="text-sm text-white">{file.name}</p>
                           <p className="text-xs text-white/60">{formatSize(file.sizeBytes)}</p>
                         </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => downloadFile(file.id, file.name)}
+                          className="rounded p-1 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+                          title="Télécharger"
+                        >
+                          <Download className="h-3 w-3" />
+                        </button>
+                        {(canManageBox(selectedBox) || file.uploaderId === session?.user?.id) && (
+                          <button
+                            onClick={() => deleteFile(file.id)}
+                            className="rounded p-1 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        )}
                       </div>
                       <span className="text-xs text-white/40">
                         {new Date(file.createdAt).toLocaleDateString()}

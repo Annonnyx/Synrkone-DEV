@@ -28,7 +28,7 @@ export default function Navbar() {
   }
 
   if (userRole === "ADMIN" || userRole === "OWNER") {
-    roleLinks.push({ href: "/dashboard/boxes", label: "Boxes", icon: Shield });
+    roleLinks.push({ href: "/dashboard/boxes/admin", label: "Boxes", icon: Shield });
   }
 
   return (
