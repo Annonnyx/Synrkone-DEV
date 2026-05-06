@@ -74,15 +74,8 @@ export default function BoxesPage() {
   const [targetUserName, setTargetUserName] = useState("");
   const [allUsers, setAllUsers] = useState<Array<{id: string, name: string, email: string}>>([]);
 
-  // File manager states
-  const [currentPath, setCurrentPath] = useState("/");
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
-  const [renamingFile, setRenamingFile] = useState<string | null>(null);
-  const [newFolderName, setNewFolderName] = useState("");
-  const [showNewFolderModal, setShowNewFolderModal] = useState(false);
-  const [contextMenu, setContextMenu] = useState<{x: number, y: number, file: any} | null>(null);
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
-  const [searchQuery, setSearchQuery] = useState("");
+  // Simplified states for working file manager
+  const [uploadingFile, setUploadingFile] = useState(false);
 
   // Vérifier les permissions (DEV+)
   useEffect(() => {
@@ -280,41 +273,19 @@ export default function BoxesPage() {
     }
   };
 
-  // Advanced file manager functions
+  // Simplified file manager to work with existing API
   const getFilteredFiles = () => {
     if (!selectedBox) return [];
     
-    const allItems = [
-      // Add folders first (simulate folder structure)
-      ...selectedBox.files.filter(file => file.name.includes("/")).map(file => ({
-        ...file,
-        isFolder: true,
-        name: file.name.split("/").pop() || file.name,
-        path: file.name,
-      })),
-      // Add files
-      ...selectedBox.files.filter(file => !file.name.includes("/")).map(file => ({
-        ...file,
-        isFolder: false,
-        name: file.name,
-        path: file.name,
-      }))
-    ];
+    const allFiles = selectedBox.files;
 
     if (searchQuery) {
-      return allItems.filter(item => 
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      return allFiles.filter(file => 
+        file.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    // Filter by current path
-    if (currentPath === "/") return allItems;
-    
-    const pathParts = currentPath.split("/").filter(Boolean);
-    return allItems.filter(item => {
-      const itemPathParts = item.path.split("/").filter(Boolean);
-      return itemPathParts.slice(0, pathParts.length).every((part, index) => part === pathParts[index]);
-    });
+    return allFiles;
   };
 
   const handleFileSelect = (fileId: string) => {
@@ -345,7 +316,6 @@ export default function BoxesPage() {
         id: `folder-${Date.now()}`,
         name: newFolderName,
         path: folderPath,
-        isFolder: true,
         sizeBytes: 0,
         mimeType: "folder",
         location: "BOX",
@@ -369,7 +339,7 @@ export default function BoxesPage() {
     if (!newName.trim()) return;
 
     try {
-      // In real implementation, this would call the API to rename the file/folder
+      // In real implementation, this would call the API to rename the file
       console.log("Renaming file:", fileId, "to:", newName);
       
       setRenamingFile(null);
@@ -421,31 +391,7 @@ export default function BoxesPage() {
     }
   };
 
-  // Close context menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = () => closeContextMenu();
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
-
-  // Handle keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setSelectedFiles([]);
-        closeContextMenu();
-      }
-      if (e.ctrlKey && e.key === "a") {
-        e.preventDefault();
-        const allFileIds = getFilteredFiles().filter(f => !f.isFolder).map(f => f.id);
-        setSelectedFiles(allFileIds);
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
+  
   const formatSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} o`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
@@ -929,70 +875,17 @@ export default function BoxesPage() {
 
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-4">
-                    <h4 className="text-sm font-medium text-white">Fichiers ({selectedBox.files.length})</h4>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setViewMode(viewMode === "list" ? "grid" : "list")}
-                        className="rounded p-1.5 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
-                        title={`Vue ${viewMode === "list" ? "grille" : "liste"}`}
-                      >
-                        {viewMode === "list" ? <Folder className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
-                      </button>
-                      <button
-                        onClick={() => setShowNewFolderModal(true)}
-                        className="rounded p-1.5 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
-                        title="Nouveau dossier"
-                      >
-                        <FolderPlus className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 h-4 w-4 text-white/40" />
-                      <input
-                        type="text"
-                        placeholder="Rechercher des fichiers..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/60 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all w-64"
-                      />
-                    </div>
-                    <label className="btn-violet rounded-lg px-3 py-1.5 text-xs font-semibold text-white cursor-pointer hover:bg-violet-600 transition-colors">
-                      <Upload className="mr-1.5 h-3 w-3" />
-                      Uploader un fichier
-                      <input
-                        type="file"
-                        className="hidden"
-                        onChange={handleFileUpload}
-                        disabled={uploadingFile}
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                {/* Breadcrumb navigation */}
-                <div className="flex items-center gap-2 mb-4 text-sm text-white/60">
-                  <button
-                    onClick={() => setCurrentPath("/")}
-                    className="flex items-center gap-1 hover:text-white transition-colors"
-                  >
-                    <Home className="h-3 w-3" />
-                    <span>Racine</span>
-                  </button>
-                  {currentPath !== "/" && currentPath.split("/").filter(Boolean).map((part, index, arr) => (
-                    <Fragment key={index}>
-                      <span className="text-white/40">/</span>
-                      <button
-                        onClick={() => setCurrentPath(arr.slice(0, index + 1).join("/"))}
-                        className="flex items-center gap-1 hover:text-white transition-colors"
-                      >
-                        <Folder className="h-3 w-3" />
-                        <span>{part}</span>
-                      </button>
-                    </Fragment>
-                  ))}
+                  <h4 className="text-sm font-medium text-white">Fichiers ({selectedBox.files.length})</h4>
+                  <label className="btn-violet rounded-lg px-3 py-1.5 text-xs font-semibold text-white cursor-pointer hover:bg-violet-600 transition-colors">
+                    <Upload className="mr-1.5 h-3 w-3" />
+                    Uploader un fichier
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                      disabled={uploadingFile}
+                    />
+                  </label>
                 </div>
 
                 {uploadingFile && (
@@ -1004,97 +897,46 @@ export default function BoxesPage() {
                   </div>
                 )}
 
-                {/* Files and folders display */}
-                <div 
-                  className={`space-y-2 max-h-96 overflow-y-auto ${
-                    viewMode === "grid" ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" : ""
-                  }`}
-                >
-                  {getFilteredFiles().map((item) => (
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {selectedBox.files.map((file) => (
                     <div
-                      key={item.id}
-                      className={`relative group rounded-lg border border-white/10 bg-white/5 p-3 transition-all hover:border-white/20 ${
-                        selectedFiles.includes(item.id) ? "ring-2 ring-violet-500/50" : ""
-                      }`}
-                      onClick={() => handleFileSelect(item.id)}
-                      onContextMenu={(e) => handleContextMenu(e, item)}
+                      key={file.id}
+                      className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-3 transition-all hover:border-white/20"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          {item.isFolder ? (
-                            <Folder className="h-4 w-4 text-violet-400" />
-                          ) : (
-                            <FileText className="h-4 w-4 text-white/40" />
-                          )}
-                          <div>
-                            <p className="text-sm text-white">{item.name}</p>
-                            <p className="text-xs text-white/60">
-                              {item.isFolder ? "Dossier" : formatSize(item.sizeBytes)}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {canManageBox(selectedBox) && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setRenamingFile(item.id);
-                              }}
-                              className="rounded p-1 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
-                              title="Renommer"
-                            >
-                              <Edit className="h-3 w-3" />
-                            </button>
-                          )}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              downloadFile(item.id, item.name);
-                            }}
-                            className="rounded p-1 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
-                            title="Télécharger"
-                          >
-                            <Download className="h-3 w-3" />
-                          </button>
-                          {(canManageBox(selectedBox) || item.uploaderId === session?.user?.id) && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                deleteFile(item.id);
-                              }}
-                              className="rounded p-1 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                              title="Supprimer"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </button>
-                          )}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setContextMenu({ x: e.clientX, y: e.clientY, file: item });
-                            }}
-                            className="rounded p-1 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
-                            title="Plus d'options"
-                          >
-                            <MoreVertical className="h-3 w-3" />
-                          </button>
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-4 w-4 text-white/40" />
+                        <div>
+                          <p className="text-sm text-white">{file.name}</p>
+                          <p className="text-xs text-white/60">{formatSize(file.sizeBytes)}</p>
                         </div>
                       </div>
-                      {selectedFiles.includes(item.id) && (
-                        <div className="absolute top-1 right-1 w-2 h-2 bg-violet-500 rounded"></div>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => downloadFile(file.id, file.name)}
+                          className="rounded p-1 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+                          title="Télécharger"
+                        >
+                          <Download className="h-3 w-3" />
+                        </button>
+                        {(canManageBox(selectedBox) || file.uploaderId === session?.user?.id) && (
+                          <button
+                            onClick={() => deleteFile(file.id)}
+                            className="rounded p-1 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        )}
+                      </div>
+                      <span className="text-xs text-white/40">
+                        {new Date(file.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
                   ))}
+                  {selectedBox.files.length === 0 && (
+                    <p className="text-sm text-white/40 text-center py-4">Aucun fichier dans cette box</p>
+                  )}
                 </div>
-
-                {getFilteredFiles().length === 0 && (
-                  <div className="text-center py-8">
-                    <Folder className="mx-auto h-12 w-12 text-white/20 mb-4" />
-                    <p className="text-sm text-white/40">
-                      {searchQuery ? "Aucun fichier trouvé pour cette recherche" : "Aucun fichier dans ce dossier"}
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
           </div>
