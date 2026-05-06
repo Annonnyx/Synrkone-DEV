@@ -19,11 +19,15 @@ export async function GET() {
     });
 
     // Fallback : si l'ID dans la session est l'ancien Discord ID (token pré-correction)
-    if (!user && session.user.discordId) {
-      user = await prisma.user.findUnique({
-        where: { discordId: session.user.discordId },
-        select: { id: true, discordId: true, discordRoles: true, isOnSynkroneServer: true, role: true },
-      });
+    // ou si session.user.discordId est null (ancien token incomplet)
+    if (!user) {
+      const potentialDiscordId = session.user.discordId || session.user.id;
+      if (potentialDiscordId && /^\d{17,20}$/.test(potentialDiscordId)) {
+        user = await prisma.user.findUnique({
+          where: { discordId: potentialDiscordId },
+          select: { id: true, discordId: true, discordRoles: true, isOnSynkroneServer: true, role: true },
+        });
+      }
     }
 
     let discordId = user?.discordId;

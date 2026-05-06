@@ -12,19 +12,31 @@ export async function POST() {
   console.log("🔄 /api/discord/sync called", { sessionUserId: session.user.id, sessionDiscordId: session.user.discordId });
 
   try {
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { discordId: true },
+      select: { id: true, discordId: true },
     });
+
+    // Fallback : si l'ID session est un ancien Discord ID (token pré-correction)
+    if (!user) {
+      const potentialDiscordId = session.user.discordId || session.user.id;
+      if (potentialDiscordId && /^\d{17,20}$/.test(potentialDiscordId)) {
+        user = await prisma.user.findUnique({
+          where: { discordId: potentialDiscordId },
+          select: { id: true, discordId: true },
+        });
+      }
+    }
 
     console.log("🔄 DB user lookup", { dbUser: user });
 
     let discordId = user?.discordId;
+    const userId = user?.id ?? session.user.id;
 
     // Fallback : récupérer depuis Account si absent dans User
     if (!discordId) {
       const account = await prisma.account.findFirst({
-        where: { userId: session.user.id, provider: "discord" },
+        where: { userId, provider: "discord" },
         select: { providerAccountId: true },
       });
       console.log("🔄 Account fallback", { account });
