@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
@@ -47,12 +47,7 @@ export default function BoxesPage() {
   const [loading, setLoading] = useState(false);
   const [selectedBox, setSelectedBox] = useState<BoxData | null>(null);
 
-  useEffect(() => {
-    if (status === "unauthenticated") router.push("/login");
-    if (status === "authenticated") loadBoxes();
-  }, [status, router]);
-
-  const loadBoxes = async () => {
+  const loadBoxes = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/boxes");
@@ -67,7 +62,17 @@ export default function BoxesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+      return;
+    }
+    if (status === "authenticated") {
+      void Promise.resolve().then(loadBoxes);
+    }
+  }, [status, router, loadBoxes]);
 
   const loadBoxFiles = async (boxId: string) => {
     try {

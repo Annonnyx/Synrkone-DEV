@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
 import {
   User,
@@ -52,7 +52,7 @@ export default function ProfilePage() {
 
   const user = session?.user;
 
-  const loadDiscordRoles = async () => {
+  const loadDiscordRoles = useCallback(async () => {
     setLoadingRoles(true);
     setRolesError(null);
     try {
@@ -69,7 +69,7 @@ export default function ProfilePage() {
     } finally {
       setLoadingRoles(false);
     }
-  };
+  }, []);
 
   const syncRoles = async () => {
     setLoadingRoles(true);
@@ -95,9 +95,9 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (status === "authenticated") {
-      loadDiscordRoles();
+      void Promise.resolve().then(loadDiscordRoles);
     }
-  }, [status]);
+  }, [status, loadDiscordRoles]);
 
   const roleColor = roleColors[user?.role ?? "USER"] ?? roleColors.USER;
 

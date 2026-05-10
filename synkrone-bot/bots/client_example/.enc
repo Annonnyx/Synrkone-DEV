@@ -1,0 +1,9 @@
+# Variables d'environnement du bot — chargées par dotenv depuis main.py.
+# Ce fichier ne doit JAMAIS être versionné en clair en prod.
+BOT_TOKEN=replace_with_real_token
+PREFIX=!
+LOG_LEVEL=INFO
+
+# IDs Discord facultatifs, lus par les commandes via os.getenv()
+GUILD_ID=
+MOD_LOG_CHANNEL_ID=

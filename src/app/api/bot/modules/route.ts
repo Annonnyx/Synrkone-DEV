@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { STORAGE_ROOT } from "@/lib/storage";
 import fs from "fs/promises";
 import path from "path";
 
-const STORAGE_ROOT = process.env.VPS_STORAGE_PATH ?? "/var/lib/synkrone/storage";
-const MODULE_TEMPLATES = process.env.MODULE_TEMPLATES_PATH ?? "/var/lib/synkrone/templates/modules";
+const MODULE_TEMPLATES = process.env.MODULE_TEMPLATES_PATH ?? "/Partage/Synkrone/templates/modules";
 
 // GET /api/bot/modules — Récupère les modules du bot
 export async function GET() {

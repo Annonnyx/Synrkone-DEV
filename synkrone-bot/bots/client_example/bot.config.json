@@ -1,0 +1,10 @@
+{
+  "name": "client_example",
+  "prefix": "!",
+  "intents": ["default", "members", "message_content"],
+  "commands": [
+    "moderation.ban",
+    "fun.poll",
+    "utility.ping"
+  ]
+}

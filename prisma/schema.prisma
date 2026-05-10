@@ -102,7 +102,7 @@ model User {
 model Box {
   id        String @id @default(cuid())
   name      String
-  path      String @unique // Chemin sur le VPS : /var/lib/synkrone/storage/boxes/{userId}
+  path      String @unique // Chemin sur le VPS : /Partage/Synkrone/boxes/{userId}
   maxSizeMb Int    @default(500) // Quota en MB
 
   // Propriétaire (un utilisateur = une box max)

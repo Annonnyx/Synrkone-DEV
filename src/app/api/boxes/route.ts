@@ -3,10 +3,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hasRole } from "@/lib/auth-guard";
+import { STORAGE_ROOT } from "@/lib/storage";
 import fs from "fs/promises";
 import path from "path";
-
-const STORAGE_ROOT = process.env.VPS_STORAGE_PATH ?? "/Partage/Synkrone";
 
 // GET /api/boxes — Liste les boxes (la sienne pour dev+, toutes pour admin+)
 export async function GET() {
@@ -47,15 +46,20 @@ export async function GET() {
   }
 }
 
-// Fonction pour obtenir les limites de boxes par rôle
+// Limites de boxes par rôle.
+//
+// Le schéma Prisma impose `userId @unique` sur Box, donc maxBoxes vaut
+// toujours 1 quel que soit le rôle — sinon la 2e création lève une erreur
+// de contrainte unique au lieu d'un message clair. Les ADMIN/OWNER peuvent
+// créer des boxes pour d'autres utilisateurs (1 par utilisateur cible).
 function getBoxLimits(role: string) {
   switch (role) {
     case "DEV":
       return { maxBoxes: 1, defaultSizeMb: 500, maxSizeMb: 1000 };
     case "ADMIN":
-      return { maxBoxes: 2, defaultSizeMb: 1000, maxSizeMb: 5000 };
+      return { maxBoxes: 1, defaultSizeMb: 1000, maxSizeMb: 5000 };
     case "OWNER":
-      return { maxBoxes: 999, defaultSizeMb: 2000, maxSizeMb: 10000 };
+      return { maxBoxes: 1, defaultSizeMb: 2000, maxSizeMb: 10000 };
     default:
       return { maxBoxes: 0, defaultSizeMb: 0, maxSizeMb: 0 };
   }
