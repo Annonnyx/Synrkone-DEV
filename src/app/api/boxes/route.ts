@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hasRole } from "@/lib/auth-guard";
 import { STORAGE_ROOT } from "@/lib/storage";
+import { serializeBigInt } from "@/lib/serialize";
 import fs from "fs/promises";
 import path from "path";
 
@@ -24,7 +25,7 @@ export async function GET() {
         },
         orderBy: { createdAt: "desc" },
       });
-      return NextResponse.json(boxes);
+      return NextResponse.json(serializeBigInt(boxes));
     }
 
     // Dev voit sa box
@@ -36,7 +37,7 @@ export async function GET() {
           files: true,
         },
       });
-      return NextResponse.json(box ? [box] : []);
+      return NextResponse.json(serializeBigInt(box ? [box] : []));
     }
 
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
@@ -204,7 +205,7 @@ export async function PATCH(request: Request) {
       },
     });
 
-    return NextResponse.json(updatedBox);
+    return NextResponse.json(serializeBigInt(updatedBox));
   } catch (error) {
     console.error("Erreur modification box:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
