@@ -59,7 +59,24 @@ pm2 save
 pm2 startup        # à lancer une fois pour activer le démarrage auto
 ```
 
-## Créer un nouveau bot pour un client
+## Créer un nouveau bot
+
+### Méthode 1 — via le dashboard (recommandé)
+
+Quand un user crée un bot dans `/dashboard`, le site fait automatiquement :
+
+1. Crée la ligne `Bot` en base + une `ModuleInstance` désactivée par module.
+2. Crée `/bots/synkrone_<botId>/` avec :
+   - `main.py` (copie du template)
+   - `bot.config.json` (rempli depuis les modules activés via `MODULE_TO_COGS`)
+   - `.enc` (chmod 600, BOT_TOKEN du formulaire dashboard)
+3. Lance `pm2 start --name synkrone_<botId>` avec le venv partagé.
+4. À chaque toggle de module : réécrit `bot.config.json` puis `pm2 restart`.
+
+→ Le user n'a rien à faire en SSH. Le dossier sur disque est nommé
+`synkrone_<botId>` (id immuable) pour ne pas casser quand l'user renomme son bot.
+
+### Méthode 2 — via SSH (fallback / multi-bots / scripts)
 
 ```bash
 bash /var/www/synkrone/new_bot.sh client_acme
@@ -74,6 +91,20 @@ pm2 restart synkrone_client_acme
 3. Crée `.enc` (chmod 600) avec un placeholder de token.
 4. Enregistre le process dans PM2 en utilisant `/Partage/Synkrone/.venv/bin/python`.
 5. `pm2 save`.
+
+## Permissions UNIX requises côté site
+
+Pour que la dashboard puisse provisionner / mettre à jour les bots, le user
+qui exécute `pm2` du site (souvent `synkrone` ou l'user de la VM) doit pouvoir :
+
+- Écrire dans `/bots/` → `setup_shared_env.sh` met `chgrp synkrone /bots && chmod 2775 /bots`.
+- Écrire dans `/var/log/synkrone/` → idem.
+- Lancer `pm2` → le user du site doit être propriétaire du daemon PM2 (un
+  `pm2 startup` doit être lancé sous CE user-là).
+
+Si tu lances le site sous l'user `root` et les bots sous l'user `synkrone`,
+il faut deux daemons PM2 séparés ou bien un seul daemon partagé. Le plus
+simple : tout sous le même user (`synkrone`).
 
 ## Mettre à jour les commandes partagées
 

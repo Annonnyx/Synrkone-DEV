@@ -20,13 +20,17 @@ export async function GET() {
 }
 
 // POST /api/modules/seed — Initialise les modules par défaut (OWNER uniquement)
-export async function POST(request: Request) {
+export async function POST() {
   const session = await getServerSession(authOptions);
   if (!session?.user || session.user.role !== "OWNER") {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 
   try {
+    // Le mapping module → Cogs Python est dans src/lib/module-cogs.ts.
+    // Pour qu'un module ait un effet réel sur le bot, il faut qu'il soit
+    // listé ici ET dans MODULE_TO_COGS. Sinon le module reste un placeholder
+    // visible dans le dashboard mais n'ajoute aucune commande.
     const defaultModules = [
       { moduleId: "autorole", name: "Auto-Rôles", description: "Attribue automatiquement des rôles à l'arrivée des membres.", icon: "Users", premium: false, enabled: true, category: "MANAGEMENT" as const, pointCost: 1 },
       { moduleId: "generation", name: "Génération IA", description: "Génération d'images et de textes via l'IA.", icon: "Image", premium: true, enabled: true, category: "AI" as const, pointCost: 3 },
@@ -36,6 +40,9 @@ export async function POST(request: Request) {
       { moduleId: "tickets", name: "Tickets", description: "Système de tickets de support avec catégories.", icon: "Ticket", premium: false, enabled: true, category: "MANAGEMENT" as const, pointCost: 1 },
       { moduleId: "welcome", name: "Messages de bienvenue", description: "Messages personnalisés d'arrivée et de départ.", icon: "MessageSquare", premium: false, enabled: true, category: "UTILITY" as const, pointCost: 1 },
       { moduleId: "giveaway", name: "Giveaways", description: "Organisez des tirages au sort automatiques.", icon: "Crown", premium: true, enabled: true, category: "FUN" as const, pointCost: 2 },
+      // Modules avec Cog livré (correspondent à /Partage/Synkrone/commands/*)
+      { moduleId: "fun", name: "Fun", description: "Sondages, mini-jeux, commandes amusantes.", icon: "MessageSquare", premium: false, enabled: true, category: "FUN" as const, pointCost: 1 },
+      { moduleId: "utility", name: "Utilitaires", description: "Commandes essentielles : ping, info serveur, etc.", icon: "Zap", premium: false, enabled: true, category: "UTILITY" as const, pointCost: 1 },
     ];
 
     for (const mod of defaultModules) {
@@ -63,7 +70,33 @@ export async function POST(request: Request) {
       });
     }
 
-    return NextResponse.json({ success: true, count: defaultModules.length });
+    // Crée une ModuleInstance désactivée pour chaque (Bot, ModuleDef) qui n'en
+    // a pas encore — utile après avoir ajouté de nouveaux modules au seed,
+    // sinon les bots déjà créés ne voient pas les nouveaux modules dans le
+    // dashboard.
+    const allBots = await prisma.bot.findMany({ select: { id: true } });
+    const allDefs = await prisma.moduleDef.findMany({ select: { id: true } });
+    let backfilled = 0;
+    for (const bot of allBots) {
+      for (const def of allDefs) {
+        const existing = await prisma.moduleInstance.findFirst({
+          where: { botId: bot.id, moduleId: def.id },
+          select: { id: true },
+        });
+        if (!existing) {
+          await prisma.moduleInstance.create({
+            data: { botId: bot.id, moduleId: def.id, enabled: false },
+          });
+          backfilled += 1;
+        }
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      count: defaultModules.length,
+      instancesBackfilled: backfilled,
+    });
   } catch (error) {
     console.error("Erreur seed modules:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

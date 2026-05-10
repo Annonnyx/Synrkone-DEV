@@ -2,98 +2,9 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { STORAGE_ROOT } from "@/lib/storage";
-import fs from "fs/promises";
-import path from "path";
+import { provisionBot, updateBotToken, type DeployResult } from "@/lib/bot-deploy";
 
-const BOT_TEMPLATES = process.env.BOT_TEMPLATES_PATH ?? "/Partage/Synkrone/templates/bot";
-
-function sanitizeDirName(name: string): string {
-  return name
-    .trim()
-    .replace(/[^a-zA-Z0-9\-_]/g, "_")
-    .replace(/_+/g, "_")
-    .slice(0, 50);
-}
-
-function generateIndexJs(botName: string): string {
-  return [
-    "// " + botName + " - Bot Discord genere par Synkrone",
-    "const { Client, GatewayIntentBits } = require('discord.js');",
-    "const fs = require('fs');",
-    "const path = require('path');",
-    "",
-    "const config = require('./config.json');",
-    "",
-    "const client = new Client({",
-    "  intents: [",
-    "    GatewayIntentBits.Guilds,",
-    "    GatewayIntentBits.GuildMessages,",
-    "    GatewayIntentBits.MessageContent,",
-    "    GatewayIntentBits.GuildMembers,",
-    "  ],",
-    "});",
-    "",
-    "// Charger les commandes",
-    "client.commands = new Map();",
-    "const commandsPath = path.join(__dirname, 'commands');",
-    "if (fs.existsSync(commandsPath)) {",
-    "  const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));",
-    "  for (const file of commandFiles) {",
-    "    const command = require(path.join(commandsPath, file));",
-    "    if (command.name) client.commands.set(command.name, command);",
-    "  }",
-    "}",
-    "",
-    "// Charger les evenements",
-    "const eventsPath = path.join(__dirname, 'events');",
-    "if (fs.existsSync(eventsPath)) {",
-    "  const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));",
-    "  for (const file of eventFiles) {",
-    "    const event = require(path.join(eventsPath, file));",
-    "    if (event.name) client.on(event.name, (...args) => event.execute(...args, client));",
-    "  }",
-    "}",
-    "",
-    "// Evenement ready",
-    "client.once('ready', () => {",
-    "  console.log(client.user.tag + ' est en ligne !');",
-    "});",
-    "",
-    "// Gestion des messages (prefixe)",
-    "client.on('messageCreate', (message) => {",
-    "  if (!message.content.startsWith(config.prefix) || message.author.bot) return;",
-    "  const args = message.content.slice(config.prefix.length).trim().split(/ +/);",
-    "  const commandName = args.shift().toLowerCase();",
-    "  const command = client.commands.get(commandName);",
-    "  if (command) command.execute(message, args, client);",
-    "});",
-    "",
-    "// Gestion des /commandes",
-    "if (config.useSlashCommands) {",
-    "  client.on('interactionCreate', async (interaction) => {",
-    "    if (!interaction.isChatInputCommand()) return;",
-    "    const command = client.commands.get(interaction.commandName);",
-    "    if (command) command.execute(interaction, [], client);",
-    "  });",
-    "}",
-    "",
-    "client.login(config.token);",
-  ].join("\n");
-}
-
-function generateReadyEvent(): string {
-  return [
-    "module.exports = {",
-    "  name: 'ready',",
-    "  execute(client) {",
-    "    console.log(client.user.tag + ' est connecte !');",
-    "  },",
-    "};",
-  ].join("\n");
-}
-
-// GET /api/bot — Récupère le bot de l'utilisateur
+// GET /api/bot — Récupère le bot de l'utilisateur courant.
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
@@ -120,20 +31,35 @@ export async function GET() {
   }
 }
 
-// POST /api/bot — Crée un nouveau bot
+// POST /api/bot — Crée un nouveau bot Python (un par utilisateur).
+//
+// Pipeline :
+//   1. Crée la ligne `Bot` + `BotStats` + une `ModuleInstance` désactivée par
+//      `ModuleDef` connue.
+//   2. Provisionne /bots/synkrone_<id>/ avec main.py + bot.config.json + .enc.
+//   3. Lance le process PM2 via le venv partagé /Partage/Synkrone/.venv/.
+//
+// Les étapes 2-3 sont best-effort : si le VPS (/bots, pm2) n'est pas dispo
+// (dev local, CI), on log et on retourne le bot quand même — l'utilisateur
+// pourra recréer la struct disque plus tard via /api/bot/redeploy.
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
   try {
     const body = await request.json();
-    const { name, token, hosting, prefix, useSlashCommands } = body;
+    const { name, token, hosting, prefix, useSlashCommands } = body as {
+      name?: string;
+      token?: string | null;
+      hosting?: string;
+      prefix?: string | null;
+      useSlashCommands?: boolean;
+    };
 
     if (!name) {
       return NextResponse.json({ error: "Nom du projet requis" }, { status: 400 });
     }
 
-    // Vérifier si l'utilisateur a déjà un bot
     const existing = await prisma.bot.findFirst({
       where: { ownerId: session.user.id },
     });
@@ -142,7 +68,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Vous avez déjà un bot" }, { status: 400 });
     }
 
-    // Créer le bot dans la DB
     const bot = await prisma.bot.create({
       data: {
         name,
@@ -156,7 +81,6 @@ export async function POST(request: Request) {
       },
     });
 
-    // Créer les stats initiales
     await prisma.botStats.create({
       data: {
         botId: bot.id,
@@ -176,7 +100,6 @@ export async function POST(request: Request) {
       },
     });
 
-    // Initialiser tous les modules comme désactivés
     const allModules = await prisma.moduleDef.findMany();
     for (const mod of allModules) {
       await prisma.moduleInstance.create({
@@ -188,90 +111,50 @@ export async function POST(request: Request) {
       });
     }
 
-    // Créer l'architecture du bot sur le VPS
-    // Structure: /Partage/Synkrone/{userId}/{projectName}/
+    const instances = await prisma.moduleInstance.findMany({
+      where: { botId: bot.id },
+      include: { module: true },
+    });
+
+    let deploy: DeployResult = { ok: true };
     try {
-      const userDir = path.join(STORAGE_ROOT, session.user.id);
-      const botDir = path.join(userDir, sanitizeDirName(name));
-      const commandsDir = path.join(botDir, "commands");
-      const modulesDir = path.join(botDir, "modules");
-      const eventsDir = path.join(botDir, "events");
-
-      // Créer les dossiers
-      await fs.mkdir(commandsDir, { recursive: true });
-      await fs.mkdir(modulesDir, { recursive: true });
-      await fs.mkdir(eventsDir, { recursive: true });
-
-      // Copier les fichiers de base depuis les templates
-      try {
-        const templateFiles = await fs.readdir(BOT_TEMPLATES);
-        for (const file of templateFiles) {
-          const src = path.join(BOT_TEMPLATES, file);
-          const dest = path.join(botDir, file);
-          const stat = await fs.stat(src);
-          if (stat.isFile()) {
-            await fs.copyFile(src, dest);
-          }
-        }
-      } catch {
-        // Pas de templates trouvés, on crée les fichiers de base
-      }
-
-      // config.json
-      const configContent = JSON.stringify({
-        name: name,
-        prefix: prefix || "!",
-        useSlashCommands: useSlashCommands || false,
-        token: token || "YOUR_BOT_TOKEN_HERE",
-        ownerId: session.user.id,
-        createdAt: new Date().toISOString(),
-      }, null, 2);
-      await fs.writeFile(path.join(botDir, "config.json"), configContent);
-
-      // index.js
-      await fs.writeFile(path.join(botDir, "index.js"), generateIndexJs(name));
-
-      // events/ready.js
-      await fs.writeFile(path.join(eventsDir, "ready.js"), generateReadyEvent());
-
-      // Enregistrer les fichiers du bot dans la DB
-      const botFiles = [
-        { name: "index.js", mimeType: "application/javascript", filePath: path.join(botDir, "index.js") },
-        { name: "config.json", mimeType: "application/json", filePath: path.join(botDir, "config.json") },
-        { name: "ready.js", mimeType: "application/javascript", filePath: path.join(eventsDir, "ready.js") },
-      ];
-      for (const bf of botFiles) {
-        const stat = await fs.stat(bf.filePath);
-        await prisma.file.create({
-          data: {
-            name: bf.name,
-            path: bf.filePath,
-            mimeType: bf.mimeType,
-            sizeBytes: BigInt(stat.size),
-            location: "PROJECT",
-            uploaderId: session.user.id,
-          },
-        });
+      deploy = await provisionBot({
+        bot: { id: bot.id, name: bot.name },
+        prefix: bot.prefix,
+        token: bot.token,
+        modules: instances,
+      });
+      if (!deploy.ok) {
+        console.error("Erreur provision bot (non bloquant):", deploy.error);
       }
     } catch (fsError) {
-      console.error("Erreur creation fichiers bot (non bloquant):", fsError);
+      console.error("Erreur provision bot (non bloquant):", fsError);
+      deploy = { ok: false, error: (fsError as Error).message };
     }
 
-    return NextResponse.json(bot, { status: 201 });
+    return NextResponse.json({ ...bot, deploy }, { status: 201 });
   } catch (error) {
     console.error("Erreur creation bot:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }
 
-// PATCH /api/bot — Met à jour le bot
+// PATCH /api/bot — Met à jour le bot. Si le token change, le .enc est
+// réécrit et le process PM2 redémarré pour prendre en compte le nouveau token.
 export async function PATCH(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
   try {
     const body = await request.json();
-    const { name, token, hosting, status, prefix, useSlashCommands } = body;
+    const { name, token, hosting, status, prefix, useSlashCommands } = body as {
+      name?: string;
+      token?: string | null;
+      hosting?: string;
+      status?: string;
+      prefix?: string | null;
+      useSlashCommands?: boolean;
+    };
 
     const bot = await prisma.bot.findFirst({
       where: { ownerId: session.user.id },
@@ -280,6 +163,8 @@ export async function PATCH(request: Request) {
     if (!bot) {
       return NextResponse.json({ error: "Bot non trouvé" }, { status: 404 });
     }
+
+    const tokenChanged = token !== undefined && token !== bot.token;
 
     const updated = await prisma.bot.update({
       where: { id: bot.id },
@@ -292,6 +177,20 @@ export async function PATCH(request: Request) {
         ...(useSlashCommands !== undefined && { useSlashCommands }),
       },
     });
+
+    if (tokenChanged) {
+      try {
+        const deploy = await updateBotToken(
+          { id: updated.id, name: updated.name },
+          updated.token,
+        );
+        if (!deploy.ok) {
+          console.error("Erreur sync token bot (non bloquant):", deploy.error);
+        }
+      } catch (e) {
+        console.error("Erreur sync token bot (non bloquant):", e);
+      }
+    }
 
     return NextResponse.json(updated);
   } catch (error) {
