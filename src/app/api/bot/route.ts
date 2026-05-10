@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { STORAGE_ROOT } from "@/lib/storage";
 import fs from "fs/promises";
 import path from "path";
 
-const STORAGE_ROOT = process.env.VPS_STORAGE_PATH ?? "/Partage/Synkrone";
 const BOT_TEMPLATES = process.env.BOT_TEMPLATES_PATH ?? "/Partage/Synkrone/templates/bot";
 
 function sanitizeDirName(name: string): string {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
@@ -144,20 +144,7 @@ export default function DashboardPage() {
   const totalKrUsed = bot?.usedKr || 0;
   const maxKr = bot?.maxKr || 30;
 
-  // Vérifier l'auth et charger les données au montage
-  useEffect(() => {
-    if (status === "unauthenticated") router.push("/login");
-    if (status === "authenticated") loadData();
-  }, [status, router]);
-
-  // Redirection automatique pour le step "boxes" (uniquement si on est sur la page dashboard)
-  useEffect(() => {
-    if (step === "boxes" && window.location.pathname === "/dashboard") {
-      router.push("/dashboard/boxes");
-    }
-  }, [step, router]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       // Charger le bot et ses modules
@@ -185,7 +172,25 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Vérifier l'auth et charger les données au montage
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+      return;
+    }
+    if (status === "authenticated") {
+      void Promise.resolve().then(loadData);
+    }
+  }, [status, router, loadData]);
+
+  // Redirection automatique pour le step "boxes" (uniquement si on est sur la page dashboard)
+  useEffect(() => {
+    if (step === "boxes" && window.location.pathname === "/dashboard") {
+      router.push("/dashboard/boxes");
+    }
+  }, [step, router]);
 
   const toggleModule = async (instanceId: string, newEnabled: boolean) => {
     try {

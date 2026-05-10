@@ -3,10 +3,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hasRole } from "@/lib/auth-guard";
+import { STORAGE_ROOT } from "@/lib/storage";
 import fs from "fs/promises";
 import path from "path";
-
-const STORAGE_ROOT = process.env.VPS_STORAGE_PATH ?? "/var/lib/synkrone/storage";
 
 // GET /api/files — Liste les fichiers accessibles selon le rôle
 export async function GET(request: Request) {
@@ -51,23 +50,6 @@ export async function GET(request: Request) {
 
       const files = await prisma.file.findMany({
         where: { location: "BOX", boxId },
-        orderBy: { createdAt: "desc" },
-      });
-      return NextResponse.json(files.map((f: { sizeBytes: bigint; [key: string]: unknown }) => ({ ...f, sizeBytes: Number(f.sizeBytes) })));
-    }
-
-    // Fichiers d'une box spécifique
-    if (location === "BOX" && boxId) {
-      const box = await prisma.box.findUnique({ where: { id: boxId } });
-      if (!box) return NextResponse.json({ error: "Box introuvable" }, { status: 404 });
-
-      // Le propriétaire peut voir sa box, admin/owner voient toutes les boxes
-      if (box.userId !== session.user.id && !hasRole(userRole, "ADMIN")) {
-        return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
-      }
-
-      const files = await prisma.file.findMany({
-        where: { boxId, location: "BOX" },
         orderBy: { createdAt: "desc" },
       });
       return NextResponse.json(files.map((f: { sizeBytes: bigint; [key: string]: unknown }) => ({ ...f, sizeBytes: Number(f.sizeBytes) })));

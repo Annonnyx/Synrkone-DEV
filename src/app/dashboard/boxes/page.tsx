@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
@@ -11,29 +11,13 @@ import {
   FolderOpen,
   Settings,
   Trash2,
-  Edit,
-  Copy,
-  ExternalLink,
   Shield,
-  Clock,
-  CheckCircle2,
   XCircle,
-  AlertTriangle,
   FileText,
   Upload,
   Download,
-  Folder,
-  ArrowLeft,
-  ArrowRight,
-  MoreVertical,
-  Move,
-  Search,
-  FolderPlus,
-  Home,
-  ChevronDown,
   User,
   Lock,
-  Unlock,
 } from "lucide-react";
 
 interface Box {
@@ -74,26 +58,13 @@ export default function BoxesPage() {
   const [targetUserName, setTargetUserName] = useState("");
   const [allUsers, setAllUsers] = useState<Array<{id: string, name: string, email: string}>>([]);
 
-  // Vérifier les permissions (DEV+)
-  useEffect(() => {
-    if (status === "unauthenticated") router.push("/login");
-    if (status === "authenticated") {
-      const userRole = session?.user?.role;
-      if (!["DEV", "ADMIN", "OWNER"].includes(userRole || "")) {
-        router.push("/dashboard");
-        return;
-      }
-      loadBoxes();
-    }
-  }, [status, session, router]);
-
-  const loadBoxes = async () => {
+  const loadBoxes = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/boxes");
       if (res.ok) {
         const data = await res.json();
-        // L'API retourne soit un array (admin) soit un objet (dev)
+        // L'API retourne soit un array (admin/dev avec box) soit [] (dev sans box)
         setBoxes(Array.isArray(data) ? data : (data ? [data] : []));
       }
     } catch (err) {
@@ -101,11 +72,11 @@ export default function BoxesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadAllUsers = async () => {
+  const loadAllUsers = useCallback(async () => {
     if (!["ADMIN", "OWNER"].includes(session?.user?.role || "")) return;
-    
+
     try {
       // Charger tous les utilisateurs sans box
       const res = await fetch("/api/users?withoutBox=true");
@@ -116,19 +87,37 @@ export default function BoxesPage() {
     } catch (err) {
       console.error("Erreur chargement utilisateurs:", err);
     }
-  };
+  }, [session?.user?.role]);
+
+  // Vérifier les permissions (DEV+) et charger les boxes
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+      return;
+    }
+    if (status !== "authenticated") return;
+
+    const userRole = session?.user?.role;
+    if (!["DEV", "ADMIN", "OWNER"].includes(userRole || "")) {
+      router.push("/dashboard");
+      return;
+    }
+    // Defer the fetch (which calls setState) so it doesn't run synchronously
+    // inside the effect body — satisfies react-hooks/set-state-in-effect.
+    void Promise.resolve().then(loadBoxes);
+  }, [status, session, router, loadBoxes]);
 
   // Charger les utilisateurs quand le modal s'ouvre pour les admins
   useEffect(() => {
-    if (showCreateModal && ["ADMIN", "OWNER"].includes(session?.user?.role || "")) {
-      loadAllUsers();
-    }
-  }, [showCreateModal, session]);
+    if (!showCreateModal) return;
+    if (!["ADMIN", "OWNER"].includes(session?.user?.role || "")) return;
+    void Promise.resolve().then(loadAllUsers);
+  }, [showCreateModal, session, loadAllUsers]);
 
   const createBox = async (name: string) => {
     try {
-      const body: any = { name };
-      
+      const body: { name: string; userId?: string } = { name };
+
       // Si admin crée pour un autre utilisateur
       if (creatingForUser && targetUserId) {
         body.userId = targetUserId;
@@ -267,96 +256,6 @@ export default function BoxesPage() {
     } catch (err) {
       console.error("Erreur suppression fichier:", err);
       alert("Erreur lors de la suppression");
-    }
-  };
-
-  // Simplified file manager to work with existing API
-  const getFilteredFiles = () => {
-    if (!selectedBox) return [];
-    
-    const allFiles = selectedBox.files;
-
-    if (searchQuery) {
-      return allFiles.filter(file => 
-        file.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    return allFiles;
-  };
-
-  const handleFileSelect = (fileId: string) => {
-    setSelectedFiles(prev => 
-      prev.includes(fileId) 
-        ? prev.filter(id => id !== fileId)
-        : [...prev, fileId]
-    );
-  };
-
-  const handleContextMenu = (e: React.MouseEvent, file: any) => {
-    e.preventDefault();
-    setContextMenu({ x: e.clientX, y: e.clientY, file });
-  };
-
-  const closeContextMenu = () => {
-    setContextMenu(null);
-  };
-
-  const createFolder = async () => {
-    if (!newFolderName.trim() || !selectedBox) return;
-
-    try {
-      const folderPath = currentPath === "/" ? newFolderName : `${currentPath}/${newFolderName}`;
-      
-      // Simulate folder creation (in real implementation, this would create a folder in the backend)
-      const newFolder = {
-        id: `folder-${Date.now()}`,
-        name: newFolderName,
-        path: folderPath,
-        sizeBytes: 0,
-        mimeType: "folder",
-        location: "BOX",
-        createdAt: new Date().toISOString(),
-        uploaderId: session?.user?.id || "",
-      };
-
-      // In real implementation, this would call the API to create the folder
-      console.log("Creating folder:", newFolder);
-      
-      setNewFolderName("");
-      setShowNewFolderModal(false);
-      loadBoxes();
-    } catch (err) {
-      console.error("Erreur création dossier:", err);
-      alert("Erreur lors de la création du dossier");
-    }
-  };
-
-  const renameFile = async (fileId: string, newName: string) => {
-    if (!newName.trim()) return;
-
-    try {
-      // In real implementation, this would call the API to rename the file
-      console.log("Renaming file:", fileId, "to:", newName);
-      
-      setRenamingFile(null);
-      loadBoxes();
-    } catch (err) {
-      console.error("Erreur renommage:", err);
-      alert("Erreur lors du renommage");
-    }
-  };
-
-  const moveFiles = async (fileIds: string[], targetPath: string) => {
-    try {
-      // In real implementation, this would call to API to move files
-      console.log("Moving files:", fileIds, "to:", targetPath);
-      
-      setSelectedFiles([]);
-      loadBoxes();
-    } catch (err) {
-      console.error("Erreur déplacement:", err);
-      alert("Erreur lors du déplacement");
     }
   };
 
@@ -653,7 +552,7 @@ export default function BoxesPage() {
               {creatingForUser && ["ADMIN", "OWNER"].includes(session?.user?.role || "") && (
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-white">
-                    Sélectionner l'utilisateur
+                    Sélectionner l&apos;utilisateur
                   </label>
                   <select
                     value={targetUserId}
@@ -854,7 +753,7 @@ export default function BoxesPage() {
                         <div className="space-y-2">
                           <button className="w-full flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-sm text-amber-400 hover:bg-amber-500/10 hover:text-amber-300 transition-all">
                             <Lock className="h-4 w-4" />
-                            Révoquer l'accès
+                            Révoquer l&apos;accès
                           </button>
                           <button 
                             onClick={() => deleteBox(selectedBox.id)}
@@ -940,125 +839,6 @@ export default function BoxesPage() {
         </div>
       )}
 
-      {/* Context Menu */}
-      {contextMenu && (
-        <div 
-          className="fixed bg-white/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-xl py-2 z-50"
-          style={{ left: contextMenu.x, top: contextMenu.y }}
-          onClick={closeContextMenu}
-        >
-          <button
-            onClick={() => {
-              if (selectedFiles.includes(contextMenu.file.id)) {
-                downloadFile(contextMenu.file.id, contextMenu.file.name);
-              }
-            }}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-          >
-            <Download className="h-4 w-4" />
-            Télécharger
-          </button>
-          <button
-            onClick={() => {
-              if (selectedFiles.includes(contextMenu.file.id)) {
-                setRenamingFile(contextMenu.file.id);
-              }
-            }}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-          >
-            <Edit className="h-4 w-4" />
-            Renommer
-          </button>
-          <button
-            onClick={() => {
-              if (selectedFiles.includes(contextMenu.file.id)) {
-                deleteFile(contextMenu.file.id);
-              }
-            }}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
-          >
-            <Trash2 className="h-4 w-4" />
-            Supprimer
-          </button>
-        </div>
-      )}
-
-      {/* Rename Modal */}
-      {renamingFile && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="card max-w-md w-full mx-4 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Renommer le fichier/dossier</h3>
-            <input
-              type="text"
-              defaultValue={getFilteredFiles().find(f => f.id === renamingFile)?.name || ""}
-              placeholder="Nouveau nom"
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/60 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  const newName = (e.target as HTMLInputElement).value;
-                  renameFile(renamingFile, newName);
-                }
-                if (e.key === "Escape") {
-                  setRenamingFile(null);
-                }
-              }}
-              autoFocus
-            />
-            <div className="flex gap-3 mt-4">
-              <button
-                onClick={() => setRenamingFile(null)}
-                className="flex-1 rounded-lg border border-white/10 px-4 py-2.5 text-sm font-medium text-white/60 hover:bg-white/5 hover:text-white transition-all"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={() => {
-                  const input = document.querySelector('input[placeholder="Nouveau nom"]') as HTMLInputElement;
-                  const newName = input.value;
-                  renameFile(renamingFile, newName);
-                }}
-                className="flex-1 btn-violet rounded-lg px-4 py-2.5 text-sm font-semibold text-white"
-              >
-                Renommer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* New Folder Modal */}
-      {showNewFolderModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="card max-w-md w-full mx-4 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Créer un nouveau dossier</h3>
-            <input
-              type="text"
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-              placeholder="Nom du dossier"
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/60 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all"
-              autoFocus
-            />
-            <div className="flex gap-3 mt-4">
-              <button
-                onClick={() => {
-                  setShowNewFolderModal(false);
-                  setNewFolderName("");
-                }}
-                className="flex-1 rounded-lg border border-white/10 px-4 py-2.5 text-sm font-medium text-white/60 hover:bg-white/5 hover:text-white transition-all"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={() => createFolder()}
-                className="flex-1 btn-violet rounded-lg px-4 py-2.5 text-sm font-semibold text-white"
-              >
-                Créer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
