@@ -25,7 +25,8 @@ export async function GET() {
         },
         orderBy: { createdAt: "desc" },
       });
-      return NextResponse.json(serializeBigInt(boxes));
+      const responseBody = JSON.stringify(serializeBigInt(boxes));
+      return new Response(responseBody, { status: 200, headers: { "Content-Type": "application/json" } });
     }
 
     // Dev voit sa box
@@ -37,7 +38,8 @@ export async function GET() {
           files: true,
         },
       });
-      return NextResponse.json(serializeBigInt(box ? [box] : []));
+      const responseBody = JSON.stringify(serializeBigInt(box ? [box] : []));
+      return new Response(responseBody, { status: 200, headers: { "Content-Type": "application/json" } });
     }
 
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
@@ -205,7 +207,8 @@ export async function PATCH(request: Request) {
       },
     });
 
-    return NextResponse.json(serializeBigInt(updatedBox));
+    const responseBody = JSON.stringify(serializeBigInt(updatedBox));
+    return new Response(responseBody, { status: 200, headers: { "Content-Type": "application/json" } });
   } catch (error) {
     console.error("Erreur modification box:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
