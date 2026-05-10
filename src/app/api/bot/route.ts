@@ -2,7 +2,13 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { provisionBot, updateBotToken, type DeployResult } from "@/lib/bot-deploy";
+import {
+  provisionBot,
+  updateBotConfig,
+  updateBotToken,
+  type DeployResult,
+} from "@/lib/bot-deploy";
+import { loadCommandManifests } from "@/lib/command-manifests";
 
 // GET /api/bot — Récupère le bot de l'utilisateur courant.
 export async function GET() {
@@ -16,6 +22,7 @@ export async function GET() {
         modules: {
           include: { module: true },
         },
+        commands: true,
         stats: true,
       },
     });
@@ -111,9 +118,30 @@ export async function POST(request: Request) {
       });
     }
 
+    // Créer les BotCommand pour chaque commande manifest (toutes désactivées)
+    const manifests = await loadCommandManifests().catch(() => []);
+    for (const m of manifests) {
+      await prisma.botCommand.upsert({
+        where: {
+          botId_commandId: { botId: bot.id, commandId: m.id },
+        },
+        update: {},
+        create: {
+          botId: bot.id,
+          commandId: m.id,
+          enabled: false,
+          priceKr: m.priceKr ?? 0,
+        },
+      });
+    }
+
     const instances = await prisma.moduleInstance.findMany({
       where: { botId: bot.id },
       include: { module: true },
+    });
+
+    const botCommands = await prisma.botCommand.findMany({
+      where: { botId: bot.id },
     });
 
     let deploy: DeployResult = { ok: true };
@@ -123,6 +151,7 @@ export async function POST(request: Request) {
         prefix: bot.prefix,
         token: bot.token,
         modules: instances,
+        commands: botCommands,
       });
       if (!deploy.ok) {
         console.error("Erreur provision bot (non bloquant):", deploy.error);
@@ -165,6 +194,7 @@ export async function PATCH(request: Request) {
     }
 
     const tokenChanged = token !== undefined && token !== bot.token;
+    const prefixChanged = prefix !== undefined && prefix !== bot.prefix;
 
     const updated = await prisma.bot.update({
       where: { id: bot.id },
@@ -189,6 +219,33 @@ export async function PATCH(request: Request) {
         }
       } catch (e) {
         console.error("Erreur sync token bot (non bloquant):", e);
+      }
+    }
+
+    // Si le préfix a changé, réécrire bot.config.json + redémarrer le bot
+    // pour que le changement prenne effet immédiatement. Sans ce bloc, le
+    // bot continue à tourner avec l'ancien préfix jusqu'au prochain
+    // toggle de module (qui appelle déjà updateBotConfig).
+    if (prefixChanged) {
+      try {
+        const instances = await prisma.moduleInstance.findMany({
+          where: { botId: updated.id },
+          include: { module: true },
+        });
+        const botCommands = await prisma.botCommand.findMany({
+          where: { botId: updated.id },
+        });
+        const deploy = await updateBotConfig({
+          bot: { id: updated.id, name: updated.name },
+          prefix: updated.prefix,
+          modules: instances,
+          commands: botCommands,
+        });
+        if (!deploy.ok) {
+          console.error("Erreur sync préfix bot (non bloquant):", deploy.error);
+        }
+      } catch (e) {
+        console.error("Erreur sync préfix bot (non bloquant):", e);
       }
     }
 

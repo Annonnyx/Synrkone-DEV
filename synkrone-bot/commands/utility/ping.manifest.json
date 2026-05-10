@@ -1,0 +1,16 @@
+{
+  "id": "utility.ping",
+  "name": "Ping",
+  "description": "Renvoie la latence WebSocket du bot. Utile pour vérifier qu'un bot tourne.",
+  "category": "UTILITY",
+  "module": "utility",
+  "priceKr": 0,
+  "premium": false,
+  "usage": "{prefix}ping",
+  "permissions": {
+    "user": [],
+    "bot": []
+  },
+  "envVars": [],
+  "version": "1.0.0"
+}

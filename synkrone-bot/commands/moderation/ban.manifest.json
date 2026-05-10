@@ -1,0 +1,22 @@
+{
+  "id": "moderation.ban",
+  "name": "Ban",
+  "description": "Bannit un membre du serveur. Anti-self-ban et hiérarchie de rôles vérifiée.",
+  "category": "MODERATION",
+  "module": "moderation",
+  "priceKr": 2,
+  "premium": false,
+  "usage": "{prefix}ban @membre [raison]",
+  "permissions": {
+    "user": ["ban_members"],
+    "bot": ["ban_members"]
+  },
+  "envVars": [
+    {
+      "name": "MOD_LOG_CHANNEL_ID",
+      "description": "ID du salon où loguer les bans (facultatif)",
+      "required": false
+    }
+  ],
+  "version": "1.0.0"
+}

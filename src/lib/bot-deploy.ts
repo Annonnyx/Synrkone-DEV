@@ -29,27 +29,50 @@ interface ModuleInstanceLike {
   module: { moduleId: string };
 }
 
+interface BotCommandLike {
+  enabled: boolean;
+  commandId: string;
+  priceKr?: number;
+}
+
 export interface ProvisionInput {
   bot: BotIdentity;
   prefix?: string | null;
   token?: string | null;
   modules: ModuleInstanceLike[];
+  commands?: BotCommandLike[];
 }
 
 export interface UpdateConfigInput {
   bot: BotIdentity;
   prefix?: string | null;
   modules: ModuleInstanceLike[];
+  commands?: BotCommandLike[];
 }
 
-function buildCommandList(modules: ModuleInstanceLike[]): string[] {
+function buildCommandList(
+  modules: ModuleInstanceLike[],
+  commands?: BotCommandLike[],
+): string[] {
   const out = new Set<string>();
-  for (const inst of modules) {
-    if (!inst.enabled) continue;
-    for (const cog of cogsForModule(inst.module.moduleId)) {
-      out.add(cog);
+
+  if (commands && commands.length > 0) {
+    // Mode "commande par commande" — on filtre sur BotCommand.enabled
+    for (const cmd of commands) {
+      if (cmd.enabled) {
+        out.add(cmd.commandId);
+      }
+    }
+  } else {
+    // Fallback legacy : filtre sur ModuleInstance.enabled
+    for (const inst of modules) {
+      if (!inst.enabled) continue;
+      for (const cog of cogsForModule(inst.module.moduleId)) {
+        out.add(cog);
+      }
     }
   }
+
   // Toujours inclure ping pour qu'un bot fraîchement provisionné réponde.
   out.add("utility.ping");
   return [...out];
@@ -60,7 +83,7 @@ function buildBotConfig(input: ProvisionInput | UpdateConfigInput) {
     name: input.bot.name ?? input.bot.id,
     prefix: input.prefix ?? "!",
     intents: ["default", "members", "message_content"],
-    commands: buildCommandList(input.modules),
+    commands: buildCommandList(input.modules, input.commands),
   };
 }
 
@@ -74,9 +97,13 @@ async function pathExists(p: string): Promise<boolean> {
 }
 
 async function writeEnc(filePath: string, token: string | null | undefined): Promise<void> {
+  // .enc ne contient QUE les secrets / IDs spécifiques au bot. Le préfix
+  // vit dans bot.config.json (source de vérité côté API). Si on écrivait
+  // PREFIX=! ici, cela primerait sur bot.config.json (cf. main.py qui fait
+  // `os.getenv("PREFIX") or config.get("prefix")`) et le changement de
+  // préfix depuis le dashboard serait silencieusement ignoré.
   const lines = [
     `BOT_TOKEN=${token ?? "replace_with_real_token"}`,
-    "PREFIX=!",
     "LOG_LEVEL=INFO",
     "GUILD_ID=",
     "MOD_LOG_CHANNEL_ID=",

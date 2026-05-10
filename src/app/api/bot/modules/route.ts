@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { updateBotConfig } from "@/lib/bot-deploy";
+import { loadCommandManifests } from "@/lib/command-manifests";
 
 // GET /api/bot/modules — Liste les modules (instances) du bot du user courant.
 export async function GET() {
@@ -92,9 +93,25 @@ export async function PATCH(request: Request) {
       data: { usedKr: newUsed },
     });
 
+    // Activer/désactiver les commandes du module en même temps
+    const manifests = await loadCommandManifests().catch(() => []);
+    const moduleCommands = manifests.filter(
+      (m) => m.module === instance.module.moduleId,
+    );
+    for (const cmd of moduleCommands) {
+      await prisma.botCommand.updateMany({
+        where: { botId: bot.id, commandId: cmd.id },
+        data: { enabled },
+      });
+    }
+
     const finalInstances = await prisma.moduleInstance.findMany({
       where: { botId: bot.id },
       include: { module: true },
+    });
+
+    const finalCommands = await prisma.botCommand.findMany({
+      where: { botId: bot.id },
     });
 
     try {
@@ -102,6 +119,7 @@ export async function PATCH(request: Request) {
         bot: { id: bot.id, name: bot.name },
         prefix: bot.prefix,
         modules: finalInstances,
+        commands: finalCommands,
       });
       if (!deploy.ok) {
         console.error("Erreur sync bot.config.json (non bloquant):", deploy.error);

@@ -1,0 +1,16 @@
+{
+  "id": "fun.poll",
+  "name": "Sondage",
+  "description": "Crée un sondage à réactions emoji avec jusqu'à 10 options.",
+  "category": "FUN",
+  "module": "fun",
+  "priceKr": 1,
+  "premium": false,
+  "usage": "{prefix}poll \"Question ?\" \"Option 1\" \"Option 2\" ...",
+  "permissions": {
+    "user": [],
+    "bot": ["add_reactions", "send_messages"]
+  },
+  "envVars": [],
+  "version": "1.0.0"
+}

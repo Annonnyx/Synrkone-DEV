@@ -250,12 +250,33 @@ model Bot {
   ownerId     String
   owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   modules     ModuleInstance[]
+  commands    BotCommand[]
   stats       BotStats?
-  
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@map("bots")
+}
+
+// =====================
+// BOT COMMANDS (Activation commande par commande)
+// =====================
+
+model BotCommand {
+  id        String  @id @default(cuid())
+  commandId String  // ex: "moderation.ban" (notation pointée, match le manifest)
+  enabled   Boolean @default(false)
+  priceKr   Int     @default(0) // Kr coût de cette commande (lu depuis le manifest au provision)
+
+  botId     String
+  bot       Bot     @relation(fields: [botId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([botId, commandId]) // Une commande unique par bot
+  @@map("bot_commands")
 }
 
 model BotStats {

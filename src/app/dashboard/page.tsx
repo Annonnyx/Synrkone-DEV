@@ -76,6 +76,13 @@ interface ModuleInstance {
   module: ModuleDef;
 }
 
+interface BotCommandData {
+  id: string;
+  commandId: string;
+  enabled: boolean;
+  priceKr: number;
+}
+
 interface BotData {
   id: string;
   name: string;
@@ -85,6 +92,7 @@ interface BotData {
   maxKr: number;
   usedKr: number;
   modules: ModuleInstance[];
+  commands: BotCommandData[];
   stats?: BotStats;
 }
 
@@ -205,7 +213,7 @@ export default function DashboardPage() {
         setModules((prev) =>
           prev.map((m) => (m.id === instanceId ? { ...m, enabled: newEnabled } : m))
         );
-        // Recharger le bot pour avoir les Krônes à jour
+        // Recharger le bot pour avoir les Krônes et commandes à jour
         loadData();
       } else {
         const err = await res.json();
@@ -213,6 +221,36 @@ export default function DashboardPage() {
       }
     } catch (err) {
       console.error("Erreur toggle module:", err);
+    }
+  };
+
+  const toggleCommand = async (commandId: string, newEnabled: boolean) => {
+    try {
+      const res = await fetch("/api/bot/commands", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ commandId, enabled: newEnabled }),
+      });
+
+      if (res.ok) {
+        // Mettre à jour localement
+        setBot((prev) =>
+          prev
+            ? {
+                ...prev,
+                commands: prev.commands.map((c) =>
+                  c.commandId === commandId ? { ...c, enabled: newEnabled } : c,
+                ),
+              }
+            : prev,
+        );
+        loadData();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Erreur lors de l'activation de la commande");
+      }
+    } catch (err) {
+      console.error("Erreur toggle commande:", err);
     }
   };
 
@@ -777,8 +815,8 @@ export default function DashboardPage() {
                       <div className="flex items-center gap-3">
                         <div
                           className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
-                            modInstance.enabled 
-                              ? "bg-gradient-to-br from-violet-500/30 to-violet-600/10 text-violet-300 shadow-lg shadow-violet-500/20" 
+                            modInstance.enabled
+                              ? "bg-gradient-to-br from-violet-500/30 to-violet-600/10 text-violet-300 shadow-lg shadow-violet-500/20"
                               : "bg-white/5 text-white/50"
                           }`}
                         >
@@ -798,8 +836,8 @@ export default function DashboardPage() {
                       <button
                         onClick={() => toggleModule(modInstance.id, !modInstance.enabled)}
                         className={`relative h-7 w-12 flex-shrink-0 rounded-full transition-all duration-300 ${
-                          modInstance.enabled 
-                            ? "bg-gradient-to-r from-violet-600 to-violet-500 shadow-lg shadow-violet-500/30" 
+                          modInstance.enabled
+                            ? "bg-gradient-to-r from-violet-600 to-violet-500 shadow-lg shadow-violet-500/30"
                             : "bg-white/10 hover:bg-white/15"
                         }`}
                       >
@@ -810,6 +848,43 @@ export default function DashboardPage() {
                         />
                       </button>
                     </div>
+
+                    {/* Commandes individuelles — visibles quand le module est activé */}
+                    {modInstance.enabled && bot && bot.commands.length > 0 && (
+                      <div className="mt-4 space-y-2 border-t border-white/5 pt-3">
+                        {bot.commands
+                          .filter((c) => c.commandId.startsWith(mod.moduleId + "."))
+                          .map((cmd) => (
+                            <div
+                              key={cmd.commandId}
+                              className="flex items-center justify-between"
+                            >
+                              <div>
+                                <span className="text-xs text-white/80">
+                                  {cmd.commandId.split(".")[1]}
+                                </span>
+                                <span className="ml-2 text-[10px] text-white/40">
+                                  {cmd.priceKr > 0 ? `${cmd.priceKr} Kr` : "gratuit"}
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => toggleCommand(cmd.commandId, !cmd.enabled)}
+                                className={`relative h-5 w-9 flex-shrink-0 rounded-full transition-all ${
+                                  cmd.enabled
+                                    ? "bg-violet-500/80"
+                                    : "bg-white/10 hover:bg-white/15"
+                                }`}
+                              >
+                                <span
+                                  className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-all ${
+                                    cmd.enabled ? "translate-x-4" : "translate-x-0"
+                                  }`}
+                                />
+                              </button>
+                            </div>
+                          ))}
+                      </div>
+                    )}
                   </div>
                 );
               })}

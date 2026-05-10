@@ -1,14 +1,18 @@
 // Mapping ModuleDef.moduleId → liste de Cogs Python (notation pointée
 // `category.name` exactement comme dans bot.config.json["commands"]).
 //
-// Quand un module est activé dans le dashboard, ses Cogs sont injectés dans
-// bot.config.json puis le bot est redémarré. Les Cogs doivent exister dans
-// /Partage/Synkrone/commands/ — sinon `bot.load_extension` log une erreur mais
-// le bot continue à tourner.
+// Source de vérité : les fichiers manifest.json dans
+// `synkrone-bot/commands/<module>/<command>.manifest.json`. Voir
+// `src/lib/command-manifests.ts` pour le loader.
 //
-// Modules sans Cog associé (ex. "welcome", "tickets" pas encore implémentés)
-// retournent une liste vide : ils restent visibles dans le dashboard mais
-// n'ajoutent aucune commande au bot tant qu'on n'a pas livré le Cog.
+// Cette table est conservée comme FALLBACK SYNCHRONE :
+//   - utilisée par `provisionBot` qui tourne dans un context sync friendly
+//     (et tolère l'absence du manifest, rare en prod).
+//   - permet aux modules sans manifest (placeholders type "welcome",
+//     "tickets") de rester visibles dans le dashboard sans commande.
+//
+// Pour lister vraiment les commandes (avec prix, permissions, etc.),
+// utiliser `loadCommandManifests()` depuis command-manifests.ts.
 export const MODULE_TO_COGS: Record<string, string[]> = {
   moderation: ["moderation.ban"],
   fun: ["fun.poll"],

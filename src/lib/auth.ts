@@ -102,6 +102,29 @@ export const authOptions: NextAuthOptions = {
         token.accessToken = account.access_token;
       }
 
+      // Resync Discord automatique : tous les ROLE_SYNC_INTERVAL_MS, on
+      // re-vérifie les rôles Discord depuis l'API Discord. Permet de
+      // refléter rapidement un user qui a perdu / gagné un rôle Discord
+      // sans qu'il ait à se reconnecter.
+      if (token.discordId && typeof token.discordId === "string") {
+        const ROLE_SYNC_INTERVAL_MS = 60 * 60 * 1000; // 1h
+        const now = Date.now();
+        const lastSync = (token.lastRoleSyncAt as number | undefined) ?? 0;
+        if (now - lastSync > ROLE_SYNC_INTERVAL_MS) {
+          try {
+            const result = await syncDiscordRoles(token.discordId);
+            token.role = result.role;
+            token.isOnSynkroneServer = result.isOnServer;
+            token.lastRoleSyncAt = now;
+          } catch (err) {
+            console.error("⚠️ Auto Discord resync failed (non-blocking)", err);
+            // On enregistre quand même un timestamp pour ne pas spammer l'API
+            // Discord en boucle si elle échoue. Retry au prochain interval.
+            token.lastRoleSyncAt = now;
+          }
+        }
+      }
+
       return token;
     },
   },
@@ -148,5 +171,6 @@ declare module "next-auth/jwt" {
     discordId?: string | null;
     isOnSynkroneServer?: boolean;
     accessToken?: string;
+    lastRoleSyncAt?: number;
   }
 }

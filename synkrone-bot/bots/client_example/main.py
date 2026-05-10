@@ -80,7 +80,10 @@ def main() -> None:
             "BOT_TOKEN manquant. Renseigne-le dans .enc à côté de main.py."
         )
 
-    prefix = os.getenv("PREFIX") or config.get("prefix", "!")
+    # bot.config.json est la source de vérité (réécrite par le site quand
+    # l'utilisateur change son préfix dans le dashboard). On ne lit PREFIX
+    # depuis l'env qu'en dernier recours, jamais en priorité.
+    prefix = config.get("prefix") or os.getenv("PREFIX") or "!"
     intents = build_intents(config)
 
     bot = commands.Bot(

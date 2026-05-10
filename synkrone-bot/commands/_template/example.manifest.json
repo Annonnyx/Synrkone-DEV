@@ -1,0 +1,22 @@
+{
+  "id": "_template.example",
+  "name": "Example Command",
+  "description": "Template — ne pas activer en prod. Sert de point de départ pour de nouvelles commandes.",
+  "category": "CUSTOM",
+  "module": "_template",
+  "priceKr": 0,
+  "premium": false,
+  "usage": "{prefix}example <texte>",
+  "permissions": {
+    "user": ["manage_messages"],
+    "bot": ["send_messages"]
+  },
+  "envVars": [
+    {
+      "name": "EXAMPLE_CHANNEL_ID",
+      "description": "ID d'un salon (exemple, non requis)",
+      "required": false
+    }
+  ],
+  "version": "0.0.1"
+}
