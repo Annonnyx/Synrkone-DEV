@@ -65,7 +65,20 @@ export default function BoxesPage() {
       if (res.ok) {
         const data = await res.json();
         // L'API retourne soit un array (admin/dev avec box) soit [] (dev sans box)
-        setBoxes(Array.isArray(data) ? data : (data ? [data] : []));
+        // Si c'est un objet d'erreur, on ignore et on laisse boxes = []
+        if (Array.isArray(data)) {
+          setBoxes(data);
+        } else if (data && data.error) {
+          console.error("Erreur API boxes:", data.error);
+          setBoxes([]);
+        } else if (data) {
+          setBoxes([data]);
+        } else {
+          setBoxes([]);
+        }
+      } else {
+        console.error("Erreur HTTP boxes:", res.status);
+        setBoxes([]);
       }
     } catch (err) {
       console.error("Erreur chargement boxes:", err);
@@ -794,7 +807,7 @@ export default function BoxesPage() {
                 )}
 
                 <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {selectedBox.files.map((file) => (
+                  {(Array.isArray(selectedBox.files) ? selectedBox.files : []).map((file) => (
                     <div
                       key={file.id}
                       className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-3 transition-all hover:border-white/20"

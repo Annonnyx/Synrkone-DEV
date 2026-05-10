@@ -850,7 +850,7 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Commandes individuelles — visibles quand le module est activé */}
-                    {modInstance.enabled && bot && bot.commands.length > 0 && (
+                    {modInstance.enabled && bot && Array.isArray(bot.commands) && bot.commands.length > 0 && (
                       <div className="mt-4 space-y-2 border-t border-white/5 pt-3">
                         {bot.commands
                           .filter((c) => c.commandId.startsWith(mod.moduleId + "."))
@@ -1006,7 +1006,7 @@ export default function DashboardPage() {
                 Activité horaire (dernières 12h)
               </h3>
               <div className="flex items-end gap-2 h-32">
-                {(stats?.dailyActivity || []).map((val: number, i: number) => (
+                {(Array.isArray(stats?.dailyActivity) ? stats.dailyActivity : []).map((val: number, i: number) => (
                   <div key={i} className="flex-1 flex flex-col items-center gap-1">
                     <div
                       className="w-full rounded-t bg-primary/60 hover:bg-primary transition-colors"
@@ -1025,7 +1025,7 @@ export default function DashboardPage() {
                 Commandes les plus utilisées
               </h3>
               <div className="space-y-3">
-                {(stats?.topCommands || []).map((cmd: {name: string, uses: number}, i: number) => (
+                {(Array.isArray(stats?.topCommands) ? stats.topCommands : []).map((cmd: {name: string, uses: number}, i: number) => (
                   <div key={cmd.name} className="flex items-center gap-3">
                     <span className="text-xs font-bold text-white/60 w-4">#{i + 1}</span>
                     <code className="flex-1 text-sm text-white bg-white/5 rounded-lg px-2.5 py-1 border border-white/10">
